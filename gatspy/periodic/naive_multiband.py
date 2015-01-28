@@ -4,7 +4,7 @@ Naive Multiband Methods
 This basically amounts to a band-by-band single band approach, followed by
 some sort of majority vote among the peaks of the individual periodograms.
 """
-from __future__ import division, print_function
+from __future__ import division, print_function, absolute_import
 
 import numpy as np
 from scipy.stats import mode

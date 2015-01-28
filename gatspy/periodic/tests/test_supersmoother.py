@@ -1,3 +1,5 @@
+from __future__ import division
+
 import numpy as np
 from numpy.testing import assert_allclose, assert_, assert_equal, assert_raises
 from nose import SkipTest
@@ -20,7 +22,6 @@ def test_supersmoother(N=100, period=1):
     """Test whether the standard and generalized lomb-scargle
     give close to the same results for non-centered data"""
     t, y, dy = _generate_data(N, period)
-    periods = np.linspace(period / 2, period * 2, 100)
 
     model = SuperSmoother().fit(t, y, dy)
     model.optimizer.period_range = (period / 1.1, period * 1.1)

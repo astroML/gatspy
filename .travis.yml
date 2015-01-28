@@ -7,7 +7,7 @@ python:
   - 3.4
 
 env:
-  - DEPS="numpy scipy nose pip"
+  - DEPS="numpy scipy nose pip scikit-learn"
 
 install:
   - conda create -n testenv --yes python=$TRAVIS_PYTHON_VERSION

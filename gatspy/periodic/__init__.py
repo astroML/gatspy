@@ -1,4 +1,5 @@
 """General Periodic Modeling for Astronomical Time Series"""
+from __future__ import absolute_import
 
 __version__ = "0.1"
 
