@@ -58,7 +58,7 @@ class RRLyraeGenerated(object):
         if band not in 'ugriz':
             raise ValueError("band='{0}' not recognized".format(band))
         i = 'ugriz'.find(band)
-        t, y, dy = self.lcdata.get_lightcurve(self.lcid)
+        t, y, dy = self.lcdata.get_lightcurve(self.lcid, return_1d=False)
 
         if corrected:
             ext = self.obsmeta['rExt'] * self.ext_correction[band]
