@@ -33,28 +33,26 @@ class RRLyraeGenerated(object):
                       'g': 1.400,
                       'r': 1.0,
                       'i': 0.759,
-                      'z': 0.561 }
-    
+                      'z': 0.561}
+
     @classmethod
     def _template_func(cls, num, band, mu=0, A=1):
         template_id = "{0:.0f}{1}".format(num, band)
-    
         phase, amp = cls.templates.get_template(template_id)
         phase = np.concatenate([phase, [1]])
         amp = np.concatenate([amp, amp[-1:]])
-
         return interp1d(phase, mu + A * amp)
-    
+
     def __init__(self, lcid, random_state=None):
         self.lcid = lcid
         self.meta = self.lcdata.get_metadata(lcid)
         self.obsmeta = self.lcdata.get_obsmeta(lcid)
         self.rng = np.random.RandomState(random_state)
-        
+
     @property
     def period(self):
         return self.meta['P']
-    
+
     def observed(self, band, corrected=True):
         if band not in 'ugriz':
             raise ValueError("band='{0}' not recognized".format(band))
@@ -75,15 +73,21 @@ class RRLyraeGenerated(object):
         amp = self.meta[band + 'A']
         t0 = self.meta[band + 'E']
 
+        # if there are nans or infinities, mask them
+        bad_vals = np.isnan(t) | np.isinf(t)
+        t[bad_vals] = t0
+
         if corrected:
             ext = 0
         else:
             ext = self.obsmeta['rExt'] * self.ext_correction[band]
-        
+
         func = self._template_func(num, band, mu + ext, amp)
         mag = func(((t - t0) / self.period) % 1)
-        
+
+        mag[bad_vals] = np.nan
+
         if err is not None:
             mag += self.rng.normal(0, err, t.shape)
-            
+
         return mag
