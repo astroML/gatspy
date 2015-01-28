@@ -63,7 +63,7 @@ class LinearScanOptimizer(PeriodicOptimizer):
             sys.stdout.flush()
 
         # Compute the score on the initial grid
-        N = 1 + width // omega_step
+        N = int(1 + width // omega_step)
         score = model.score(periods)
 
         # find initial candidates of unique peaks
