@@ -2,10 +2,10 @@
 
 import numpy as np
 from scipy.interpolate import interp1d
-from .data import fetch_rrlyrae_templates, fetch_rrlyrae
+from . import fetch_rrlyrae_templates, fetch_rrlyrae
 
 
-class RRLyraeObject(object):
+class RRLyraeGenerated(object):
     """Generate RR Lyrae light curves from Sesar 2010 lightcurves
 
     Parameters
