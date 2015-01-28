@@ -1,26 +1,26 @@
 import numpy as np
-from numpy.testing import assert_allclose, assert_, assert_equal
+from numpy.testing import assert_allclose, assert_, assert_equal, assert_raises
 from nose import SkipTest
 
 from .. import LombScargle, LombScargleAstroML
 
 
-def _generate_data(N=100, omega=10, theta=[10, 2, 3], dy=1, rseed=0):
+def _generate_data(N=100, period=1, theta=[10, 2, 3], dy=1, rseed=0):
     """Generate some data for testing"""
     rng = np.random.RandomState(rseed)
-    t = 20 * (2 * np.pi / omega) * rng.rand(N)
+    t = 20 * period * rng.rand(N)
+    omega = 2 * np.pi / period
     y = theta[0] + theta[1] * np.sin(omega * t) + theta[2] * np.cos(omega * t)
     dy = dy * (0.5 + rng.rand(N))
     y += dy * rng.randn(N)
     return t, y, dy
 
 
-def test_lomb_scargle(N=100, omega=10):
+def test_lomb_scargle_std_vs_centered(N=100, period=1):
     """Test whether the standard and generalized lomb-scargle
     give close to the same results for non-centered data"""
-    t, y, dy = _generate_data(N, omega)
-    omegas = np.linspace(1, omega + 1, 100)
-    periods = 2 * np.pi / omegas
+    t, y, dy = _generate_data(N, period)
+    periods = np.linspace(period - 0.5, period + 0.5, 100)
 
     def check_model(Model):
         P1 = Model(fit_offset=True).fit(t, y, dy).score(periods)
@@ -33,15 +33,14 @@ def test_lomb_scargle(N=100, omega=10):
         yield check_model, Model
 
 
-def test_dy_scalar(N=100, omega=10):
+def test_dy_scalar(N=100, period=1):
     """Test whether the standard and generalized lomb-scargle
     give close to the same results for non-centered data"""
-    t, y, dy = _generate_data(N, omega)
+    t, y, dy = _generate_data(N, period)
 
     # Make dy array all the same
     dy[:] = dy.mean()
-    omegas = np.linspace(1, omega + 1, 100)
-    periods = 2 * np.pi / omegas
+    periods = np.linspace(period - 0.5, period + 0.5, 100)
 
     def check_model(Model):
         assert_equal(Model().fit(t, y, dy).score(periods),
@@ -51,10 +50,9 @@ def test_dy_scalar(N=100, omega=10):
         yield check_model, Model
 
 
-def test_vs_astroML(N=100, omega=10):
-    t, y, dy = _generate_data(N, omega)
-    omegas = np.linspace(omega - 4, omega + 4, 100)
-    periods = 2 * np.pi / omegas
+def test_vs_astroML(N=100, period=1):
+    t, y, dy = _generate_data(N, period)
+    periods = np.linspace(period - 0.5, period + 0.5, 100)
 
     def compare_models(model1, model2):
         P = [model.fit(t, y, dy).score(periods)
@@ -66,6 +64,9 @@ def test_vs_astroML(N=100, omega=10):
         yield (compare_models,
                LombScargle(fit_offset=fit_offset),
                LombScargleAstroML(fit_offset=fit_offset))
+        yield (compare_models,
+               LombScargleAstroML(fit_offset=fit_offset),
+               LombScargleAstroML(fit_offset=fit_offset, slow_version=True))
 
     # Sanity check: make sure they work without centering data
     yield (compare_models,
@@ -73,16 +74,16 @@ def test_vs_astroML(N=100, omega=10):
            LombScargle(center_data=False))
 
 
-def test_construct_X(N=100, omega=10):
+def test_construct_X(N=100, period=1):
     """
     Check whether the X array is constructed correctly
     """
-    t, y, dy = _generate_data(N, omega)
+    t, y, dy = _generate_data(N, period)
     
     X = [LombScargle(Nterms=N, fit_offset=False).fit(t, y, dy)
-         ._construct_X(omega) for N in [1, 2, 3]]
+         ._construct_X(period) for N in [1, 2, 3]]
     Y = [LombScargle(Nterms=N, fit_offset=True).fit(t, y, dy)
-         ._construct_X(omega) for N in [0, 1, 2, 3]]
+         ._construct_X(period) for N in [0, 1, 2, 3]]
 
     for i in range(3):
         assert_allclose(X[i], Y[i + 1][:, 1:])
@@ -94,12 +95,12 @@ def test_construct_X(N=100, omega=10):
         assert_allclose(X[i], X[i + 1][:, :2 * (i + 1)])
 
 
-def test_best_params(N=100, omega=10):
+def test_best_params(N=100, period=1):
     """Quick test for whether best params are computed without failure"""
     theta_true = [10, 2, 3]
     dy = 1.0
 
-    t, y, dy = _generate_data(N, omega, theta_true, dy)
+    t, y, dy = _generate_data(N, period, theta_true, dy)
 
     for Nterms in [1, 2, 3]:
         for Model in [LombScargle, LombScargleAstroML]:
@@ -108,6 +109,23 @@ def test_best_params(N=100, omega=10):
             else:
                 model = Model(Nterms=Nterms, center_data=False)
             model.fit(t, y, dy)
-            theta_best = model._best_params(omega)
+            theta_best = model._best_params(2 * np.pi / period)
             assert_allclose(theta_true, theta_best[:3], atol=0.2)
 
+
+def test_regularized(N=100, period=1):
+    theta_true = [10, 2, 3]
+    dy = 1.0
+    t, y, dy = _generate_data(N, period, theta_true, dy)
+    
+    for regularize_by_trace in [True, False]:
+        model = LombScargle(Nterms=1, regularization=0.1,
+                            regularize_by_trace=regularize_by_trace)
+        model.fit(t, y, dy)
+        pred = model.predict(period)
+
+
+def test_bad_args():
+    assert_raises(ValueError, LombScargle, Nterms=-2)
+    assert_raises(ValueError, LombScargle, Nterms=0, fit_offset=False)
+    assert_raises(ValueError, LombScargleAstroML, Nterms=2)
