@@ -7,10 +7,19 @@ some sort of majority vote among the peaks of the individual periodograms.
 from __future__ import division, print_function
 
 import numpy as np
+from scipy.stats import mode
 
 from .modeler import PeriodicModeler
 from .lomb_scargle import LombScargle
-from .utils import mode_in_range
+
+
+def mode_in_range(a, axis=0, tol=1E-3):
+    """Find the mode of values to within a certain range"""
+    a_trunc = a // tol
+    vals, counts = mode(a_trunc, axis)
+    mask = (a_trunc == vals)
+    # mean of each row
+    return np.sum(a * mask, axis) / np.sum(mask, axis)
 
 
 class NaiveMultiband(PeriodicModeler):

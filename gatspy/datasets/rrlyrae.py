@@ -70,13 +70,16 @@ class RRLyraeLC(object):
             else:
                 yield int(f[0])
 
-    def get_lightcurve(self, star_id, return_1d=False):
+    def get_lightcurve(self, star_id, return_1d=True):
         """Get the light curves for the given ID
 
         Parameters
         ----------
         star_id : int
             A valid integer star id representing an object in the dataset
+        return_1d : boolean (default=True)
+            Specify whether to return 1D arrays of (t, y, dy, filts) or
+            2D arrays of (t, y, dy) where each column is a filter.
 
         Returns
         -------

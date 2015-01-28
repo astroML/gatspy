@@ -69,7 +69,7 @@ class LombScargle(PeriodicModeler):
             raise ValueError("Nterms must be non-negative")
 
         if self.Nterms == 0 and not fit_offset:
-            raise ValueError("You're specifying an empty model, dude!")
+            raise ValueError("Empty model: try larger Nterms.")
 
     def _construct_X(self, omega, weighted=True, **kwargs):
         """Construct the design matrix for the problem"""
