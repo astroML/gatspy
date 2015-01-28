@@ -6,10 +6,6 @@ import numpy as np
 
 
 class PeriodicOptimizer(object):
-    def __init__(self, *args, **kwargs):
-        self.args = args
-        self.kwargs = kwargs
-
     def find_best_periods(self, model, n_periods=5, return_scores=False):
         raise NotImplementedError()
 

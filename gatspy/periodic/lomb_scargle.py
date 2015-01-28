@@ -141,7 +141,10 @@ class LombScargle(PeriodicModeler):
         XTy = np.dot(Xw.T, self.yw_)
         return np.linalg.solve(XTX, XTy)
 
-    def _fit(self, t, y, dy=1.0, filts=None):
+    def _fit(self, t, y, dy, filts):
+        if filts is not None:
+            raise NotImplementedError("``filts`` keyword is not supported")
+
         self.yw_ = self._construct_y(weighted=True)
         self.ymean_ = self._compute_ymean()
         return self
