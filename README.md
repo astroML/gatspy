@@ -4,6 +4,9 @@ gatspy: General tools for Astronomical Time Series in Python
 Gatspy (pronounced as F. Scott Fitzgerald would probably pronounce it)
 is a collection of tools for analyzing astronomical time series in Python.
 
+[![version status](https://pypip.in/v/gatspy/badge.png)](https://pypi.python.org/pypi/gatspy)
+[![build status](https://travis-ci.org/jakevdp/gatspy.png?branch=master)](https://travis-ci.org/jakevdp/gatspy)
+
 Dependencies
 ------------
 Gatspy depends on the following packages:
