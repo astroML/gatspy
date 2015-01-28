@@ -173,7 +173,7 @@ class LombScargleMultibandFast(PeriodicModeler):
         Optimizer to use to find the best period. If not specified, the
         LinearScanOptimizer will be used.
     Nterms : integer (default = 1)
-        Number of fourier terms to use in themodel
+        Number of fourier terms to use in the model
     BaseModel : class type (default = LombScargle)
         The base model to use for each individual band.
 
