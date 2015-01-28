@@ -5,7 +5,7 @@ LONG_DESCRIPTION = """
 gatspy: General tools for Astronomical Time Series in Python
 ============================================================
 
-Gatspy (pronounced as F. Scott Fitzgerald would pronounce it) is a collection of tools for analyzing astronomical time series in Python.
+Gatspy (pronounced as F. Scott Fitzgerald might pronounce it) is a collection of tools for analyzing astronomical time series in Python.
 
 For more information, visit http://github.com/jakevdp/gatspy/
 """
