@@ -1,5 +1,8 @@
 *.pyc
-build
+build/
+dist/
+MANIFEST
+
 .coverage
 
 #*

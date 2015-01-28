@@ -15,11 +15,15 @@ Gatspy depends on the following packages:
 
 Installation
 ------------
-Install gatspy using
+You can install the released version of gatspy using
+
+    $ pip install gatspy
+
+or install the source from this directory using
 
     $ python setup.py install
 
-The package is pure python (i.e. no C or Fortran extensions) so thre should not be installation issues.
+The package is pure python (i.e. no C or Fortran extensions) so there should be no problems with installation on any system.
 
 
 Unit Tests
