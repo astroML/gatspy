@@ -5,7 +5,78 @@ import numpy as np
 from .modeler import PeriodicModeler
 
 
-class LombScargle(PeriodicModeler):
+class LeastSquaresMixin(object):
+    """Mixin for matrix-based Least Squares periodic analysis"""
+    def _construct_X(self, omega, weighted=True, **kwargs):
+        raise NotImplementedError()
+
+    def _construct_y(self, weighted=True, **kwargs):
+        raise NotImplementedError()
+
+    def _construct_X_M(self, omega, **kwargs):
+        """Construct the weighted normal matrix of the problem"""
+        X = self._construct_X(omega, weighted=True, **kwargs)
+        M = np.dot(X.T, X)
+
+        if self.regularization is not None:
+            diag = M.ravel(order='K')[::M.shape[0] + 1]
+            if self.regularize_by_trace:
+                diag += diag.sum() * np.asarray(self.regularization)
+            else:
+                diag += np.asarray(self.regularization)
+
+        return X, M
+
+    def _compute_ymean(self, **kwargs):
+        """Compute the (weighted) mean of the y data"""
+        y = kwargs.get('y', self.y)
+        dy = kwargs.get('dy', self.dy)
+
+        y = np.asarray(y)
+        dy = np.asarray(dy)
+
+        if dy.size == 1:
+            # if dy is a scalar, we use the simple mean
+            return np.mean(y)
+        else:
+            w = 1 / dy ** 2
+            return np.dot(y, w) / w.sum()
+
+    def _best_params(self, omega):
+        Xw, XTX = self._construct_X_M(omega)
+        XTy = np.dot(Xw.T, self.yw_)
+        return np.linalg.solve(XTX, XTy)
+
+    def _score(self, periods):
+        omegas = 2 * np.pi / periods
+
+        # Set up the reference chi2. Note that this entire function would
+        # be much simpler if we did not allow center_data=False.
+        # We keep it just to make sure our math is correct
+        chi2_0 = np.dot(self.yw_.T, self.yw_)
+        if self.center_data:
+            chi2_ref = chi2_0
+        else:
+            yref = self._construct_y(weighted=True, center_data=True)
+            chi2_ref = np.dot(yref.T, yref)
+        chi2_0_minus_chi2 = np.zeros(omegas.size, dtype=float)
+
+        # Iterate through the omegas and compute the power for each
+        for i, omega in enumerate(omegas.flat):
+            Xw, XTX = self._construct_X_M(omega)
+            XTy = np.dot(Xw.T, self.yw_)
+            chi2_0_minus_chi2[i] = np.dot(XTy.T, np.linalg.solve(XTX, XTy))
+
+        # construct and return the power from the chi2 difference
+        if self.center_data:
+            P = chi2_0_minus_chi2 / chi2_ref
+        else:
+            P = 1 + (chi2_0_minus_chi2 - chi2_0) / chi2_ref
+
+        return P
+
+
+class LombScargle(LeastSquaresMixin, PeriodicModeler):
     """Lomb-Scargle Periodogram Implementation
 
     This is a generalized periodogram implementation using the matrix formalism
@@ -91,35 +162,6 @@ class LombScargle(PeriodicModeler):
         else:
             return np.transpose(np.vstack(cols))
 
-    def _construct_X_M(self, omega, **kwargs):
-        """Construct the weighted normal matrix of the problem"""
-        X = self._construct_X(omega, weighted=True, **kwargs)
-        M = np.dot(X.T, X)
-
-        if self.regularization is not None:
-            diag = M.ravel(order='K')[::M.shape[0] + 1]
-            if self.regularize_by_trace:
-                diag += diag.sum() * np.asarray(self.regularization)
-            else:
-                diag += np.asarray(self.regularization)
-
-        return X, M
-
-    def _compute_ymean(self, **kwargs):
-        """Compute the (weighted) mean of the y data"""
-        y = kwargs.get('y', self.y)
-        dy = kwargs.get('dy', self.dy)
-
-        y = np.asarray(y)
-        dy = np.asarray(dy)
-
-        if dy.size == 1:
-            # if dy is a scalar, we use the simple mean
-            return np.mean(y)
-        else:
-            w = 1 / dy ** 2
-            return np.dot(y, w) / w.sum()
-
     def _construct_y(self, weighted=True, **kwargs):
         y = kwargs.get('y', self.y)
         dy = kwargs.get('dy', self.dy)
@@ -136,54 +178,21 @@ class LombScargle(PeriodicModeler):
         else:
             return y
 
-    def _best_params(self, omega):
-        Xw, XTX = self._construct_X_M(omega)
-        XTy = np.dot(Xw.T, self.yw_)
-        return np.linalg.solve(XTX, XTy)
-
-    def _fit(self, t, y, dy, filts):
-        if filts is not None:
-            raise NotImplementedError("``filts`` keyword is not supported")
-
+    def _fit(self, t, y, dy):
         self.yw_ = self._construct_y(weighted=True)
         self.ymean_ = self._compute_ymean()
         return self
 
-    def _score(self, periods):
-        omegas = 2 * np.pi / periods
-
-        # Set up the reference chi2. Note that this entire function would
-        # be much simpler if we did not allow center_data=False.
-        # We keep it just to make sure our math is correct
-        chi2_0 = np.dot(self.yw_.T, self.yw_)
-        if self.center_data:
-            chi2_ref = chi2_0
-        else:
-            yref = self._construct_y(weighted=True, center_data=True)
-            chi2_ref = np.dot(yref.T, yref)
-        chi2_0_minus_chi2 = np.zeros(omegas.size, dtype=float)
-
-        # Iterate through the omegas and compute the power for each
-        for i, omega in enumerate(omegas.flat):
-            Xw, XTX = self._construct_X_M(omega)
-            XTy = np.dot(Xw.T, self.yw_)
-            chi2_0_minus_chi2[i] = np.dot(XTy.T, np.linalg.solve(XTX, XTy))
-
-        # construct and return the power from the chi2 difference
-        if self.center_data:
-            P = chi2_0_minus_chi2 / chi2_ref
-        else:
-            P = 1 + (chi2_0_minus_chi2 - chi2_0) / chi2_ref
-
-        return P
-
-    def _predict(self, t, filts, period):
+    def _predict(self, t, period):
         omega = 2 * np.pi / period
         t = np.asarray(t)
         outshape = t.shape
         theta = self._best_params(omega)
         X = self._construct_X(omega, weighted=False, t=t.ravel())
         return np.reshape(self.ymean_ + np.dot(X, theta), outshape)
+
+    def _score(self, periods):
+        return LeastSquaresMixin._score(self, periods)
 
 
 class LombScargleAstroML(LombScargle):

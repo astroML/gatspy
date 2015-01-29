@@ -11,7 +11,7 @@ except ImportError:
     raise ImportError("Package supersmoother is required. "
                       "Use ``pip install supersmoother`` to install")
 
-from .modeler import PeriodicModeler
+from .modeler import PeriodicModeler, PeriodicModelerMultiband
 
 
 class SuperSmoother(PeriodicModeler):
@@ -45,15 +45,12 @@ class SuperSmoother(PeriodicModeler):
     def __init__(self, optimizer=None):
         PeriodicModeler.__init__(self, optimizer)
 
-    def _fit(self, t, y, dy, filts):
-        if filts is not None:
-            raise NotImplementedError("``filts`` keyword is not supported")
-
+    def _fit(self, t, y, dy):
         # TODO: this should actually be a weighted median, probably...
         mu = np.sum(y / dy ** 2) / np.sum(1 / dy ** 2)
         self.baseline_err = np.mean(abs((y - mu) / dy))
 
-    def _predict(self, t, filts, period):
+    def _predict(self, t, period):
         model = ssm.SuperSmoother(period=period).fit(self.t, self.y, self.dy)
         return model.predict(t)
 
@@ -65,7 +62,7 @@ class SuperSmoother(PeriodicModeler):
                            for p in periods])
         
 
-class SuperSmootherMultiband(PeriodicModeler):
+class SuperSmootherMultiband(PeriodicModelerMultiband):
     """
     Simple multi-band SuperSmoother, with each band smoothed independently
     
@@ -79,7 +76,7 @@ class SuperSmootherMultiband(PeriodicModeler):
     """
     def __init__(self, optimizer=None, BaseModel=SuperSmoother):
         self.BaseModel = BaseModel
-        PeriodicModeler.__init__(self, optimizer)
+        PeriodicModelerMultiband.__init__(self, optimizer)
 
     def _fit(self, t, y, dy, filts):
         self.unique_filts_ = np.unique(filts)
