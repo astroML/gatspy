@@ -9,7 +9,7 @@ from __future__ import division, print_function, absolute_import
 import numpy as np
 from scipy.stats import mode
 
-from .modeler import PeriodicModeler
+from .modeler import PeriodicModelerMultiband
 from .lomb_scargle import LombScargle
 
 
@@ -22,7 +22,7 @@ def mode_in_range(a, axis=0, tol=1E-3):
     return np.sum(a * mask, axis) / np.sum(mask, axis)
 
 
-class NaiveMultiband(PeriodicModeler):
+class NaiveMultiband(PeriodicModelerMultiband):
     """Naive version of multiband fitting
 
     Parameters
@@ -37,7 +37,7 @@ class NaiveMultiband(PeriodicModeler):
         self.BaseModel = BaseModel
         self.args = args
         self.kwargs = kwargs
-        PeriodicModeler.__init__(self, optimizer)
+        PeriodicModelerMultiband.__init__(self, optimizer)
 
     def _fit(self, t, y, dy, filts):
         t, y, dy, filts = np.broadcast_arrays(t, y, dy, filts)

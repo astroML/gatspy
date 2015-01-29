@@ -18,7 +18,7 @@ class PeriodicModeler(object):
         self.kwargs = kwargs
         self._best_period = None
 
-    def fit(self, t, y, dy=None, filts=None):
+    def fit(self, t, y, dy=None):
         """Fit the multiterm Periodogram model to the data.
 
         Parameters
@@ -29,28 +29,18 @@ class PeriodicModeler(object):
             sequence of observed values
         dy : float or array_like (optional)
             errors on observed values
-        filts : array_like (optional)
-            The array specifying the filter/bandpass for each observation.
         """
-        if filts is None:
-            self.t, self.y, self.dy = np.broadcast_arrays(t, y, dy)
-            self.filts = None
-        else:
-            self.t, self.y, self.dy, self.filts = np.broadcast_arrays(t, y, dy,
-                                                                      filts)
-        self._fit(self.t, self.y, self.dy, filts=self.filts)
+        self.t, self.y, self.dy = np.broadcast_arrays(t, y, dy)
+        self._fit(self.t, self.y, self.dy)
         return self
 
-    def predict(self, t, filts=None, period=None):
+    def predict(self, t, period=None):
         """Compute the best-fit model at ``t`` for a given frequency omega
 
         Parameters
         ----------
         t : float or array_like
             times at which to predict
-        filts : array_like (optional)
-            the array specifying the filter/bandpass for each observation. This
-            is used only in multiband periodograms.
         period : float (optional)
             The period at which to compute the model. If not specified, it
             will be computed via the optimizer provided at initialization.
@@ -62,18 +52,8 @@ class PeriodicModeler(object):
         """
         if period is None:
             period = self.best_period
-
-        if filts is None:
-            t = np.asarray(t)
-            if self.filts is not None:
-                raise ValueError("filts must be passed")
-            result = self._predict(t.ravel(), filts=filts, period=period)
-        else:
-            t, filts = np.broadcast_arrays(t, filts)
-            if self.filts is None:
-                raise ValueError("filts passed to predict(), but not to fit()")
-            result = self._predict(t.ravel(), filts=filts.ravel(),
-                                   period=period)
+        t = np.asarray(t)
+        result = self._predict(t.ravel(), period=period)
         return result.reshape(t.shape)
 
     def score(self, periods):
@@ -116,6 +96,70 @@ class PeriodicModeler(object):
         """Compute the score of the model given the periods"""
         raise NotImplementedError()
 
+    def _fit(self, t, y, dy):
+        """Fit the model to the given data"""
+        raise NotImplementedError()
+
+    def _predict(self, t, period):
+        """Predict the model values at the given times & filters"""
+        raise NotImplementedError()
+        
+
+class PeriodicModelerMultiband(PeriodicModeler):
+    """Base class for periodic modeling"""
+
+    def fit(self, t, y, dy=None, filts=None):
+        """Fit the multiterm Periodogram model to the data.
+
+        Parameters
+        ----------
+        t : array_like, one-dimensional
+            sequence of observation times
+        y : array_like, one-dimensional
+            sequence of observed values
+        dy : float or array_like (optional)
+            errors on observed values
+        filts : array_like (optional)
+            The array specifying the filter/bandpass for each observation.
+        """
+        self.unique_filts_ = np.unique(filts)
+        self.t, self.y, self.dy, self.filts = np.broadcast_arrays(t, y, dy,
+                                                                  filts)
+        self._fit(self.t, self.y, self.dy, filts=self.filts)
+        return self
+
+    def predict(self, t, filts=None, period=None):
+        """Compute the best-fit model at ``t`` for a given frequency omega
+
+        Parameters
+        ----------
+        t : float or array_like
+            times at which to predict
+        filts : array_like (optional)
+            the array specifying the filter/bandpass for each observation. This
+            is used only in multiband periodograms.
+        period : float (optional)
+            The period at which to compute the model. If not specified, it
+            will be computed via the optimizer provided at initialization.
+
+        Returns
+        -------
+        y : np.ndarray
+            predicted model values at times t
+        """
+        vals = set(np.unique(filts))
+        if not vals.issubset(self.unique_filts_):
+            raise ValueError("filts does not match training data: "
+                             "input: {0} output: {1}"
+                             "".format(set(self.unique_filts_), set(vals)))
+        t, filts = np.broadcast_arrays(t, filts)
+
+        if period is None:
+            period = self.best_period
+
+        result = self._predict(t.ravel(), filts=filts.ravel(), period=period)
+        return result.reshape(t.shape)
+
     def _fit(self, t, y, dy, filts):
         """Fit the model to the given data"""
         raise NotImplementedError()
@@ -123,4 +167,3 @@ class PeriodicModeler(object):
     def _predict(self, t, filts, period):
         """Predict the model values at the given times & filters"""
         raise NotImplementedError()
-        

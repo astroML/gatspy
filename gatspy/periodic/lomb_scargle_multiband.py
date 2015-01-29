@@ -2,11 +2,11 @@ from __future__ import division, print_function
 
 import numpy as np
 
-from .modeler import PeriodicModeler
-from.lomb_scargle import LombScargle
+from .modeler import PeriodicModelerMultiband
+from .lomb_scargle import LombScargle, LeastSquaresMixin
 
 
-class LombScargleMultiband(LombScargle):
+class LombScargleMultiband(LeastSquaresMixin, PeriodicModelerMultiband):
     """Multiband Periodogram Implementation
 
     This implements the generalized multi-band periodogram described in
@@ -47,16 +47,16 @@ class LombScargleMultiband(LombScargle):
         self.reg_band = reg_band
         self.regularize_by_trace = regularize_by_trace
         self.center_data = center_data
-        PeriodicModeler.__init__(self, optimizer)
+        PeriodicModelerMultiband.__init__(self, optimizer)
 
     def _fit(self, t, y, dy, filts):
         self.unique_filts_ = np.unique(filts)
         self.ymean_ = self._compute_ymean()
 
         masks = [(filts == filt) for filt in self.unique_filts_]
-        self.ymean_by_filt_ = [LombScargle._compute_ymean(self,
-                                                          y=y[mask],
-                                                          dy=dy[mask])
+        self.ymean_by_filt_ = [LeastSquaresMixin._compute_ymean(self,
+                                                                y=y[mask],
+                                                                dy=dy[mask])
                                for mask in masks]
 
         self.yw_ = self._construct_y(weighted=True)
@@ -84,8 +84,8 @@ class LombScargleMultiband(LombScargle):
         ymean = np.zeros(y.shape)
         for filt in np.unique(filts):
             mask = (filts == filt)
-            ymean[mask] = LombScargle._compute_ymean(self, y=y[mask],
-                                                     dy=dy[mask])
+            ymean[mask] = LeastSquaresMixin._compute_ymean(self, y=y[mask],
+                                                           dy=dy[mask])
         return ymean
 
     def _construct_y(self, weighted=True, **kwargs):
@@ -160,7 +160,7 @@ class LombScargleMultiband(LombScargle):
         return (ymeans + np.dot(X, theta)).reshape(output_shape)
 
 
-class LombScargleMultibandFast(PeriodicModeler):
+class LombScargleMultibandFast(PeriodicModelerMultiband):
     """Fast Multiband Periodogram Implementation
 
     This implements the specialized multi-band periodogram described in
@@ -187,7 +187,7 @@ class LombScargleMultibandFast(PeriodicModeler):
         # Note: center_data must be True, or else the chi^2 weighting will fail
         self.Nterms = Nterms
         self.BaseModel = BaseModel
-        PeriodicModeler.__init__(self, optimizer)
+        PeriodicModelerMultiband.__init__(self, optimizer)
 
     def _fit(self, t, y, dy, filts):
         self.unique_filts_ = np.unique(filts)
