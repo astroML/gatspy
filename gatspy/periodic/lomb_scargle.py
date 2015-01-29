@@ -18,7 +18,7 @@ class LeastSquaresMixin(object):
         X = self._construct_X(omega, weighted=True, **kwargs)
         M = np.dot(X.T, X)
 
-        if self.regularization is not None:
+        if hasattr(self, 'regularization') and self.regularization is not None:
             diag = M.ravel(order='K')[::M.shape[0] + 1]
             if self.regularize_by_trace:
                 diag += diag.sum() * np.asarray(self.regularization)
@@ -29,18 +29,31 @@ class LeastSquaresMixin(object):
 
     def _compute_ymean(self, **kwargs):
         """Compute the (weighted) mean of the y data"""
-        y = kwargs.get('y', self.y)
-        dy = kwargs.get('dy', self.dy)
+        y = np.asarray(kwargs.get('y', self.y))
+        dy = np.asarray(kwargs.get('dy', self.dy))
 
-        y = np.asarray(y)
-        dy = np.asarray(dy)
-
+        # if dy is a scalar, we use the simple mean
         if dy.size == 1:
-            # if dy is a scalar, we use the simple mean
             return np.mean(y)
         else:
             w = 1 / dy ** 2
             return np.dot(y, w) / w.sum()
+
+    def _construct_y(self, weighted=True, **kwargs):
+        y = kwargs.get('y', self.y)
+        dy = kwargs.get('dy', self.dy)
+        center_data = kwargs.get('center_data', self.center_data)
+
+        y = np.asarray(y)
+        dy = np.asarray(dy)
+
+        if center_data:
+            y = y - self._compute_ymean(y=y, dy=dy)
+
+        if weighted:
+            return y / dy
+        else:
+            return y
 
     def _best_params(self, omega):
         Xw, XTX = self._construct_X_M(omega)
@@ -161,22 +174,6 @@ class LombScargle(LeastSquaresMixin, PeriodicModeler):
             return np.transpose(np.vstack(cols) / dy)
         else:
             return np.transpose(np.vstack(cols))
-
-    def _construct_y(self, weighted=True, **kwargs):
-        y = kwargs.get('y', self.y)
-        dy = kwargs.get('dy', self.dy)
-        center_data = kwargs.get('center_data', self.center_data)
-
-        y = np.asarray(y)
-        dy = np.asarray(dy)
-
-        if center_data:
-            y = y - self._compute_ymean(y=y, dy=dy)
-
-        if weighted:
-            return y / dy
-        else:
-            return y
 
     def _fit(self, t, y, dy):
         self.yw_ = self._construct_y(weighted=True)

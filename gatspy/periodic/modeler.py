@@ -108,7 +108,7 @@ class PeriodicModeler(object):
 class PeriodicModelerMultiband(PeriodicModeler):
     """Base class for periodic modeling"""
 
-    def fit(self, t, y, dy=None, filts=None):
+    def fit(self, t, y, dy=None, filts=0):
         """Fit the multiterm Periodogram model to the data.
 
         Parameters
@@ -128,7 +128,7 @@ class PeriodicModelerMultiband(PeriodicModeler):
         self._fit(self.t, self.y, self.dy, filts=self.filts)
         return self
 
-    def predict(self, t, filts=None, period=None):
+    def predict(self, t, filts, period=None):
         """Compute the best-fit model at ``t`` for a given frequency omega
 
         Parameters
