@@ -38,7 +38,7 @@ class LinearScanOptimizer(PeriodicOptimizer):
         self.verbose = verbose
         self.first_pass_coverage = first_pass_coverage
         self.final_pass_coverage = final_pass_coverage
-        
+
     def find_best_periods(self, model, n_periods=5, return_scores=False):
         """Find the `n_periods` best periods in the model"""
 
@@ -76,10 +76,10 @@ class LinearScanOptimizer(PeriodicOptimizer):
             candidate_freqs[i] = omegas[j]
             candidate_scores[i] = score[j]
             score[max(0, j - N):(j + N)] = minscore
-        
+
         # If required, do a final pass on these unique at higher resolution
         if self.final_pass_coverage <= self.first_pass_coverage:
-            best_periods =  2 * np.pi / candidate_freqs[:n_periods]
+            best_periods = 2 * np.pi / candidate_freqs[:n_periods]
             best_scores = candidate_scores[:n_periods]
         else:
             final_step = width / self.final_pass_coverage
@@ -88,7 +88,8 @@ class LinearScanOptimizer(PeriodicOptimizer):
             periods = 2 * np.pi / omegas
 
             if self.verbose:
-                print("Zooming-in on {0} candidate peaks:".format(n_candidates))
+                print("Zooming-in on {0} candidate peaks:"
+                      "".format(n_candidates))
                 print(" - Computing periods at {0:.0f} "
                       "steps".format(periods.size))
                 sys.stdout.flush()

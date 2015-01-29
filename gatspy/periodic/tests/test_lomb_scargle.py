@@ -79,7 +79,7 @@ def test_construct_X(N=100, period=1):
     Check whether the X array is constructed correctly
     """
     t, y, dy = _generate_data(N, period)
-    
+
     X = [LombScargle(Nterms=N, fit_offset=False).fit(t, y, dy)
          ._construct_X(period) for N in [1, 2, 3]]
     Y = [LombScargle(Nterms=N, fit_offset=True).fit(t, y, dy)
@@ -117,7 +117,7 @@ def test_regularized(N=100, period=1):
     theta_true = [10, 2, 3]
     dy = 1.0
     t, y, dy = _generate_data(N, period, theta_true, dy)
-    
+
     for regularize_by_trace in [True, False]:
         model = LombScargle(Nterms=1, regularization=0.1,
                             regularize_by_trace=regularize_by_trace)

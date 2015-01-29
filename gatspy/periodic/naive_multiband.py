@@ -50,8 +50,8 @@ class NaiveMultiband(PeriodicModelerMultiband):
                                                                 y[mask],
                                                                 dy[mask]))
                              for filt, mask in zip(unique_filts, masks)])
-        
-    def _predict(self, t, filts, period):        
+
+    def _predict(self, t, filts, period):
         result = np.zeros_like(t)
         for filt, model in self.models_.items():
             mask = (filts == filt)
@@ -96,7 +96,7 @@ class NaiveMultiband(PeriodicModelerMultiband):
             model.optimizer = self.optimizer
 
         return dict((filt, model.best_period)
-                     for (filt, model) in self.models_.items())
+                    for (filt, model) in self.models_.items())
 
     @property
     def best_period(self):

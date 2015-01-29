@@ -7,7 +7,7 @@ def test_downloads():
                        fetch_rrlyrae_templates, fetch_rrlyrae_lc_params):
         data = downloader()
         assert data is not None
-                
+
 
 def test_forced_download():
     """Test downloading the smallest of the files: table3.dat.gz (22K)"""

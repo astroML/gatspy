@@ -38,7 +38,7 @@ def test_lomb_scargle_multiband(N=100, period=1):
 
     assert_allclose(model.predict(t, period=period),
                     model_mb.predict(t, filts=1, period=period))
-    
+
 
 def test_multiband_predict(N=100, period=1):
     t, y, dy = _generate_data(N, period)

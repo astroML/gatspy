@@ -11,8 +11,8 @@ class PeriodicModeler(object):
         if optimizer is None:
             optimizer = LinearScanOptimizer()
         if not hasattr(optimizer, 'best_period'):
-            raise ValueError("optimizer must be an PeriodicOptimizer instance. "
-                             "{0} not valid".format(optimizer))
+            raise ValueError("optimizer must be a PeriodicOptimizer instance: "
+                             "{0} has no best_period method".format(optimizer))
         self.optimizer = optimizer
         self.args = args
         self.kwargs = kwargs
@@ -106,7 +106,7 @@ class PeriodicModeler(object):
     def _predict(self, t, period):
         """Predict the model values at the given times"""
         raise NotImplementedError()
-        
+
 
 class PeriodicModelerMultiband(PeriodicModeler):
     """Base class for periodic modeling on multiband data"""

@@ -13,4 +13,3 @@ def test_rrlyrae_generated():
     for corrected in [True, False]:
         t, y, dy = gen.observed('g', corrected=corrected)
         y = gen.generated('g', t, dy, corrected=corrected)
-    
