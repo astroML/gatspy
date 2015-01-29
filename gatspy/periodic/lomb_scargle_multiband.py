@@ -63,19 +63,6 @@ class LombScargleMultiband(LeastSquaresMixin, PeriodicModelerMultiband):
         self.regularization = self._construct_regularization()
         return self
 
-    def _construct_regularization(self):
-        if self.reg_base is None and self.reg_band is None:
-            reg = 0
-        else:
-            Nbase = 1 + 2 * self.Nterms_base
-            Nband = 1 + 2 * self.Nterms_band
-            reg = np.zeros(Nbase + len(self.unique_filts_) * Nband)
-            if self.reg_base is not None:
-                reg[:Nbase] = self.reg_base
-            if self.reg_band is not None:
-                reg[Nbase:] = self.reg_band
-        return reg
-
     def _compute_ymean(self, **kwargs):
         y = kwargs.get('y', self.y)
         dy = kwargs.get('dy', self.dy)
@@ -88,21 +75,18 @@ class LombScargleMultiband(LeastSquaresMixin, PeriodicModelerMultiband):
                                                            dy=dy[mask])
         return ymean
 
-    def _construct_y(self, weighted=True, **kwargs):
-        y = kwargs.get('y', self.y)
-        dy = kwargs.get('dy', self.dy)
-        filts = kwargs.get('filts', self.filts)
-        center_data = kwargs.get('center_data', self.center_data)
-
-        ymean = self._compute_ymean(**kwargs)
-
-        if center_data:
-            y = y - ymean
-
-        if weighted:
-            return y / dy
+    def _construct_regularization(self):
+        if self.reg_base is None and self.reg_band is None:
+            reg = 0
         else:
-            return y
+            Nbase = 1 + 2 * self.Nterms_base
+            Nband = 1 + 2 * self.Nterms_band
+            reg = np.zeros(Nbase + len(self.unique_filts_) * Nband)
+            if self.reg_base is not None:
+                reg[:Nbase] = self.reg_base
+            if self.reg_band is not None:
+                reg[Nbase:] = self.reg_band
+        return reg
 
     def _construct_X(self, omega, weighted=True, **kwargs):
         t = kwargs.get('t', self.t)
