@@ -50,7 +50,6 @@ class LombScargleMultiband(LeastSquaresMixin, PeriodicModelerMultiband):
         PeriodicModelerMultiband.__init__(self, optimizer)
 
     def _fit(self, t, y, dy, filts):
-        self.unique_filts_ = np.unique(filts)
         self.ymean_ = self._compute_ymean()
 
         masks = [(filts == filt) for filt in self.unique_filts_]
@@ -168,7 +167,6 @@ class LombScargleMultibandFast(PeriodicModelerMultiband):
         PeriodicModelerMultiband.__init__(self, optimizer)
 
     def _fit(self, t, y, dy, filts):
-        self.unique_filts_ = np.unique(filts)
         masks = [(filts == f) for f in self.unique_filts_]
         self.models_ = [self.BaseModel(Nterms=self.Nterms, center_data=True,
                                        fit_offset=True).fit(t[m], y[m], dy[m])

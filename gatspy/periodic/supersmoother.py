@@ -79,7 +79,6 @@ class SuperSmootherMultiband(PeriodicModelerMultiband):
         PeriodicModelerMultiband.__init__(self, optimizer)
 
     def _fit(self, t, y, dy, filts):
-        self.unique_filts_ = np.unique(filts)
         masks = [(filts == f) for f in self.unique_filts_]
         self.models_ = [self.BaseModel().fit(t[m], y[m], dy[m]) for m in masks]
 
