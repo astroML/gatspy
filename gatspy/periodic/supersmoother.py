@@ -56,16 +56,16 @@ class SuperSmoother(PeriodicModeler):
 
     def _score(self, periods):
         return np.asarray([1 - (ssm.SuperSmoother(period=p)
-                                            .fit(self.t, self.y, self.dy)
-                                            .cv_error(skip_endpoints=False)
+                                .fit(self.t, self.y, self.dy)
+                                .cv_error(skip_endpoints=False)
                                 / self.baseline_err)
                            for p in periods])
-        
+
 
 class SuperSmootherMultiband(PeriodicModelerMultiband):
     """
     Simple multi-band SuperSmoother, with each band smoothed independently
-    
+
     Parameters
     ----------
     optimizer : PeriodicOptimizer instance
@@ -97,4 +97,3 @@ class SuperSmootherMultiband(PeriodicModelerMultiband):
         for model, mask in zip(self.models_, masks):
             result[mask] = model.predict(t[mask], period=period)
         return result
-        

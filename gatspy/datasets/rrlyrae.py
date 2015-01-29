@@ -164,7 +164,7 @@ class PartialRRLyraeLC(RRLyraeLC):
     def get_lightcurve(self, star_id, return_1d=True):
         if not return_1d:
             raise ValueError("partial can only return 1D data")
-            
+
         t, y, dy = RRLyraeLC.get_lightcurve(self, star_id, return_1d=False)
 
         r = np.arange(len(t))
@@ -198,7 +198,6 @@ class RRLyraeTemplates(object):
         except KeyError:
             raise ValueError("invalid star id: {0}".format(template_id))
         return data.T
-
 
 
 def fetch_rrlyrae(partial=False, **kwargs):
@@ -237,11 +236,10 @@ def fetch_rrlyrae_fitdata(**kwargs):
              ('grmin', 'f'), ('grmin_err', 'f')]
 
     return np.loadtxt(save_loc, dtype=dtype)
-    
+
 
 def fetch_rrlyrae_templates(**kwargs):
     """Access the RR Lyrae template data (table 1 of Sesar 2010)"""
     save_loc = _get_download_or_cache('RRLyr_ugriz_templates.tar.gz', **kwargs)
 
     return RRLyraeTemplates(save_loc)
-    
