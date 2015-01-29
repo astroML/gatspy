@@ -90,12 +90,6 @@ class SuperSmootherMultiband(PeriodicModelerMultiband):
         return np.dot(baselines / baselines.sum(), powers)
 
     def _predict(self, t, filts, period):
-        vals = set(np.unique(filts))
-        if not vals.issubset(self.unique_filts_):
-            raise ValueError("filts does not match training data: "
-                             "input: {0} output: {1}"
-                             "".format(set(self.unique_filts_), set(vals)))
-
         t, filts = np.broadcast_arrays(t, filts)
 
         result = np.zeros(t.shape, dtype=float)

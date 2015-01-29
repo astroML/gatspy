@@ -51,13 +51,7 @@ class NaiveMultiband(PeriodicModelerMultiband):
                                                                 dy[mask]))
                              for filt, mask in zip(unique_filts, masks)])
         
-    def _predict(self, t, filts, period):
-        fset = set(np.unique(filts))
-        if not fset.issubset(self.models_.keys()):
-            raise ValueError("filts does not match training data: "
-                             "input: {0} output: {1}"
-                             "".format(set(self.model_.keys()), fset))
-        
+    def _predict(self, t, filts, period):        
         result = np.zeros_like(t)
         for filt, model in self.models_.items():
             mask = (filts == filt)
