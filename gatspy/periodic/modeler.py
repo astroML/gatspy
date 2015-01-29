@@ -32,6 +32,7 @@ class PeriodicModeler(object):
         """
         self.t, self.y, self.dy = np.broadcast_arrays(t, y, dy)
         self._fit(self.t, self.y, self.dy)
+        self._best_period = None  # reset best period in case of refitting
         return self
 
     def predict(self, t, period=None):
@@ -50,14 +51,14 @@ class PeriodicModeler(object):
         y : np.ndarray
             predicted model values at times t
         """
+        t = np.asarray(t)
         if period is None:
             period = self.best_period
-        t = np.asarray(t)
         result = self._predict(t.ravel(), period=period)
         return result.reshape(t.shape)
 
     def score(self, periods):
-        """Compute the score for the given period or periods
+        """Compute the periodogram for the given period or periods
 
         Parameters
         ----------
@@ -79,7 +80,7 @@ class PeriodicModeler(object):
     @property
     def best_period(self):
         """Lazy evaluation of the best period given the model"""
-        if not hasattr(self, '_best_period') or self._best_period is None:
+        if self._best_period is None:
             self._best_period = self._calc_best_period()
         return self._best_period
 
@@ -92,6 +93,8 @@ class PeriodicModeler(object):
         """Compute the best period using the optimizer"""
         return self.optimizer.best_period(self)
 
+    # The following methods should be overloaded by derived classes:
+
     def _score(self, periods):
         """Compute the score of the model given the periods"""
         raise NotImplementedError()
@@ -101,12 +104,12 @@ class PeriodicModeler(object):
         raise NotImplementedError()
 
     def _predict(self, t, period):
-        """Predict the model values at the given times & filters"""
+        """Predict the model values at the given times"""
         raise NotImplementedError()
         
 
 class PeriodicModelerMultiband(PeriodicModeler):
-    """Base class for periodic modeling"""
+    """Base class for periodic modeling on multiband data"""
 
     def fit(self, t, y, dy=None, filts=0):
         """Fit the multiterm Periodogram model to the data.
@@ -125,7 +128,8 @@ class PeriodicModelerMultiband(PeriodicModeler):
         self.unique_filts_ = np.unique(filts)
         self.t, self.y, self.dy, self.filts = np.broadcast_arrays(t, y, dy,
                                                                   filts)
-        self._fit(self.t, self.y, self.dy, filts=self.filts)
+        self._fit(self.t, self.y, self.dy, self.filts)
+        self._best_period = None  # reset best period in case of refitting
         return self
 
     def predict(self, t, filts, period=None):
@@ -147,11 +151,12 @@ class PeriodicModelerMultiband(PeriodicModeler):
         y : np.ndarray
             predicted model values at times t
         """
-        vals = set(np.unique(filts))
-        if not vals.issubset(self.unique_filts_):
+        unique_filts = set(np.unique(filts))
+        if not unique_filts.issubset(self.unique_filts_):
             raise ValueError("filts does not match training data: "
                              "input: {0} output: {1}"
-                             "".format(set(self.unique_filts_), set(vals)))
+                             "".format(set(self.unique_filts_),
+                                       set(unique_filts)))
         t, filts = np.broadcast_arrays(t, filts)
 
         if period is None:
@@ -159,6 +164,12 @@ class PeriodicModelerMultiband(PeriodicModeler):
 
         result = self._predict(t.ravel(), filts=filts.ravel(), period=period)
         return result.reshape(t.shape)
+
+    # The following methods should be overloaded by derived classes:
+
+    def _score(self, periods):
+        """Compute the score of the model given the periods"""
+        raise NotImplementedError()
 
     def _fit(self, t, y, dy, filts):
         """Fit the model to the given data"""
