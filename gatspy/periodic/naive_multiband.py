@@ -45,7 +45,8 @@ class NaiveMultiband(PeriodicModelerMultiband):
 
         masks = [(filts == filt) for filt in unique_filts]
         self.models_ = dict([(filt,
-                              self.BaseModel(*self.args,
+                              self.BaseModel(self.optimizer,
+                                             *self.args,
                                              **self.kwargs).fit(t[mask],
                                                                 y[mask],
                                                                 dy[mask]))

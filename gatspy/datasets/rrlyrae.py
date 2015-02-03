@@ -38,15 +38,22 @@ def _get_download_or_cache(filename, data_home=None,
 
 class RRLyraeLC(object):
     """Container for accessing RR Lyrae Light Curve data."""
-    def __init__(self, filename, dirname='table1'):
-        self.filename = filename
+    def __init__(self, tablename='table1.tar.gz', dirname='table1',
+                 cache_kwargs=None):
+        self.tablename = tablename
         self.dirname = dirname
+        self.cache_kwargs = cache_kwargs
+        self._load_data()
+
+    def _load_data(self):
+        filename = _get_download_or_cache(self.tablename,
+                                          **(self.cache_kwargs or {}))
         self.data = tarfile.open(filename)
         self._metadata = None
         self._obsdata = None
 
     def __getstate__(self):
-        return (self.filename, self.dirname)
+        return (self.tablename, self.dirname, self.cache_kwargs)
 
     def __setstate__(self, args):
         self.__init__(*args)
@@ -151,12 +158,13 @@ class PartialRRLyraeLC(RRLyraeLC):
                    dirname=rrlyrae.dirname,
                    offset=offset)
 
-    def __init__(self, filename, dirname='table1', offset=0):
+    def __init__(self, tablename='table1.tar.gz', dirname='table1',
+                 offset=0, cache_kwargs=None):
         self.offset = offset
-        RRLyraeLC.__init__(self, filename, dirname)
+        RRLyraeLC.__init__(self, tablename, dirname, cache_kwargs)
 
     def __getstate__(self):
-        return (self.filename, self.dirname, self.offset)
+        return (self.tablename, self.dirname, self.offset, self.cache_kwargs)
 
     def __setstate__(self, args):
         self.__init__(*args)
@@ -180,9 +188,22 @@ class PartialRRLyraeLC(RRLyraeLC):
 
 class RRLyraeTemplates(object):
     """Container to access the RR Lyrae templates from Sesar 2010"""
-    def __init__(self, filename, dirname='table1'):
+    def __init__(self, tablename='RRLyr_ugriz_templates.tar.gz',
+                 cache_kwargs=None):
+        self.tablename = tablename
+        self.cache_kwargs = cache_kwargs
+        self._load_data()
+
+    def _load_data(self):
+        filename = _get_download_or_cache(self.tablename,
+                                          **(self.cache_kwargs or {}))
         self.data = tarfile.open(filename)
-        self.dirname = dirname
+
+    def __getstate__(self):
+        return (self.tablename, self.cache_kwargs)
+
+    def __setstate__(self, args):
+        self.__init__(*args)
 
     @property
     def filenames(self):
@@ -202,12 +223,12 @@ class RRLyraeTemplates(object):
 
 def fetch_rrlyrae(partial=False, **kwargs):
     """Fetch light curves from Sesar 2010"""
-    save_loc = _get_download_or_cache('table1.tar.gz', **kwargs)
-
     if partial:
-        return PartialRRLyraeLC(save_loc)
+        return PartialRRLyraeLC('table1.tar.gz',
+                                cache_kwargs=kwargs)
     else:
-        return RRLyraeLC(save_loc)
+        return RRLyraeLC('table1.tar.gz',
+                         cache_kwargs=kwargs)
 
 
 def fetch_rrlyrae_lc_params(**kwargs):
@@ -240,6 +261,4 @@ def fetch_rrlyrae_fitdata(**kwargs):
 
 def fetch_rrlyrae_templates(**kwargs):
     """Access the RR Lyrae template data (table 1 of Sesar 2010)"""
-    save_loc = _get_download_or_cache('RRLyr_ugriz_templates.tar.gz', **kwargs)
-
-    return RRLyraeTemplates(save_loc)
+    return RRLyraeTemplates('RRLyr_ugriz_templates.tar.gz', kwargs)
