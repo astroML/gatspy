@@ -6,6 +6,7 @@ is a collection of tools for analyzing astronomical time series in Python.
 
 [![version status](https://pypip.in/v/gatspy/badge.png)](https://pypi.python.org/pypi/gatspy)
 [![build status](https://travis-ci.org/jakevdp/gatspy.png?branch=master)](https://travis-ci.org/jakevdp/gatspy)
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.14833.svg)](http://dx.doi.org/10.5281/zenodo.14833)
 
 Dependencies
 ------------
