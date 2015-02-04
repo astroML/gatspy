@@ -7,15 +7,15 @@ gatspy: General tools for Astronomical Time Series in Python
 
 Gatspy (pronounced as F. Scott Fitzgerald might pronounce it) is a collection of tools for analyzing astronomical time series in Python.
 
-For more information, visit http://github.com/jakevdp/gatspy/
+For more information, visit http://github.com/astroml/gatspy/
 """
 NAME = "gatspy"
 AUTHOR = "Jake VanderPlas"
 AUTHOR_EMAIL = "jakevdp@uw.edu"
 MAINTAINER = "Jake VanderPlas"
 MAINTAINER_EMAIL = "jakevdp@uw.edu"
-URL = 'http://github.com/jakevdp/gatspy'
-DOWNLOAD_URL = 'http://github.com/jakevdp/gatspy'
+URL = 'http://github.com/astroml/gatspy'
+DOWNLOAD_URL = 'http://github.com/astroml/gatspy'
 LICENSE = 'BSD 3-clause'
 
 import gatspy
