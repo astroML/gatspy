@@ -12,7 +12,10 @@ def test_extirpolate():
     y = np.sin(x)
     f = lambda x: np.sin(x / 10)
 
-    x_hat = np.arange(100)
-    y_hat = extirpolate(x, y, 100, M=5)
+    def check_result(N, M=5):
+        y_hat = extirpolate(x, y, N, M)
+        x_hat = np.arange(len(y_hat))
+        assert_allclose(np.dot(f(x), y), np.dot(f(x_hat), y_hat))
 
-    assert_allclose(np.dot(f(x), y), np.dot(f(x_hat), y_hat))
+    for N in [100, None]:
+        yield check_result, N

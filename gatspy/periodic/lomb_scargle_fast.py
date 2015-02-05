@@ -52,20 +52,29 @@ def extirpolate(x, y, N=None, M=4):
     >>> f = lambda x: np.sin(x / 10)
     >>> np.allclose(np.sum(y * f(x)), np.sum(y_hat * f(x_hat)))
     True
+
+    Notes
+    -----
+    This code is based on the C implementation of spread() presented in
+    Numerical Recipes in C, Second Edition (Press et al. 1989; p.583).
     """
     x, y = map(np.ravel, np.broadcast_arrays(x, y))
 
     if N is None:
-        N = int(np.ceil(np.max(x + 0.5 * M)))
+        N = int(np.max(x) + 0.5 * M + 1)
 
-    ilo = np.clip((x - 0.5 * M + 1).astype(int), 0, N - M)
-    ihi = ilo + M - 1
+    # For each value x, find the index describing the extirpolation range.
+    # i.e. ilo[i] < x[i] < ilo[i] + M with x[i] in the center,
+    # adjusted so that the limits are within the range 0...N
+    ilo = np.clip((x - M // 2).astype(int), 0, N - M)
 
+    # Now use legendre polynomial weights to populate the results array;
+    # This is an efficient recursive implementation (See Press et al. 1989)
     result = np.zeros(N)
     numerator = y * np.prod(x - ilo - np.arange(M)[:, np.newaxis], 0)
     denominator = factorial(M - 1)
     for j in range(M):
-        if j > 0:
-            denominator *= j / (j - M)
-        np.add.at(result, ihi - j, numerator / (denominator * (x - (ihi - j))))
+        if j > 0: denominator *= j / (j - M)
+        ind = ilo + (M - 1 - j)
+        np.add.at(result, ind, numerator / (denominator * (x - ind)))
     return result
