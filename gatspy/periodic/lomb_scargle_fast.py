@@ -63,18 +63,25 @@ def extirpolate(x, y, N=None, M=4):
     if N is None:
         N = int(np.max(x) + 0.5 * M + 1)
 
-    # For each value x, find the index describing the extirpolation range.
-    # i.e. ilo[i] < x[i] < ilo[i] + M with x[i] in the center,
-    # adjusted so that the limits are within the range 0...N
-    ilo = np.clip((x - M // 2).astype(int), 0, N - M)
-
     # Now use legendre polynomial weights to populate the results array;
     # This is an efficient recursive implementation (See Press et al. 1989)
     result = np.zeros(N)
+
+    # first take care of the easy cases where x is an integer
+    integers = (x % 1 == 0)
+    np.add.at(result, x[integers].astype(int), y[integers])
+    x, y = x[~integers], y[~integers]
+
+    # For each remaining x, find the index describing the extirpolation range.
+    # i.e. ilo[i] < x[i] < ilo[i] + M with x[i] in the center,
+    # adjusted so that the limits are within the range 0...N
+    ilo = np.clip((x - M // 2).astype(int), 0, N - M)
     numerator = y * np.prod(x - ilo - np.arange(M)[:, np.newaxis], 0)
     denominator = factorial(M - 1)
+
     for j in range(M):
-        if j > 0: denominator *= j / (j - M)
+        if j > 0:
+            denominator *= j / (j - M)
         ind = ilo + (M - 1 - j)
         np.add.at(result, ind, numerator / (denominator * (x - ind)))
     return result
