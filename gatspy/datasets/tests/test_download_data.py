@@ -1,5 +1,14 @@
 from .. import (fetch_rrlyrae, fetch_rrlyrae_fitdata,
                 fetch_rrlyrae_templates, fetch_rrlyrae_lc_params)
+from nose import SkipTest
+from numpy.testing import assert_equal
+
+try:
+    # Python 3
+    from urllib.error import URLError
+except:
+    # Python 2
+    from urllib2 import URLError
 
 
 def test_downloads():
@@ -11,5 +20,11 @@ def test_downloads():
 
 def test_forced_download():
     """Test downloading the smallest of the files: table3.dat.gz (22K)"""
-    data = fetch_rrlyrae_fitdata(force_download=True)
-    assert data is not None
+    try:
+        data = fetch_rrlyrae_fitdata(force_download=True)
+    except URLError:
+        raise SkipTest("No internet connection: data download test skipped")
+    assert_equal(data.shape, (483,))
+    assert_equal(data.dtype.names, ('id', 'RA', 'DEC', 'rExt', 'd', 'RGC',
+                                    'u', 'g', 'r', 'i', 'z', 'V',
+                                    'ugmin', 'ugmin_err', 'grmin', 'grmin_err'))
