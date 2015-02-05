@@ -85,3 +85,53 @@ def extirpolate(x, y, N=None, M=4):
         ind = ilo + (M - 1 - j)
         np.add.at(result, ind, numerator / (denominator * (x - ind)))
     return result
+
+
+
+def fast_LS(x, y, ofac=5, hifac=10, MACC=4):
+    """Fast Lomb-Scargle algorithm, based on Press et al (1989)"""
+    # TODO: clean-up and documentate
+
+    #Check dimensions of input arrays
+    x, y = np.broadcast_arrays(x, y)
+    assert(x.ndim == 1)
+    n = len(x)
+
+    # Determine size of output and of frequency array
+    df  = 1.0 / (ofac * (x.max() - x.min()))
+    nout  = int(0.5 * ofac * hifac * n)
+    nfreq = int(ofac * hifac * n * MACC)
+
+    # size the FFT as next power of 2 above nfreq.
+    # (Is this necessary? I think np.fft does this internally.)
+    ndim = 2 ** (int(np.log2(nfreq)) + 1)
+
+    # extirpolate the data into uniformly-spaced arrays
+    # using the power-of-two folding trick from Press et al.
+    ck  = ((x - x.min()) * ndim * df) % ndim
+    wk1 = extirpolate(ck, y - y.mean(), ndim, MACC)
+
+    ckk  = (2.0 * ck) % ndim
+    wk2 = extirpolate(ckk, 1.0, ndim, MACC)
+
+    # Take the Fast Fourier Transforms
+    wk1 = len(wk1) * np.fft.ifft(wk1)[1:nout + 1]
+    wk2 = len(wk2) * np.fft.ifft(wk2)[1:nout + 1]
+    rwk1, iwk1 = wk1.real, wk1.imag
+    rwk2, iwk2 = wk2.real, wk2.imag
+  
+    # Compute Lomb-Scargle power
+    hypo2 = 2.0 * abs(wk2)
+    hc2wt = rwk2 / hypo2
+    hs2wt = iwk2 / hypo2
+    cwt  = np.sqrt(0.5 + hc2wt)
+    swt  = np.sign(hs2wt) * (np.sqrt(0.5 - hc2wt))
+    den  = 0.5 * n + hc2wt * rwk2 + hs2wt * iwk2
+    cterm = (cwt * rwk1 + swt * iwk1) ** 2 / den
+    sterm = (cwt * iwk1 - swt * rwk1) ** 2 / (n - den)
+
+    freq = df * np.arange(1, nout + 1)
+    power = (cterm + sterm) / (2.0 * y.var(ddof=1))
+
+    return freq, power
+    
