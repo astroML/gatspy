@@ -4,8 +4,8 @@ gatspy: General tools for Astronomical Time Series in Python
 Gatspy (pronounced as F. Scott Fitzgerald would probably pronounce it)
 is a collection of tools for analyzing astronomical time series in Python.
 
-[![version status](https://pypip.in/v/gatspy/badge.png)](https://pypi.python.org/pypi/gatspy)
-[![build status](https://travis-ci.org/astroML/gatspy.svg?branch=master)](https://travis-ci.org/astroml/gatspy)
+[![version status](https://pypip.in/v/gatspy/badge.svg)](https://pypi.python.org/pypi/gatspy)
+[![build status](https://travis-ci.org/astroML/gatspy.svg?branch=master)](https://travis-ci.org/astroML/gatspy)
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.14833.svg)](http://dx.doi.org/10.5281/zenodo.14833)
 
 Dependencies
@@ -41,3 +41,7 @@ to run the unit tests
 Authors
 -------
 gatspy is written by [Jake VanderPlas](http://www.vanderplas.com)
+
+Citing
+------
+If you use this code in an academic publication, please consider including a citation. Citation information in a variety of formats can be found [on zenodo](http://dx.doi.org/10.5281/zenodo.14833).
