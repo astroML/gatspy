@@ -1,8 +1,8 @@
-from __future__ import print_function, division
-
 """
 Fast Lomb-Scargle Algorithm, following Press & Rybicki 1989
 """
+from __future__ import print_function, division
+import warnings
 import numpy as np
 
 # Precomputed factorials
@@ -180,39 +180,111 @@ def trig_sum(t, h, df, N, f0=0, freq_factor=1,
     return S, C
     
 
-def lomb_scargle(t, y, dy, f0, df, N, subtract_mean=True, fit_offset=True,
-                 use_fft=True, oversampling=5, Mfft=4):
-    N = int(N)
+def lomb_scargle(t, y, dy=1, f0=0, df=None, Nf=None,
+                 subtract_mean=True, fit_offset=True,
+                 use_fft=True, freq_oversampling=5, nyquist_factor=2,
+                 trig_sum_kwds=None):
+    """Compute a lomb-scargle periodogram for the given data
 
+    This implements both an O[N^2] method if use_fft==False, or an
+    O[NlogN] method if use_fft==True.
+
+    Parameters
+    ----------
+    t, y, dy : array_like
+        times, values, and errors of the data points. These should be
+        broadcastable to the same shape. If dy is not specified, a
+        constant error will be used.
+    f0, df, Nf : (float, float, int)
+        parameters describing the frequency grid, f = f0 + df * arange(Nf).
+        Defaults, with T = t.max() - t.min():
+        - f0 = 0
+        - df is set such that there are ``freq_oversampling`` points per
+          peak width. ``freq_oversampling`` defaults to 5.
+        - Nf is set such that the highest frequency is ``nyquist_factor``
+          times the so-called "average Nyquist frequency".
+          ``nyquist_factor`` defaults to 2.
+        Note that for unevenly-spaced data, the periodogram can be sensitive
+        to frequencies far higher than the average Nyquist frequency.
+    subtract_mean : bool (default=True)
+        Specify whether to subtract the mean of the data before the fit
+    fit_offset : bool (default=True)
+        If True, then compute the floating-mean periodogram; i.e. let the mean
+        vary with the fit.
+    use_fft : bool (default=True)
+        If True, then use the Press & Rybicki O[NlogN] algorithm to compute
+        the result. Otherwise, use a slower O[N^2] algorithm
+
+    Other Parameters
+    ----------------
+    freq_oversampling : float (default=5)
+        Oversampling factor for the frequency bins. Only referenced if
+        ``df`` is not specified
+    nyquist_factor : float (default=2)
+        Parameter controlling the highest probed frequency. Only referenced
+        if ``Nf`` is not specified.
+    trig_sum_kwds : dict or None (optional)
+        extra keyword arguments to pass to the ``trig_sum`` utility.
+        Options are ``oversampling`` and ``Mfft``. See documentation
+        of ``trig_sum`` for details.
+    """
+    # Validate and setup input data
     t, y, dy = map(np.ravel, np.broadcast_arrays(t, y, dy))
     w = 1. / (dy ** 2)
     w /= w.sum()
-    freq = f0 + df * np.arange(N)
-    ymean = np.dot(y, w)
+
+    # Validate and setup frequency grid
+    if df is None:
+        peak_width = 1. / (t.max() - t.min())
+        df = peak_width / freq_oversampling
+    if Nf is None:
+        avg_Nyquist = 0.5 * len(t) / (t.max() - t.min())
+        Nf = max(16, (nyquist_factor * avg_Nyquist - f0) / df)
+    Nf = int(Nf)
+    assert(df > 0)
+    assert(Nf > 0)
+    freq = f0 + df * np.arange(Nf)
 
     # Center the data. Even if we're fitting the offset,
     # this step makes the expressions below more succinct
     if subtract_mean or fit_offset:
-        y = y - ymean
+        y = y - np.dot(w, y)
 
-    kwargs = dict(f0=f0, df=df, use_fft=use_fft, Mfft=Mfft,
-                  oversampling=oversampling, N=N)
+    # set up arguments to trig_sum
+    kwargs = dict.copy(trig_sum_kwds or {})
+    kwargs.update(f0=f0, df=df, use_fft=use_fft, N=Nf)
 
-    # first compute the time-shift tau for each frequency
-    S, C = trig_sum(t, w, **kwargs)
+    #----------------------------------------------------------------------
+    # 1. compute functions of the time-shift tau at each frequency
+    Sh, Ch = trig_sum(t, w * y, **kwargs)
     S2, C2 = trig_sum(t, w, freq_factor=2, **kwargs)
 
     if fit_offset:
-        tan_2omega_tau = (S2 - 2 * S * C) / (C2 - (C * C - S * S))
+        S, C = trig_sum(t, w, **kwargs)
+        with warnings.catch_warnings():
+            # Filter "invalid value in divide" warnings for zero-frequency
+            if f0 == 0:
+                warnings.simplefilter("ignore")
+            tan_2omega_tau = (S2 - 2 * S * C) / (C2 - (C * C - S * S))
+            # fix NaN at zero frequency
+            if np.isnan(tan_2omega_tau[0]):
+                tan_2omega_tau[0] = 0
     else:
         tan_2omega_tau = S2 / C2
-    omega_tau = 0.5 * np.arctan(tan_2omega_tau)
 
-    Sw, Cw = np.sin(omega_tau), np.cos(omega_tau)
-    S2w, C2w = np.sin(2 * omega_tau), np.cos(2 * omega_tau)
+    # slower/less stable way: we'll use trig identities instead
+    # omega_tau = 0.5 * np.arctan(tan_2omega_tau)
+    # S2w, C2w = np.sin(2 * omega_tau), np.cos(2 * omega_tau)
+    # Sw, Cw = np.sin(omega_tau), np.cos(omega_tau)
 
-    # Now compute the periodogram
-    Sh, Ch = trig_sum(t, w * y, **kwargs)
+    S2w = tan_2omega_tau / np.sqrt(1 + tan_2omega_tau * tan_2omega_tau)
+    C2w = 1 / np.sqrt(1 + tan_2omega_tau * tan_2omega_tau)
+    Cw = np.sqrt(0.5) * np.sqrt(1 + C2w)
+    Sw = np.sqrt(0.5) * np.sign(S2w) * np.sqrt(1 - C2w)
+
+    #----------------------------------------------------------------------
+    # 2. Compute the periodogram, following Zechmeister & Kurster
+    #    and using tricks from Press & Rybicki.
     YY = np.dot(w, y ** 2)
     YC = Ch * Cw + Sh * Sw
     YS = Sh * Cw - Ch * Sw
@@ -223,4 +295,15 @@ def lomb_scargle(t, y, dy, f0, df, N, subtract_mean=True, fit_offset=True,
         CC -= (C * Cw + S * Sw) ** 2
         SS -= (S * Cw - C * Sw) ** 2
 
-    return freq, (YC * YC / CC + YS * YS / SS) / YY
+    with warnings.catch_warnings():
+        # Filter "invalid value in divide" warnings for zero-frequency
+        if fit_offset and f0 == 0:
+            warnings.simplefilter("ignore")
+
+        power = (YC * YC / CC + YS * YS / SS) / YY
+
+        # fix NaN at zero frequency
+        if np.isnan(power[0]):
+            power[0] = 0
+
+    return freq, power
