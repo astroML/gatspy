@@ -57,6 +57,25 @@ class PeriodicModeler(object):
         result = self._predict(t.ravel(), period=period)
         return result.reshape(t.shape)
 
+    def score_frequency_grid(self, f0, df, N):
+        """Compute the score on a frequency grid.
+
+        Some models can compute results faster if the inputs are passed in this
+        manner.
+
+        Parameters
+        ----------
+        f0, df, N : (float, float, int)
+            parameters describing the frequency grid freq = f0 + df * arange(N)
+
+        Returns
+        -------
+        score : ndarray
+            the length-N array giving the score at each frequency
+        """
+        freq = f0 + df * np.arange(N)
+        return self.score(2 * np.pi / freq)
+
     def score(self, periods):
         """Compute the periodogram for the given period or periods
 
