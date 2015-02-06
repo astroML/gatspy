@@ -64,7 +64,9 @@ class LinearScanOptimizer(PeriodicOptimizer):
 
         # Compute the score on the initial grid
         N = int(1 + width // omega_step)
-        score = model.score(periods)
+        score = model.score_frequency_grid(omega_min / (2 * np.pi),
+                                           omega_step / (2 * np.pi),
+                                           len(omegas))
 
         # find initial candidates of unique peaks
         minscore = score.min()

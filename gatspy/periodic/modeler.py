@@ -67,6 +67,7 @@ class PeriodicModeler(object):
         ----------
         f0, df, N : (float, float, int)
             parameters describing the frequency grid freq = f0 + df * arange(N)
+            Note that these are frequencies, not angular frequencies.
 
         Returns
         -------
@@ -74,7 +75,7 @@ class PeriodicModeler(object):
             the length-N array giving the score at each frequency
         """
         freq = f0 + df * np.arange(N)
-        return self.score(2 * np.pi / freq)
+        return self.score(1. / freq)
 
     def score(self, periods):
         """Compute the periodogram for the given period or periods
