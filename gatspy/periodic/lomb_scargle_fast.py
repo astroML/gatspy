@@ -229,6 +229,13 @@ def lomb_scargle_fast(t, y, dy=1, f0=0, df=None, Nf=None,
         extra keyword arguments to pass to the ``trig_sum`` utility.
         Options are ``oversampling`` and ``Mfft``. See documentation
         of ``trig_sum`` for details.
+
+    References
+    ----------
+    .. [1] Press W.H. and Rybicki, G.B, "Fast algorithm for spectral analysis
+        of unevenly sampled data". ApJ 1:338, p277, 1989
+    .. [2] M. Zechmeister and M. Kurster, A&A 496, 577-584 (2009)
+    .. [3] W. Press et al, Numerical Recipies in C (2002)
     """
     # Validate and setup input data
     t, y, dy = map(np.ravel, np.broadcast_arrays(t, y, dy))
@@ -315,8 +322,9 @@ class LombScargleFast(LombScargle):
     """Fast FFT-based Lomb-Scargle Periodogram Implementation
 
     This implements the O[N log N] lomb-scargle periodogram, described in
-    Press & Rybicki (1989). To compute the periodogram via the fast algorithm,
-    use the ``score_frequency_grid()`` method. The ``score()`` method of
+    Press & Rybicki (1989) [1].
+    To compute the periodogram via the fast algorithm, use the
+    ``score_frequency_grid()`` method. The ``score()`` method of
     ``periodogram()`` method will default to the slower algorithm.
 
     Parameters
@@ -353,6 +361,12 @@ class LombScargleFast(LombScargle):
     See Also
     --------
     LombScargle
+    LombScargleAstroML
+
+    References
+    ----------
+    .. [1] Press W.H. and Rybicki, G.B, "Fast algorithm for spectral analysis
+           of unevenly sampled data". ApJ 1:338, p277, 1989
     """
     def __init__(self, optimizer=None, center_data=True, fit_offset=True,
                  use_fft=True, ls_kwds=None):
@@ -370,3 +384,9 @@ class LombScargleFast(LombScargle):
                                     use_fft=self.use_fft,
                                     **(self.ls_kwds or {}))
         return P
+
+    def _score(self, periods):
+        warnings.warn("The score() method defaults to a slower O[N^2] "
+                      "algorithm. Use the score_frequency_grid() method "
+                      "to access the fast FFT-based algorithm")
+        return LombScargle._score(self, periods)

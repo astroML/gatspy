@@ -114,7 +114,7 @@ def test_find_best_period():
         fast = LombScargleFast(fit_offset=fit_offset,
                                center_data=center_data,
                                use_fft=use_fft).fit(t, y, dy)
-        assert_equal(model.best_period, fast.best_period)
+        assert_allclose(model.best_period, fast.best_period, atol=5E-4)
 
     for use_fft in [True, False]:
         for fit_offset in [True, False]:

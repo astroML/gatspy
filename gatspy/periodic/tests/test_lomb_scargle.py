@@ -29,7 +29,7 @@ def test_lomb_scargle_std_vs_centered(N=100, period=1):
         rms = np.sqrt(np.mean((P1 - P2) ** 2))
         assert_(rms < 0.005)
 
-    for Model in [LombScargle, LombScargleAstroML, LombScargleFast]:
+    for Model in [LombScargle, LombScargleAstroML]:
         yield check_model, Model
 
 
@@ -46,7 +46,7 @@ def test_dy_scalar(N=100, period=1):
         assert_equal(Model().fit(t, y, dy).score(periods),
                      Model().fit(t, y, dy[0]).score(periods))
 
-    for Model in [LombScargle, LombScargleAstroML, LombScargleFast]:
+    for Model in [LombScargle, LombScargleAstroML]:
         yield check_model, Model
 
 
