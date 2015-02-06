@@ -103,9 +103,9 @@ def extirpolate(x, y, N=None, M=4):
 def trig_sum(t, h, df, N, f0=0, freq_factor=1,
              oversampling=5, use_fft=True, Mfft=4):
     """Compute (approximate) trigonometric sums for a number of frequencies
-    
+
     This routine computes weighted sine and cosine sums:
-    
+
         S_j = sum_i { h_i * sin(2 pi * f_j * t_i) }
         C_j = sum_i { h_i * cos(2 pi * f_j * t_i) }
 
@@ -178,12 +178,12 @@ def trig_sum(t, h, df, N, f0=0, freq_factor=1,
         S = np.dot(h, np.sin(2 * np.pi * f * t[:, np.newaxis]))
 
     return S, C
-    
 
-def lomb_scargle(t, y, dy=1, f0=0, df=None, Nf=None,
-                 subtract_mean=True, fit_offset=True,
-                 use_fft=True, freq_oversampling=5, nyquist_factor=2,
-                 trig_sum_kwds=None):
+
+def lomb_scargle_fast(t, y, dy=1, f0=0, df=None, Nf=None,
+                      subtract_mean=True, fit_offset=True,
+                      use_fft=True, freq_oversampling=5, nyquist_factor=2,
+                      trig_sum_kwds=None):
     """Compute a lomb-scargle periodogram for the given data
 
     This implements both an O[N^2] method if use_fft==False, or an

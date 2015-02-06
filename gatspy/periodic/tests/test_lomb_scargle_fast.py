@@ -3,7 +3,8 @@ from __future__ import division
 import numpy as np
 from numpy.testing import assert_allclose, assert_equal
 
-from ..lomb_scargle_fast import extirpolate, bitceil, trig_sum
+from ..lomb_scargle_fast import (extirpolate, bitceil, trig_sum,
+                                 lomb_scargle_fast)
 
 
 def test_extirpolate():
@@ -49,7 +50,7 @@ def test_trig_sum():
     rng = np.random.RandomState(0)
     t = 10 * rng.rand(50)
     h = np.sin(t)
-    
+
     def check_result(f0, adjust_t, freq_factor, df=0.01):
         tfit = t - t.min() if adjust_t else t
         S1, C1 = trig_sum(tfit, h, df, N=1000, use_fft=True,
@@ -63,3 +64,27 @@ def test_trig_sum():
         for adjust_t in [True, False]:
             for freq_factor in [1, 2]:
                 yield check_result, f0, adjust_t, freq_factor
+
+
+def test_lomb_scargle_fast():
+    """Test lomb scargle with and without FFT"""
+    rng = np.random.RandomState(0)
+
+    t = 30 * rng.rand(100)
+    y = np.sin(t)
+    dy = 0.1 + 0.1 * rng.rand(len(t))
+    y += dy * rng.randn(len(t))
+
+    def check_results(subtract_mean, fit_offset):
+        freq1, P1 = lomb_scargle_fast(t, y, dy,
+                                      subtract_mean=subtract_mean,
+                                      fit_offset=fit_offset, use_fft=True)
+        freq2, P2 = lomb_scargle_fast(t, y, dy,
+                                      subtract_mean=subtract_mean,
+                                      fit_offset=fit_offset, use_fft=False)
+        assert_allclose(freq1, freq2)
+        assert_allclose(P1, P2, atol=0.005)
+
+    for subtract_mean in [True, False]:
+        for fit_offset in [True, False]:
+            yield check_results, subtract_mean, fit_offset
