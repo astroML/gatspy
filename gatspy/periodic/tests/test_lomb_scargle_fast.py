@@ -1,9 +1,9 @@
 from __future__ import division
 
 import numpy as np
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_equal
 
-from ..lomb_scargle_fast import extirpolate
+from ..lomb_scargle_fast import extirpolate, bitceil, trig_sum
 
 
 def test_extirpolate():
@@ -35,3 +35,30 @@ def test_extirpolate_with_integers():
 
     for N in [100, None]:
         yield check_result, N
+
+
+def test_bitceil():
+    slow_bitceil = lambda N: int(2 ** np.ceil(np.log2(N)))
+
+    for N in (2 ** np.arange(1, 12)):
+        for offset in (-1, 0, 1):
+            assert_equal(slow_bitceil(N + offset), bitceil(N + offset))
+
+
+def test_trig_sum():
+    rng = np.random.RandomState(0)
+    t = 10 * rng.rand(50)
+    h = np.sin(t)
+    
+    def check_result(f0, adjust_t, df=0.01):
+        tfit = t - t.min() if adjust_t else t
+        S1, C1 = trig_sum(tfit, h, df, N=1000, use_fft=True,
+                          f0=f0, oversampling=10)
+        S2, C2 = trig_sum(tfit, h, df, N=1000, use_fft=False,
+                          f0=f0, oversampling=10)
+        assert_allclose(S1, S2, atol=1E-2)
+        assert_allclose(C1, C2, atol=1E-2)
+
+    for f0 in [0, 1]:
+        for adjust_t in [True, False]:
+            yield check_result, f0, adjust_t
