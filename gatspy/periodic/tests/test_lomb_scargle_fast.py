@@ -50,15 +50,16 @@ def test_trig_sum():
     t = 10 * rng.rand(50)
     h = np.sin(t)
     
-    def check_result(f0, adjust_t, df=0.01):
+    def check_result(f0, adjust_t, freq_factor, df=0.01):
         tfit = t - t.min() if adjust_t else t
         S1, C1 = trig_sum(tfit, h, df, N=1000, use_fft=True,
-                          f0=f0, oversampling=10)
+                          f0=f0, freq_factor=freq_factor, oversampling=10)
         S2, C2 = trig_sum(tfit, h, df, N=1000, use_fft=False,
-                          f0=f0, oversampling=10)
+                          f0=f0, freq_factor=freq_factor, oversampling=10)
         assert_allclose(S1, S2, atol=1E-2)
         assert_allclose(C1, C2, atol=1E-2)
 
     for f0 in [0, 1]:
         for adjust_t in [True, False]:
-            yield check_result, f0, adjust_t
+            for freq_factor in [1, 2]:
+                yield check_result, f0, adjust_t, freq_factor
