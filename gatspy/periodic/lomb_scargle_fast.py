@@ -5,6 +5,8 @@ from __future__ import print_function, division
 import warnings
 import numpy as np
 
+from .lomb_scargle import LombScargle
+
 # Precomputed factorials
 FACTORIALS = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800]
 
@@ -181,7 +183,7 @@ def trig_sum(t, h, df, N, f0=0, freq_factor=1,
 
 
 def lomb_scargle_fast(t, y, dy=1, f0=0, df=None, Nf=None,
-                      subtract_mean=True, fit_offset=True,
+                      center_data=True, fit_offset=True,
                       use_fft=True, freq_oversampling=5, nyquist_factor=2,
                       trig_sum_kwds=None):
     """Compute a lomb-scargle periodogram for the given data
@@ -206,7 +208,7 @@ def lomb_scargle_fast(t, y, dy=1, f0=0, df=None, Nf=None,
           ``nyquist_factor`` defaults to 2.
         Note that for unevenly-spaced data, the periodogram can be sensitive
         to frequencies far higher than the average Nyquist frequency.
-    subtract_mean : bool (default=True)
+    center_data : bool (default=True)
         Specify whether to subtract the mean of the data before the fit
     fit_offset : bool (default=True)
         If True, then compute the floating-mean periodogram; i.e. let the mean
@@ -247,7 +249,7 @@ def lomb_scargle_fast(t, y, dy=1, f0=0, df=None, Nf=None,
 
     # Center the data. Even if we're fitting the offset,
     # this step makes the expressions below more succinct
-    if subtract_mean or fit_offset:
+    if center_data or fit_offset:
         y = y - np.dot(w, y)
 
     # set up arguments to trig_sum
@@ -307,3 +309,64 @@ def lomb_scargle_fast(t, y, dy=1, f0=0, df=None, Nf=None,
             power[0] = 0
 
     return freq, power
+
+
+class LombScargleFast(LombScargle):
+    """Fast FFT-based Lomb-Scargle Periodogram Implementation
+
+    This implements the O[N log N] lomb-scargle periodogram, described in
+    Press & Rybicki (1989). To compute the periodogram via the fast algorithm,
+    use the ``score_frequency_grid()`` method. The ``score()`` method of
+    ``periodogram()`` method will default to the slower algorithm.
+
+    Parameters
+    ----------
+    optimizer : PeriodicOptimizer instance
+        Optimizer to use to find the best period. If not specified, the
+        LinearScanOptimizer will be used.
+    center_data : boolean (default = True)
+        If True, then compute the weighted mean of the input data and subtract
+        before fitting the model.
+    fit_offset : boolean (default = True)
+        If True, then fit a floating-mean sinusoid model.
+    use_fft : boolean (default = True)
+        Specify whether to use the Press & Rybicki FFT algorithm to compute
+        the result
+    ls_kwds : dict
+        Dictionary of keywords to pass to the ``lomb_scargle_fast`` routine.
+
+    Examples
+    --------
+    >>> rng = np.random.RandomState(0)
+    >>> t = 100 * rng.rand(100)
+    >>> dy = 0.1
+    >>> omega = 10
+    >>> y = np.sin(omega * t) + dy * rng.randn(100)
+    >>> ls = LombScargleFast().fit(t, y, dy)
+    >>> ls.best_period
+    0.62827393156409295
+    >>> ls.score(ls.best_period)
+    array(0.9815178000850804)
+    >>> ls.predict([0, 0.5])
+    array([-0.01213809, -0.92700951])
+
+    See Also
+    --------
+    LombScargle
+    """
+    def __init__(self, optimizer=None, center_data=True, fit_offset=True,
+                 use_fft=True, ls_kwds=None):
+        self.use_fft = use_fft
+        self.ls_kwds = ls_kwds
+        LombScargle.__init__(self, optimizer=optimizer,
+                             center_data=center_data, fit_offset=fit_offset,
+                             Nterms=1, regularization=None)
+
+    def _score_frequency_grid(self, f0, df, N):
+        freq, P = lomb_scargle_fast(self.t, self.y, self.dy,
+                                    f0=f0, df=df, Nf=N,
+                                    center_data=self.center_data,
+                                    fit_offset=self.fit_offset,
+                                    use_fft=self.use_fft,
+                                    **(self.ls_kwds or {}))
+        return P

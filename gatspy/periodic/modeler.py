@@ -74,8 +74,7 @@ class PeriodicModeler(object):
         score : ndarray
             the length-N array giving the score at each frequency
         """
-        freq = f0 + df * np.arange(N)
-        return self.score(1. / freq)
+        return self._score_frequency_grid(f0, df, N)
 
     def score(self, periods):
         """Compute the periodogram for the given period or periods
@@ -114,6 +113,10 @@ class PeriodicModeler(object):
         return self.optimizer.best_period(self)
 
     # The following methods should be overloaded by derived classes:
+
+    def _score_frequency_grid(self, f0, df, N):
+        freq = f0 + df * np.arange(N)
+        return self._score(1. / freq)
 
     def _score(self, periods):
         """Compute the score of the model given the periods"""

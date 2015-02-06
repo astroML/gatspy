@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_allclose, assert_, assert_equal, assert_raises
 from nose import SkipTest
 
-from .. import LombScargle, LombScargleAstroML
+from .. import LombScargle, LombScargleAstroML, LombScargleFast
 
 
 def _generate_data(N=100, period=1, theta=[10, 2, 3], dy=1, rseed=0):
@@ -29,7 +29,7 @@ def test_lomb_scargle_std_vs_centered(N=100, period=1):
         rms = np.sqrt(np.mean((P1 - P2) ** 2))
         assert_(rms < 0.005)
 
-    for Model in [LombScargle, LombScargleAstroML]:
+    for Model in [LombScargle, LombScargleAstroML, LombScargleFast]:
         yield check_model, Model
 
 
@@ -46,7 +46,7 @@ def test_dy_scalar(N=100, period=1):
         assert_equal(Model().fit(t, y, dy).score(periods),
                      Model().fit(t, y, dy[0]).score(periods))
 
-    for Model in [LombScargle, LombScargleAstroML]:
+    for Model in [LombScargle, LombScargleAstroML, LombScargleFast]:
         yield check_model, Model
 
 
@@ -103,8 +103,8 @@ def test_best_params(N=100, period=1):
     t, y, dy = _generate_data(N, period, theta_true, dy)
 
     for Nterms in [1, 2, 3]:
-        for Model in [LombScargle, LombScargleAstroML]:
-            if Model is LombScargleAstroML:
+        for Model in [LombScargle, LombScargleAstroML, LombScargleFast]:
+            if Model is not LombScargle:
                 model = Model(center_data=False)
             else:
                 model = Model(Nterms=Nterms, center_data=False)
@@ -129,3 +129,4 @@ def test_bad_args():
     assert_raises(ValueError, LombScargle, Nterms=-2)
     assert_raises(ValueError, LombScargle, Nterms=0, fit_offset=False)
     assert_raises(ValueError, LombScargleAstroML, Nterms=2)
+    assert_raises(TypeError, LombScargleFast, Nterms=2)

@@ -1,10 +1,23 @@
 from __future__ import division
+import warnings
 
 import numpy as np
 from numpy.testing import assert_allclose, assert_equal
 
 from ..lomb_scargle_fast import (extirpolate, bitceil, trig_sum,
                                  lomb_scargle_fast)
+from .. import LombScargle, LombScargleFast
+
+
+def _generate_data(N=100, period=1, theta=[10, 2, 3], dy=1, rseed=0):
+    """Generate some data for testing"""
+    rng = np.random.RandomState(rseed)
+    t = 20 * period * rng.rand(N)
+    omega = 2 * np.pi / period
+    y = theta[0] + theta[1] * np.sin(omega * t) + theta[2] * np.cos(omega * t)
+    dy = dy * (0.5 + rng.rand(N))
+    y += dy * rng.randn(N)
+    return t, y, dy
 
 
 def test_extirpolate():
@@ -75,16 +88,60 @@ def test_lomb_scargle_fast():
     dy = 0.1 + 0.1 * rng.rand(len(t))
     y += dy * rng.randn(len(t))
 
-    def check_results(subtract_mean, fit_offset):
+    def check_results(center_data, fit_offset):
         freq1, P1 = lomb_scargle_fast(t, y, dy,
-                                      subtract_mean=subtract_mean,
+                                      center_data=center_data,
                                       fit_offset=fit_offset, use_fft=True)
         freq2, P2 = lomb_scargle_fast(t, y, dy,
-                                      subtract_mean=subtract_mean,
+                                      center_data=center_data,
                                       fit_offset=fit_offset, use_fft=False)
         assert_allclose(freq1, freq2)
         assert_allclose(P1, P2, atol=0.005)
 
-    for subtract_mean in [True, False]:
+    for center_data in [True, False]:
         for fit_offset in [True, False]:
-            yield check_results, subtract_mean, fit_offset
+            yield check_results, center_data, fit_offset
+
+
+def test_find_best_period():
+    t, y, dy = _generate_data()
+
+    def check_result(use_fft, fit_offset, center_data):
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            model = LombScargle(fit_offset=fit_offset,
+                                center_data=center_data).fit(t, y, dy)
+        fast = LombScargleFast(fit_offset=fit_offset,
+                               center_data=center_data,
+                               use_fft=use_fft).fit(t, y, dy)
+        assert_equal(model.best_period, fast.best_period)
+
+    for use_fft in [True, False]:
+        for fit_offset in [True, False]:
+            for center_data in [True, False]:
+                yield check_result, use_fft, fit_offset, center_data
+
+
+def test_power():
+    t, y, dy = _generate_data()
+    f0 = 0.8
+    df = 0.01
+    N = 40
+
+    def check_result(use_fft, fit_offset, center_data):
+        model = LombScargle(fit_offset=fit_offset,
+                            center_data=center_data).fit(t, y, dy)
+        fast = LombScargleFast(fit_offset=fit_offset,
+                               center_data=center_data,
+                               use_fft=use_fft).fit(t, y, dy)
+        assert_allclose(model.score_frequency_grid(f0, df, N),
+                        fast.score_frequency_grid(f0, df, N),
+                        atol=0.005)
+
+    for use_fft in [True, False]:
+        for fit_offset in [True, False]:
+            for center_data in [True, False]:
+                if not fit_offset and not center_data:
+                    continue
+                yield check_result, use_fft, fit_offset, center_data
+    
