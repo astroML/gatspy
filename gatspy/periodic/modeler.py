@@ -57,14 +57,68 @@ class PeriodicModeler(object):
         result = self._predict(t.ravel(), period=period)
         return result.reshape(t.shape)
 
-    def score(self, periods):
+    def score_frequency_grid(self, f0, df, N):
+        """Compute the score on a frequency grid.
+
+        Some models can compute results faster if the inputs are passed in this
+        manner.
+
+        Parameters
+        ----------
+        f0, df, N : (float, float, int)
+            parameters describing the frequency grid freq = f0 + df * arange(N)
+            Note that these are frequencies, not angular frequencies.
+
+        Returns
+        -------
+        score : ndarray
+            the length-N array giving the score at each frequency
+        """
+        return self._score_frequency_grid(f0, df, N)
+
+    def periodogram_auto(self, oversampling=5, nyquist_factor=3,
+                         return_periods=True):
+        """Compute the periodogram on an automatically-determined grid
+
+        This function uses heuristic arguments to choose a suitable frequency
+        grid for the data. Note that depending on the data window function,
+        the model may be sensitive to periodicity at higher frequencies than
+        this function returns!
+
+        The final number of frequencies will be
+        Nf = oversampling * nyquist_factor * len(t) / 2
+
+        Parameters
+        ----------
+        oversampling : float
+            the number of samples per approximate peak width
+        nyquist_factor : float
+            the highest frequency, in units of the nyquist frequency for points
+            spread uniformly through the data range.
+
+        Returns
+        -------
+        period : ndarray
+            the grid of periods
+        power : ndarray
+            the power at each frequency
+        """
+        N = len(self.t)
+        T = np.max(self.t) - np.min(self.t)
+        df = 1. / T / oversampling
+        f0 = df
+        Nf = int(0.5 * oversampling * nyquist_factor * N)
+        freq = f0 + df * np.arange(Nf)
+        return 1. / freq, self._score_frequency_grid(f0, df, Nf)
+
+    def score(self, periods=None):
         """Compute the periodogram for the given period or periods
 
         Parameters
         ----------
         periods : float or array_like
             Array of angular frequencies at which to compute
-            the periodogram
+            the periodogram.
 
         Returns
         -------
@@ -94,6 +148,10 @@ class PeriodicModeler(object):
         return self.optimizer.best_period(self)
 
     # The following methods should be overloaded by derived classes:
+
+    def _score_frequency_grid(self, f0, df, N):
+        freq = f0 + df * np.arange(N)
+        return self._score(1. / freq)
 
     def _score(self, periods):
         """Compute the score of the model given the periods"""

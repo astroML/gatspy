@@ -64,7 +64,9 @@ class LinearScanOptimizer(PeriodicOptimizer):
 
         # Compute the score on the initial grid
         N = int(1 + width // omega_step)
-        score = model.score(periods)
+        score = model.score_frequency_grid(omega_min / (2 * np.pi),
+                                           omega_step / (2 * np.pi),
+                                           len(omegas))
 
         # find initial candidates of unique peaks
         minscore = score.min()
@@ -82,10 +84,14 @@ class LinearScanOptimizer(PeriodicOptimizer):
             best_periods = 2 * np.pi / candidate_freqs[:n_periods]
             best_scores = candidate_scores[:n_periods]
         else:
-            final_step = width / self.final_pass_coverage
-            steps = np.arange(-omega_step, omega_step + final_step, final_step)
-            omegas = candidate_freqs[:, np.newaxis] + steps
-            periods = 2 * np.pi / omegas
+            f0 = -omega_step / (2 * np.pi)
+            df = width / self.final_pass_coverage / (2 * np.pi)
+            Nf = abs(2 * f0) // df
+            steps = f0 + df * np.arange(Nf)
+            candidate_freqs /= (2 * np.pi)
+
+            freqs = steps + candidate_freqs[:, np.newaxis]
+            periods = 1. / freqs
 
             if self.verbose:
                 print("Zooming-in on {0} candidate peaks:"
@@ -94,7 +100,9 @@ class LinearScanOptimizer(PeriodicOptimizer):
                       "steps".format(periods.size))
                 sys.stdout.flush()
 
-            scores = model.score(periods)
+            #scores = model.score(periods)
+            scores = np.array([model.score_frequency_grid(c + f0, df, Nf)
+                               for c in candidate_freqs])
             best_scores = scores.max(1)
             j = np.argmax(scores, 1)
             i = np.argsort(best_scores)[::-1]
