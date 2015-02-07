@@ -76,14 +76,46 @@ class PeriodicModeler(object):
         """
         return self._score_frequency_grid(f0, df, N)
 
-    def score(self, periods):
+    def periodogram_auto(self, oversampling=5, nyquist_factor=3,
+                         return_periods=True):
+        """Compute the score on an automatically-determined grid
+
+        Warning: depending on the data window function, the model may be
+        sensitive to periodicity at higher frequencies than this function
+        returns! The final number of frequencies will be
+        Nf = oversampling * nyquist_factor * len(t) / 2
+
+        Parameters
+        ----------
+        oversampling : float
+            the number of samples per approximate peak width
+        nyquist_factor : float
+            the highest frequency, in units of the nyquist frequency for points
+            spread uniformly through the data range.
+
+        Returns
+        -------
+        period : ndarray
+            the grid of periods
+        power : ndarray
+            the power at each frequency
+        """
+        N = len(self.t)
+        T = np.max(self.t) - np.min(self.t)
+        df = 1. / T / oversampling
+        f0 = df
+        Nf = int(0.5 * oversampling * nyquist_factor * N)
+        freq = f0 + df * np.arange(Nf)
+        return 1. / freq, self._score_frequency_grid(f0, df, Nf)
+
+    def score(self, periods=None):
         """Compute the periodogram for the given period or periods
 
         Parameters
         ----------
         periods : float or array_like
             Array of angular frequencies at which to compute
-            the periodogram
+            the periodogram.
 
         Returns
         -------
