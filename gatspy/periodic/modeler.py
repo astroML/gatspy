@@ -78,11 +78,14 @@ class PeriodicModeler(object):
 
     def periodogram_auto(self, oversampling=5, nyquist_factor=3,
                          return_periods=True):
-        """Compute the score on an automatically-determined grid
+        """Compute the periodogram on an automatically-determined grid
 
-        Warning: depending on the data window function, the model may be
-        sensitive to periodicity at higher frequencies than this function
-        returns! The final number of frequencies will be
+        This function uses heuristic arguments to choose a suitable frequency
+        grid for the data. Note that depending on the data window function,
+        the model may be sensitive to periodicity at higher frequencies than
+        this function returns!
+
+        The final number of frequencies will be
         Nf = oversampling * nyquist_factor * len(t) / 2
 
         Parameters

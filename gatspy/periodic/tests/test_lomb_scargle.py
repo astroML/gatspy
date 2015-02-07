@@ -16,6 +16,20 @@ def _generate_data(N=100, period=1, theta=[10, 2, 3], dy=1, rseed=0):
     return t, y, dy
 
 
+def test_periodogram_auto(N=100, period=1):
+    t, y, dy = _generate_data(N, period)
+    period, score = LombScargle().fit(t, y, dy).periodogram_auto()
+
+    def check_model(Model):
+        p, s = Model().fit(t, y, dy).periodogram_auto()
+        assert_allclose(p, period)
+        assert_allclose(s, score, atol=1E-2)
+
+    for Model in [LombScargle, LombScargleAstroML, LombScargleFast]:
+        yield check_model, Model
+    
+
+
 def test_lomb_scargle_std_vs_centered(N=100, period=1):
     """Test whether the standard and generalized lomb-scargle
     give close to the same results for non-centered data"""
