@@ -3,9 +3,9 @@
 Gatspy (pronounced as F. Scott Fitzgerald would probably pronounce it)
 is a collection of tools for analyzing astronomical time series in Python.
 
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.14833.svg)](http://dx.doi.org/10.5281/zenodo.14833)
 [![version status](http://img.shields.io/pypi/v/gatspy.svg?style=flat)](https://pypi.python.org/pypi/gatspy)
 [![build status](http://img.shields.io/travis/astroML/gatspy/master.svg?style=flat)](https://travis-ci.org/astroML/gatspy)
-[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.14833.svg)](http://dx.doi.org/10.5281/zenodo.14833)
 [![license](http://img.shields.io/badge/license-BSD-blue.svg?style=flat)](https://github.com/astroml/gatspy/blob/master/LICENSE)
 
 
