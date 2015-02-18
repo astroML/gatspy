@@ -24,7 +24,7 @@ or install the source from this directory using
 The package is pure python (i.e. no C or Fortran extensions) so there should be no problems with installation on any system.
 Gatspy has the following dependencies:
 
-- [numpy](http://numpy.org)
+- [numpy](http://numpy.org) version 1.8 or higher
 - [scipy](http://scipy.org)
 - [astroML](http://astroML.org)
 - [supersmoother](http://github.com/jakevdp/supersmoother)
