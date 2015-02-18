@@ -29,6 +29,8 @@ def bitceil(N):
 
     Roughly equivalent to int(2 ** np.ceil(np.log2(N)))
     """
+    # Note: for Python 2.7 and 3.x, this is faster:
+    # return 1 << int(N - 1).bit_length()
     N = int(N) - 1
     for i in [1, 2, 4, 8, 16, 32]:
         N |= N >> i
