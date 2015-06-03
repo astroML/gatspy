@@ -65,3 +65,33 @@ def test_multiband_predict(N=100, period=1):
 
     for Nterms in [1, 2, 3]:
         yield check_models, Nterms
+
+
+def test_multiband_predict_broadcast(N=100, period=1):
+    t, y, dy = _generate_data(3 * N, period)
+
+    t = t.reshape(3, N)
+    y = y.reshape(3, N)
+    dy = dy.reshape(3, N)
+
+    rng = np.random.RandomState(0)
+    filts = np.arange(3)[:, None]
+
+    tfit = np.linspace(5 * period, 15 * period, 30)
+    filtsfit = np.arange(3)[:, None]
+
+    def check_models(Nterms):
+        models = [LombScargle(Nterms=Nterms).fit(t[i], y[i], dy[i])
+                  for i in range(3)]
+        model_mb = LombScargleMultiband(Nterms_base=0,
+                                        Nterms_band=Nterms)
+        model_mb.fit(t, y, dy, filts)
+
+        single_results = [model.predict(tfit, period=period)
+                          for model in models]
+        multi_results = model_mb.predict(tfit, filtsfit, period=period)
+
+        assert_allclose(single_results, multi_results, rtol=1E-4)
+
+    for Nterms in [1, 2, 3]:
+        yield check_models, Nterms

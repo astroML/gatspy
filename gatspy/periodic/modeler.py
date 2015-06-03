@@ -184,8 +184,9 @@ class PeriodicModelerMultiband(PeriodicModeler):
             The array specifying the filter/bandpass for each observation.
         """
         self.unique_filts_ = np.unique(filts)
-        self.t, self.y, self.dy, self.filts = np.broadcast_arrays(t, y, dy,
-                                                                  filts)
+        all_data = np.broadcast_arrays(t, y, dy, filts)
+        self.t, self.y, self.dy, self.filts = map(np.ravel, all_data)
+
         self._fit(self.t, self.y, self.dy, self.filts)
         self._best_period = None  # reset best period in case of refitting
         return self
