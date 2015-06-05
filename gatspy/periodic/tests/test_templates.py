@@ -3,15 +3,15 @@ from numpy.testing import assert_allclose
 
 from .. import RRLyraeTemplateModeler, RRLyraeTemplateModelerMultiband
 from ...datasets import fetch_rrlyrae_templates, fetch_rrlyrae
-from scipy.interpolate import interp1d
+from scipy.interpolate import UnivariateSpline
 
 
 def test_basic_template_model():
-    template_id = 0
+    template_id = 25
 
     templates = fetch_rrlyrae_templates()
     phase, y = templates.get_template(templates.ids[template_id])
-    model = interp1d(phase, y)
+    model = UnivariateSpline(phase, y, s=0, k=5)
 
     theta = [17, 0.5, 0.3]
     period = 0.63
@@ -28,7 +28,7 @@ def test_basic_template_model():
     # check that the optimized model matches the input
     theta_fit = model._optimize(period, template_id)
     theta_fit[-1] %= 1  # symmetry
-    assert_allclose(theta, theta_fit)
+    assert_allclose(theta, theta_fit, rtol=1E-4)
 
     # check that the chi2 is near zero
     assert_allclose(model._chi2(theta_fit, period, template_id), 0,

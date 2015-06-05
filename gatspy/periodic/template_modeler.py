@@ -6,7 +6,7 @@ these templates.
 """
 import numpy as np
 from scipy import optimize
-from scipy.interpolate import interp1d
+from scipy.interpolate import UnivariateSpline
 
 from ..datasets import fetch_rrlyrae_templates
 from .modeler import PeriodicModeler, PeriodicModelerMultiband
@@ -42,10 +42,10 @@ class RRLyraeTemplateModeler(PeriodicModeler):
         phase, y = cls.raw_templates.get_template(template_id)
 
         # explicitly add phase=1 to avoid extrapolation
-        phase = np.concatenate([phase, [1]])
-        y = np.concatenate([y, y[:1]])
+        phase = np.concatenate([phase[-5:] - 1, phase, phase[:5] + 1])
+        y = np.concatenate([y[-5:], y, y[:5]])
 
-        return interp1d(phase, y)
+        return UnivariateSpline(phase, y, s=0, k=5)
 
     def __init__(self, filts='ugriz', optimizer=None):
         filts = list(filts)
@@ -94,17 +94,34 @@ class RRLyraeTemplateModeler(PeriodicModeler):
         phase = (t / period - theta[2]) % 1
         return theta[0] + theta[1] * template(phase)
 
-    def _chi2(self, theta, period, tmpid):
-        """Compute the chi2 for the given parameters, period, & template"""
-        return ((self._model(self.t, theta, period, tmpid) - self.y) ** 2
-                / self.dy ** 2).sum()
+    def _chi2(self, theta, period, tmpid, return_gradient=False):
+        """
+        Compute the chi2 for the given parameters, period, & template
 
-    def _optimize(self, period, tmpid):
+        Optionally return the gradient for faster optimization
+        """
+        template = self.templates[tmpid]
+        phase = (self.t / period - theta[2]) % 1
+        model = theta[0] + theta[1] * template(phase)
+        chi2 = (((model - self.y) / self.dy) ** 2).sum()
+
+        if return_gradient:
+            grad = 2 * (model - self.y) / self.dy ** 2
+            gradient = np.array([np.sum(grad),
+                                 np.sum(grad * template(phase)),
+                                 -np.sum(grad * theta[1]
+                                         * template.derivative(1)(phase))])
+            return chi2, gradient
+        else:
+            return chi2
+
+    def _optimize(self, period, tmpid, use_gradient=True):
         """Optimize the model for the given period & template"""
         theta_0 = [self.y.min(), self.y.max() - self.y.min(), 0]
-        return optimize.fmin_bfgs(self._chi2, theta_0,
-                                  args=(period, tmpid),
-                                  disp=False)
+        result = optimize.minimize(self._chi2, theta_0,
+                                   jac=bool(use_gradient),
+                                   args=(period, tmpid, use_gradient))
+        return result.x
 
 
 class RRLyraeTemplateModelerMultiband(PeriodicModelerMultiband):
