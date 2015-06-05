@@ -28,7 +28,7 @@ def test_basic_template_model():
     # check that the optimized model matches the input
     theta_fit = model._optimize(period, template_id)
     theta_fit[-1] %= 1  # symmetry
-    assert_allclose(theta, theta_fit, rtol=0.03)
+    assert_allclose(theta, theta_fit)
 
     # check that the chi2 is near zero
     assert_allclose(model._chi2(theta_fit, period, template_id), 0,

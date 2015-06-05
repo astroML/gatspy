@@ -29,14 +29,6 @@ class RRLyraeTemplateModeler(PeriodicModeler):
     optimizer : PeriodicOptimizer instance (optional)
         Optimizer to use to find the best period. If not specified, the
         LinearScanOptimizer will be used.
-    interpolator : callable
-        The interpolator used for the templates. Calling interpolator(t, y)
-        should return obj such that obj(t2) evaluates the interpolated
-        function y(t). Default is scipy.interpolate.interp1d
-    interp_args : tuple (optional)
-        extra arguments to the interpolator
-    interp_kwargs : tuple (optional)
-        extra keyword arguments to the interpolator
 
     See Also
     --------
@@ -45,25 +37,19 @@ class RRLyraeTemplateModeler(PeriodicModeler):
     raw_templates = fetch_rrlyrae_templates()
 
     @classmethod
-    def _interpolated_template(cls, template_id, interpolator=interp1d,
-                               interp_args=None, interp_kwargs=None):
+    def _interpolated_template(cls, template_id):
         """Return an interpolator for the given template"""
-        interp_args = interp_args or ()
-        interp_kwargs = interp_kwargs or {}
         phase, y = cls.raw_templates.get_template(template_id)
 
         # explicitly add phase=1 to avoid extrapolation
         phase = np.concatenate([phase, [1]])
         y = np.concatenate([y, y[:1]])
 
-        return interpolator(phase, y, *interp_args, **interp_kwargs)
+        return interp1d(phase, y)
 
-    def __init__(self, filts='ugriz', optimizer=None, interpolator=interp1d,
-                 interp_args=None, interp_kwargs=None):
+    def __init__(self, filts='ugriz', optimizer=None):
         filts = list(filts)
-        self.templates = [self._interpolated_template(tmpid, interpolator,
-                                                      interp_args,
-                                                      interp_kwargs)
+        self.templates = [self._interpolated_template(tmpid)
                           for tmpid in self.raw_templates.ids
                           if tmpid[-1] in filts]
         if len(self.templates) == 0:
@@ -132,35 +118,17 @@ class RRLyraeTemplateModelerMultiband(PeriodicModelerMultiband):
     optimizer : PeriodicOptimizer instance (optional)
         Optimizer to use to find the best period. If not specified, the
         LinearScanOptimizer will be used.
-    interpolator : callable
-        The interpolator used for the templates. Calling interpolator(t, y)
-        should return obj such that obj(t2) evaluates the interpolated
-        function y(t). Default is scipy.interpolate.interp1d
-    interp_args : tuple (optional)
-        extra arguments to the interpolator
-    interp_kwargs : tuple (optional)
-        extra keyword arguments to the interpolator
 
     See Also
     --------
     RRLyraeTemplateModeler : single band version of template model
     """
 
-    def __init__(self, optimizer=None, interpolator=interp1d,
-                 interp_args=None, interp_kwargs=None):
-        self.interpolator = interpolator
-        self.interp_args = interp_args
-        self.interp_kwargs = interp_kwargs
-        PeriodicModelerMultiband.__init__(self, optimizer)
-
     def _fit(self, t, y, dy, filts):
         self.models_ = []
         for filt in self.unique_filts_:
             mask = (filts == filt)
-            model = RRLyraeTemplateModeler(filts=filt,
-                                           interpolator=self.interpolator,
-                                           interp_args=self.interp_args,
-                                           interp_kwargs=self.interp_kwargs)
+            model = RRLyraeTemplateModeler(filts=filt)
             model.fit(t[mask], y[mask], dy[mask])
             self.models_.append(model)
         self.modeldict_ = dict(zip(self.unique_filts_, self.models_))
