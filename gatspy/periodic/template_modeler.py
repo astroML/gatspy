@@ -1,11 +1,11 @@
 """
 Implementation of a template modeler for RR Lyrae Stars.
 
-This is based on the description in Sesar 2010, which was also the source of
-these templates.
+This is based on the algorithm described in Sesar 2010; the same paper is the
+source of the templates used here for the fit.
 """
 import numpy as np
-from scipy import optimize
+from scipy.optimize import minimize
 from scipy.interpolate import UnivariateSpline
 
 from ..datasets import fetch_rrlyrae_templates
@@ -118,9 +118,9 @@ class RRLyraeTemplateModeler(PeriodicModeler):
     def _optimize(self, period, tmpid, use_gradient=True):
         """Optimize the model for the given period & template"""
         theta_0 = [self.y.min(), self.y.max() - self.y.min(), 0]
-        result = optimize.minimize(self._chi2, theta_0,
-                                   jac=bool(use_gradient),
-                                   args=(period, tmpid, use_gradient))
+        result = minimize(self._chi2, theta_0, jac=bool(use_gradient),
+                          bounds=[(None, None), (0, None), (0, 1)],
+                          args=(period, tmpid, use_gradient))
         return result.x
 
 
