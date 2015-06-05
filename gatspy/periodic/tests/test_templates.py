@@ -26,9 +26,10 @@ def test_basic_template_model():
     assert_allclose(model._model(t, theta, period, template_id), mag)
 
     # check that the optimized model matches the input
-    theta_fit = model._optimize(period, template_id)
-    theta_fit[-1] %= 1  # symmetry
-    assert_allclose(theta, theta_fit, rtol=1E-4)
+    for use_gradient in [True, False]:
+        theta_fit = model._optimize(period, template_id, use_gradient)
+        theta_fit[-1] %= 1  # symmetry
+        assert_allclose(theta, theta_fit, rtol=1E-4)
 
     # check that the chi2 is near zero
     assert_allclose(model._chi2(theta_fit, period, template_id), 0,
