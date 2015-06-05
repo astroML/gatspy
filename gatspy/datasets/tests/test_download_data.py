@@ -6,9 +6,11 @@ from numpy.testing import assert_equal
 try:
     # Python 3
     from urllib.error import URLError
-except:
+    ConnectionError = ConnectionResetError
+except ImportError:
     # Python 2
     from urllib2 import URLError
+    from socket import error as ConnectionError
 
 
 def test_downloads():
@@ -22,7 +24,7 @@ def test_forced_download():
     """Test downloading the smallest of the files: table3.dat.gz (22K)"""
     try:
         data = fetch_rrlyrae_fitdata(force_download=True)
-    except URLError:
+    except (URLError, ConnectionError):
         raise SkipTest("No internet connection: data download test skipped")
     assert_equal(data.shape, (483,))
     assert_equal(data.dtype.names, ('id', 'RA', 'DEC', 'rExt', 'd', 'RGC',
