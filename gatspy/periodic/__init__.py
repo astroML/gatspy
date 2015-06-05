@@ -13,4 +13,5 @@ from .lomb_scargle import *
 from .lomb_scargle_fast import *
 from .lomb_scargle_multiband import *
 from .supersmoother import *
+from .template_modeler import *
 from .naive_multiband import *
