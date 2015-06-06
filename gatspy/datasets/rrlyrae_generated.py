@@ -1,6 +1,8 @@
 """Tools to generate light curves"""
 from __future__ import division, print_function, absolute_import
 
+__all__ = ['RRLyraeGenerated']
+
 import numpy as np
 from scipy.interpolate import interp1d
 from . import fetch_rrlyrae_templates, fetch_rrlyrae

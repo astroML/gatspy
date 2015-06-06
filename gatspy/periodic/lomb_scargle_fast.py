@@ -2,6 +2,9 @@
 Fast Lomb-Scargle Algorithm, following Press & Rybicki 1989
 """
 from __future__ import print_function, division
+
+__all__ = ['LombScargleFast']
+
 import warnings
 import numpy as np
 
@@ -354,11 +357,14 @@ class LombScargleFast(LombScargle):
     >>> y = np.sin(omega * t) + dy * rng.randn(100)
     >>> ls = LombScargleFast().fit(t, y, dy)
     >>> ls.best_period
-    0.62827393156409295
-    >>> ls.score(ls.best_period)
-    array(0.9815178000850804)
+    Finding optimal frequency:
+     - Using omega_step = 0.01277
+     - Computing periods at 2051 steps from 0.20 to 1.20
+    Zooming-in on 5 candidate peaks:
+     - Computing periods at 1000 steps
+    0.62826265739259146
     >>> ls.predict([0, 0.5])
-    array([-0.01213809, -0.92700951])
+    array([-0.02019474, -0.92910567])
 
     See Also
     --------

@@ -39,6 +39,19 @@ class LinearScanOptimizer(PeriodicOptimizer):
         self.first_pass_coverage = first_pass_coverage
         self.final_pass_coverage = final_pass_coverage
 
+    def compute_grid_size(self, model):
+        # compute the estimated peak width from the data range
+        tmin, tmax = np.min(model.t), np.max(model.t)
+        width = 2 * np.pi / (tmax - tmin)
+
+        # our candidate steps in omega is controlled by period_range & coverage
+        omega_step = width / self.first_pass_coverage
+        omega_min = 2 * np.pi / np.max(self.period_range)
+        omega_max = 2 * np.pi / np.min(self.period_range)
+        N = (omega_max - omega_min) // omega_step
+
+        return N
+
     def find_best_periods(self, model, n_periods=5, return_scores=False):
         """Find the `n_periods` best periods in the model"""
 

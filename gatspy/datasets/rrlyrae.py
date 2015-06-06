@@ -3,7 +3,8 @@ Data downloaders for the Sesar 2010 RR Lyrae
 """
 
 __all__ = ['fetch_rrlyrae_templates', 'fetch_rrlyrae',
-           'fetch_rrlyrae_lc_params', 'fetch_rrlyrae_fitdata']
+           'fetch_rrlyrae_lc_params', 'fetch_rrlyrae_fitdata',
+           'RRLyraeLC', 'PartialRRLyraeLC', 'RRLyraeTemplates']
 
 import os
 import tarfile
@@ -37,7 +38,40 @@ def _get_download_or_cache(filename, data_home=None,
 
 
 class RRLyraeLC(object):
-    """Container for accessing RR Lyrae Light Curve data."""
+    """Container for accessing RR Lyrae Light Curve data.
+
+    This should generally not be instantiated directly, but rather is returned
+    by :func:`fetch_rrlyrae`.
+
+    Parameters
+    ----------
+    tablename : str (optional)
+        Name of the table file to be downloaded. Default='table1.tar.gz'.
+    dirname : str (optional)
+        subdirectory in which the table file is located. Default='table1'.
+
+    Other Parameters
+    ----------------
+    data_home : str (optional)
+        Specify the local cache directory for the dataset. If not used, it
+        will default to the ``astroML`` default location.
+    url : str (optional)
+        Specify the URL of the datasets. Defaults to webpage associated with
+        Sesar 2010.
+    force_download : bool (optional)
+        If true, then force re-downloading data even if it is already cached
+        locally. Default is False.
+
+    Examples
+    --------
+    >>> rrlyrae = fetch_rrlyrae()
+    >>> len(rrlyrae.ids)
+    483
+    >>> lcid = rrlyrae.ids[0]
+    >>> t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
+    >>> t[:4]
+    array([ 51081.347856,  51081.349522,  51081.346189,  51081.347022])
+    """
     def __init__(self, tablename='table1.tar.gz', dirname='table1',
                  cache_kwargs=None):
         self.tablename = tablename
@@ -151,7 +185,42 @@ class RRLyraeLC(object):
 
 
 class PartialRRLyraeLC(RRLyraeLC):
-    """Class to get a partial Stripe 82 light curve: one band per night"""
+    """Class to get a partial Stripe 82 light curve: one band per night.
+
+    This should generally not be instantiated directly, but rather is returned
+    by :func:`fetch_rrlyrae`.
+
+    Parameters
+    ----------
+    tablename : str (optional)
+        Name of the table file to be downloaded. Default='table1.tar.gz'.
+    dirname : str (optional)
+        subdirectory in which the table file is located. Default='table1'.
+    offset : int (optional)
+        the integer index offset for choosing the desired bands.
+
+    Other Parameters
+    ----------------
+    data_home : str (optional)
+        Specify the local cache directory for the dataset. If not used, it
+        will default to the ``astroML`` default location.
+    url : str (optional)
+        Specify the URL of the datasets. Defaults to webpage associated with
+        Sesar 2010.
+    force_download : bool (optional)
+        If true, then force re-downloading data even if it is already cached
+        locally. Default is False.
+
+    Examples
+    --------
+    >>> rrlyrae = fetch_rrlyrae(partial=True)
+    >>> len(rrlyrae.ids)
+    483
+    >>> lcid = rrlyrae.ids[0]
+    >>> t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
+    >>> t[:4]
+    array([ 51081.347856,  51819.42063 ,  52288.076401,  52551.350526])
+    """
     @classmethod
     def from_rrlyrae(cls, rrlyrae, offset=0):
         return cls(filename=rrlyrae.filename,
@@ -187,7 +256,31 @@ class PartialRRLyraeLC(RRLyraeLC):
 
 
 class RRLyraeTemplates(object):
-    """Container to access the RR Lyrae templates from Sesar 2010"""
+    """Container to access the RR Lyrae templates from Sesar 2010
+
+    This should generally not be instantiated directly, but rather is returned
+    by :func:`fetch_rrlyrae_templates`.
+
+    Parameters
+    ----------
+    tablename : str (optional)
+        Name of the file from which templates will be extracted.
+        Default is 'RRLyr_ugriz_templates.tar.gz'
+    cache_kwargs : dict (optional)
+        Additional keyword arguments passed to the data cache. Valid options
+        are ``data_home``, ``url``, and ``force_download``
+
+    Examples
+    --------
+    >>> templates = fetch_rrlyrae_templates()
+    >>> templates.ids[:5]
+    ['0g', '0i', '0r', '0u', '0z']
+    >>> phase, mag = templates.get_template('0g')
+    >>> phase[:5]
+    array([ 0.   ,  0.002,  0.004,  0.006,  0.008])
+    >>> mag[:5]
+    array([ 0.   ,  0.   ,  0.   ,  0.   ,  0.001])
+    """
     def __init__(self, tablename='RRLyr_ugriz_templates.tar.gz',
                  cache_kwargs=None):
         self.tablename = tablename
@@ -207,22 +300,77 @@ class RRLyraeTemplates(object):
 
     @property
     def filenames(self):
+        """List of template filenames"""
         return self.data.getnames()
 
     @property
     def ids(self):
+        """List of template ids"""
         return [f.split('.')[0] for f in self.filenames]
 
     def get_template(self, template_id):
+        """Get a particular lightcurve template
+
+        Parameters
+        ----------
+        template_id : str
+            id of desired template
+        Returns
+        -------
+        phase : ndarray
+            array of phases
+        mag : ndarray
+            array of normalized magnitudes
+        """
         try:
             data = np.loadtxt(self.data.extractfile(template_id + '.dat'))
         except KeyError:
             raise ValueError("invalid star id: {0}".format(template_id))
-        return data.T
+        return data[:, 0], data[:, 1]
 
 
 def fetch_rrlyrae(partial=False, **kwargs):
-    """Fetch light curves from Sesar 2010"""
+    """Fetch RR Lyrae light curves from Sesar 2010
+
+    Parameters
+    ----------
+    partial : bool (optional)
+        If true, return the partial dataset (reduced to 1 band per night)
+
+    Returns
+    -------
+    rrlyrae : :class:`RRLyraeLC` object
+        This object contains pointers to the RR Lyrae data.
+
+    Other Parameters
+    ----------------
+    data_home : str (optional)
+        Specify the local cache directory for the dataset. If not used, it
+        will default to the ``astroML`` default location.
+    url : str (optional)
+        Specify the URL of the datasets. Defaults to webpage associated with
+        Sesar 2010.
+    force_download : bool (optional)
+        If true, then force re-downloading data even if it is already cached
+        locally. Default is False.
+
+    Examples
+    --------
+    >>> rrlyrae = fetch_rrlyrae()
+    >>> rrlyrae.ids[:5]
+    [1013184, 1019544, 1027882, 1052471, 1056152]
+    >>> lcid = rrlyrae.ids[0]
+    >>> t, mag, dmag, bands = rrlyrae.get_lightcurve(lcid)
+    >>> t[:4]
+    array([ 51081.347856,  51081.349522,  51081.346189,  51081.347022])
+    >>> mag[:4]
+    array([ 18.702,  17.553,  17.236,  17.124])
+    >>> dmag[:4]
+    array([ 0.021,  0.005,  0.005,  0.006])
+    >>> bands[:4]
+    array(['u', 'g', 'r', 'i'], 
+          dtype='<U1')
+    """
     if partial:
         return PartialRRLyraeLC('table1.tar.gz',
                                 cache_kwargs=kwargs)
@@ -232,7 +380,11 @@ def fetch_rrlyrae(partial=False, **kwargs):
 
 
 def fetch_rrlyrae_lc_params(**kwargs):
-    """Fetch data from table 2 of Sesar 2010"""
+    """Fetch data from table 2 of Sesar 2010
+
+    This table includes observationally-derived parameters for all the
+    Sesar 2010 lightcurves. 
+    """
     save_loc = _get_download_or_cache('table2.dat.gz', **kwargs)
 
     dtype = [('id', 'i'), ('type', 'S2'), ('P', 'f'),
@@ -246,7 +398,11 @@ def fetch_rrlyrae_lc_params(**kwargs):
 
 
 def fetch_rrlyrae_fitdata(**kwargs):
-    """Fetch data from table 3 of Sesar 2010"""
+    """Fetch data from table 3 of Sesar 2010
+
+    This table includes parameters derived from template fits to all the
+    Sesar 2010 lightcurves.
+    """
     save_loc = _get_download_or_cache('table3.dat.gz', **kwargs)
 
     dtype = [('id', 'i'), ('RA', 'f'), ('DEC', 'f'), ('rExt', 'f'),
@@ -260,5 +416,29 @@ def fetch_rrlyrae_fitdata(**kwargs):
 
 
 def fetch_rrlyrae_templates(**kwargs):
-    """Access the RR Lyrae template data (table 1 of Sesar 2010)"""
+    """Access the RR Lyrae template data (table 1 of Sesar 2010)
+
+    These return approximately 23 ugriz RR Lyrae templates, with normalized
+    phase and amplitude.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    templates: :class:`RRLyraeTemplates` object
+        collection of RRLyrae templates.
+
+    Other Parameters
+    ----------------
+    data_home : str (optional)
+        Specify the local cache directory for the dataset. If not used, it
+        will default to the ``astroML`` default location.
+    url : str (optional)
+        Specify the URL of the datasets. Defaults to webpage associated with
+        Sesar 2010.
+    force_download : bool (optional)
+        If true, then force re-downloading data even if it is already cached
+        locally. Default is False.
+    """
     return RRLyraeTemplates('RRLyr_ugriz_templates.tar.gz', kwargs)

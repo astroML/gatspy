@@ -1,4 +1,10 @@
+"""
+Multiband generalizations of Lomb-Scargle Periodograms
+"""
+
 from __future__ import division, print_function
+
+__all__ = ['LombScargleMultiband', 'LombScargleMultibandFast']
 
 import numpy as np
 

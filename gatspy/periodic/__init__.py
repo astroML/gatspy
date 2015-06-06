@@ -1,11 +1,16 @@
-"""General Periodic Modeling for Astronomical Time Series"""
+"""
+Periodic Modeling for Astronomical Time Series
+----------------------------------------------
+"""
 from __future__ import absolute_import
 
-__version__ = "0.1"
+__all__ = ['LombScargle', 'LombScargleFast', 'LombScargleAstroML',
+           'LombScargleMultiband', 'LombScargleMultibandFast',
+           'SuperSmoother', 'SuperSmootherMultiband',
+           'NaiveMultiband']
 
-from .lomb_scargle import LombScargle, LombScargleAstroML
-from .lomb_scargle_fast import LombScargleFast
-from .lomb_scargle_multiband import (LombScargleMultiband,
-                                     LombScargleMultibandFast)
-from .supersmoother import SuperSmoother, SuperSmootherMultiband
-from .naive_multiband import NaiveMultiband
+from .lomb_scargle import *
+from .lomb_scargle_fast import *
+from .lomb_scargle_multiband import *
+from .supersmoother import *
+from .naive_multiband import *

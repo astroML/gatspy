@@ -3,6 +3,8 @@ Supersmoother code for periodic modeling
 """
 from __future__ import print_function, division, absolute_import
 
+__all__ = ['SuperSmoother', 'SuperSmootherMultiband']
+
 import numpy as np
 
 try:
@@ -32,11 +34,14 @@ class SuperSmoother(PeriodicModeler):
     >>> y = np.sin(omega * t) + dy * rng.randn(100)
     >>> ssm = SuperSmoother().fit(t, y, dy)
     >>> ssm.best_period
-    0.62826749832108475
-    >>> ssm.score(ls.best_period)
-    array(0.9951882158877049)
+    Finding optimal frequency:
+     - Using omega_step = 0.01277
+     - Computing periods at 2051 steps from 0.20 to 1.20
+    Zooming-in on 5 candidate peaks:
+     - Computing periods at 1000 steps
+    0.62819846183431927
     >>> ssm.predict([0, 0.5])
-    array([ 0.06759746, -0.90006247])
+    array([-0.02195035, -0.92119149])
 
     See Also
     --------

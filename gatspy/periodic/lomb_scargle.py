@@ -1,4 +1,7 @@
 from __future__ import division, print_function, absolute_import
+
+__all__ = ['LombScargle', 'LombScargleAstroML']
+
 import warnings
 
 import numpy as np
@@ -125,11 +128,14 @@ class LombScargle(LeastSquaresMixin, PeriodicModeler):
     >>> y = np.sin(omega * t) + dy * rng.randn(100)
     >>> ls = LombScargle().fit(t, y, dy)
     >>> ls.best_period
-    0.62827393156409295
-    >>> ls.score(ls.best_period)
-    array(0.9815178000850804)
+    Finding optimal frequency:
+     - Using omega_step = 0.01277
+     - Computing periods at 2051 steps from 0.20 to 1.20
+    Zooming-in on 5 candidate peaks:
+     - Computing periods at 1000 steps
+    0.62827068275990694
     >>> ls.predict([0, 0.5])
-    array([-0.01213809, -0.92700951])
+    array([-0.01445853, -0.92762251])
 
     See Also
     --------
@@ -225,7 +231,12 @@ class LombScargleAstroML(LombScargle):
     >>> y = np.sin(omega * t) + dy * rng.randn(100)
     >>> ls = LombScargleAstroML().fit(t, y, dy)
     >>> ls.best_period
-    0.62827393156409295
+    Finding optimal frequency:
+     - Using omega_step = 0.01277
+     - Computing periods at 2051 steps from 0.20 to 1.20
+    Zooming-in on 5 candidate peaks:
+     - Computing periods at 1000 steps
+    0.62827068275990694
 
     See Also
     --------

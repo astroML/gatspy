@@ -6,6 +6,8 @@ some sort of majority vote among the peaks of the individual periodograms.
 """
 from __future__ import division, print_function, absolute_import
 
+__all__ = ['NaiveMultiband']
+
 import numpy as np
 from scipy.stats import mode
 
