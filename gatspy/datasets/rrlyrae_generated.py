@@ -26,6 +26,17 @@ class RRLyraeGenerated(object):
         Container for the RR Lyrae template dataset
     period : float
         Period of the RR Lyrae object
+
+    Examples
+    --------
+    >>> rrlyrae = fetch_rrlyrae()
+    >>> lcid = rrlyrae.ids[0]
+    >>> gen = RRLyraeGenerated(lcid, random_state=0)
+    >>> gen.period
+    0.61431831
+    >>> t, mag, dmag = gen.observed('g')
+    >>> t[:4]
+    array([ 51081.349522,  51819.42063 ,  52288.079734,  52551.353026])
     """
     lcdata = fetch_rrlyrae()
     templates = fetch_rrlyrae_templates()
@@ -53,9 +64,24 @@ class RRLyraeGenerated(object):
 
     @property
     def period(self):
+        """Period (in days) of the RR Lyrae"""
         return self.meta['P']
 
     def observed(self, band, corrected=True):
+        """Return observed values in the given band
+
+        Parameters
+        ----------
+        band : str
+            desired bandpass: should be one of ['u', 'g', 'r', 'i', 'z']
+        corrected : bool (optional)
+            If true, correct for extinction
+
+        Returns
+        -------
+        t, mag, dmag : ndarrays
+            The times, magnitudes, and magnitude errors for the specified band.
+        """
         if band not in 'ugriz':
             raise ValueError("band='{0}' not recognized".format(band))
         i = 'ugriz'.find(band)
@@ -69,6 +95,24 @@ class RRLyraeGenerated(object):
         return t[:, i], y[:, i] - ext, dy[:, i]
 
     def generated(self, band, t, err=None, corrected=True):
+        """Return generated magnitudes in the specified band
+
+        Parameters
+        ----------
+        band : str
+            desired bandpass: should be one of ['u', 'g', 'r', 'i', 'z']
+        t : array_like
+            array of times (in days)
+        err : float or array_like
+            gaussian error in observations
+        corrected : bool (optional)
+            If true, correct for extinction
+
+        Returns
+        -------
+        mag : ndarray
+            magnitudes at the specified times under the generated model.
+        """
         t = np.asarray(t)
         num = self.meta[band + 'T']
         mu = self.meta[band + '0']

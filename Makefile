@@ -1,7 +1,7 @@
 test:
 	nosetests gatspy
 
-test-docstrings:
+doctest:
 	nosetests --with-doctest gatspy
 
 test-coverage:
