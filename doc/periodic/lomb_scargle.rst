@@ -2,3 +2,198 @@
 
 Lomb-Scargle Periodogram
 ========================
+One of the best known methods for detecting periodicity in time series is the
+Lomb-Scargle Periodogram. ``gatspy`` has three main implementations of the
+classic periodogram:
+
+:class:`~gatspy.periodic.LombScargle`
+  This basic method uses simple linear algebra to compute the periodogram.
+  Though it is relatively slow, the approach allows for some enhancements such
+  as floating mean, multiple Fourier terms, and regularization terms.
+
+:class:`~gatspy.periodic.LombScargleAstroML`
+  This class depends on the Lomb-Scargle implementation in
+  `astroML <http://www.astroml.org>`_. This is a cython implementation, and
+  is slightly faster than :class:`~gatspy.periodic.LombScargle`, though it
+  does not handle higher-order fits or regularization.
+
+:class:`~gatspy.periodic.LombScargleFast` 
+  This class implements the fast, O[N logN] implementation of Lomb-Scargle.
+  It is much faster than any of the above methods, especially as the number
+  of data points and frequencies increases. It is limited to a floating mean
+  model, and the frequencies must be computed on a regular grid.
+
+For the basic no-frills Lomb-Scargle algorithm, the best option to use is
+:class:`~gatspy.periodic.LombScargleFast`. Keep in mind that aside from
+options used at model instantiation, the API of the three is identical.
+
+API of Periodic Models
+----------------------
+The periodogram models here follow in the vein of the
+`scikit-learn <http://scikit-learn.org/>`_ API, which makes clear the separation
+between several parts of the problem:
+
+- the choice of model: this happens at class instantiation.
+- the fitting of the model to data: this happens with the ``fit()`` method.
+- the application of the model to new data: this happens with the ``predict()``
+  method.
+- the evaluation of the model fit: this happens with the ``score()`` method.
+
+The models in ``gatspy`` differ from those in ``scikit-learn`` in several
+important ways:
+
+1. The ``fit()`` method optionally accepts errors in the magnitude inputs.
+   For multiband methods, the fit method also accepts a specification of the
+   filter/band in which the magnitude is observed.
+2. The ``predict()`` and ``score()`` methods require specification of a period.
+   If this period is not supplied, the best period will be found automatically
+   via an exhaustive grid search, which can be very slow for some datasets!
+
+We'll see examples of this below.
+
+Basic Lomb-Scargle Periodogram
+------------------------------
+We'll start by looking at the basic Lomb-Scargle Periodogram, using the
+:class:`~gatspy.periodic.LombScargleFast` model.
+Let's start by loading one r-band RR Lyrae lightcurve using the
+:func:`gatspy.datasets.fetch_rrlyrae` function:
+
+    >>> from gatspy import datasets, periodic
+    >>> rrlyrae = datasets.fetch_rrlyrae()
+    >>> lcid = rrlyrae.ids[0]
+    >>> t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
+    >>> mask = (filts == 'r')
+    >>> t_r, mag_r, dmag_r = t[mask], mag[mask], dmag[mask]
+
+Given this data, we'd like to find the best period with the periodogram.
+This can be done using the ``find_best_period`` method of any of the above
+estimators. Let's use :class:`~gatspy.periodic.LombScargleFast` to do this:
+
+    >>> model = periodic.LombScargleFast()
+    >>> model.fit(t_r, mag_r, dmag_r)
+    >>> period = model.best_period
+    Finding optimal frequency:
+     - Estimated peak width = 0.00189
+     - Using 5 steps per peak; omega_step = 0.000378
+     - User-specified period range:  0.2 to 1.2
+     - Computing periods at 69190 steps
+    Zooming-in on 5 candidate peaks:
+     - Computing periods at 995 steps
+    >>> print("{0:.6f}".format(period))
+    0.614317
+
+The periodogram optimizer uses a two-step grid search, first searching a
+relatively coarse grid to find several candidate frequencies, and finally
+zooming-in on these to compute the observed period to high precision.
+Let's see how close this period is to the period measured by Sesar 2010
+using template fits:
+
+    >>> true_period = rrlyrae.get_metadata(lcid)['P']
+    >>> print("{0:.6f}".format(true_period))
+    0.614318
+
+The two periods differ to about :math:`10^{-6}` days, or approximately one tenth
+of a second. To see more about what is going on in the periodogram, let's plot
+the Lomb-Scargle periodogram as a function of period:
+
+.. plot::
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import matplotlib as mpl
+
+    mpl.style.use('ggplot')
+    mpl.rc('axes', color_cycle=["#4C72B0", "#55A868", "#C44E52",
+                                "#8172B2", "#CCB974"])
+
+    # Fetch the RRLyrae data
+    from gatspy import datasets, periodic
+    rrlyrae = datasets.fetch_rrlyrae()
+
+    # Select r-band data from the first lightcurve
+    lcid = rrlyrae.ids[0]
+    t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
+    mask = (filts == 'r')
+    t_r, mag_r, dmag_r = t[mask], mag[mask], dmag[mask]
+
+    # Fit the Lomb-Scargle model
+    model = periodic.LombScargleFast()
+    model.fit(t_r, mag_r, dmag_r)
+
+    # Compute the scores on a grid of periods
+    periods = np.linspace(0.3, 0.9, 10000)
+
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        scores = model.score(periods)
+
+    # Plot the results
+    fig, ax = plt.subplots(figsize=(8, 3))
+    fig.subplots_adjust(bottom=0.2)
+    ax.plot(periods, scores)
+    ax.set(xlabel='period (days)', ylabel='Lomb Scargle Power',
+           xlim=(0.3, 0.9), ylim=(0, 1))
+
+We see here why so many steps are needed to find the optimal period: the width
+of each of these peaks is so small that a coarser grid might easily miss a
+significant peak!
+
+The Lomb-Scargle model is essentially a least squares fit of a single sinusoid
+to the data; we can see the model fit using the ``predict`` method of the
+periodic model:
+
+    >>> import numpy as np
+    >>> tfit = np.linspace(0, period, 4)
+    >>> model.predict(tfit)
+    >>> array([ 17.03381525,  17.02560232,  17.37830128,  17.03381525])
+
+Let's take a look at this model plotted over the phased data:
+
+.. plot::
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import matplotlib as mpl
+
+    mpl.style.use('ggplot')
+    mpl.rc('axes', color_cycle=["#4C72B0", "#55A868", "#C44E52",
+                                "#8172B2", "#CCB974"])
+
+    # Fetch the RRLyrae data
+    from gatspy import datasets, periodic
+    rrlyrae = datasets.fetch_rrlyrae()
+
+    # Get data from first lightcurve
+    lcid = rrlyrae.ids[0]
+    t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
+    mask = (filts == 'r')
+    t_r, mag_r, dmag_r = t[mask], mag[mask], dmag[mask]
+
+    # Fit the Lomb-Scargle model
+    model = periodic.LombScargleFast()
+    model.fit(t_r, mag_r, dmag_r)
+
+    # Predict on a regular phase grid
+    period = model.best_period
+    tfit = np.linspace(0, period, 1000)
+    magfit = model.predict(tfit)
+
+    # Plot the results
+    phase = (t_r / period) % 1
+    phasefit = (tfit / period)
+    
+    fig, ax = plt.subplots()
+    ax.errorbar(phase, mag_r, dmag_r, fmt='o')
+    ax.plot(phasefit, magfit, '-', color='gray')
+    ax.set(xlabel='phase', ylabel='r magnitude')
+    ax.invert_yaxis()
+
+The model is clearly not a good fit for the data (RR Lyrae are much more
+complicated than a simple sine wave!) but the model serves a useful
+purpose: it gives us an accurate period determination.
+    
+
+Adjusting the Optimizer
+-----------------------
+`TODO`
