@@ -1,5 +1,16 @@
 .. _datasets_sesar2010rrlyrae:
 
+.. testsetup:: *
+
+    from gatspy.datasets import fetch_rrlyrae, fetch_rrlyrae_templates
+    rrlyrae = fetch_rrlyrae()
+    lcid = rrlyrae.ids[0]
+    t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
+    metadata = rrlyrae.get_metadata(lcid)
+    obsmeta = rrlyrae.get_obsmeta(lcid)
+    templates = fetch_rrlyrae_templates()
+
+
 Sesar 2010 RR Lyrae (Stripe 82)
 ===============================
 
@@ -139,7 +150,7 @@ There are 98 templates spread among the five bands, which can be referenced
 by their id:
 
     >>> templates.ids[:10]
-    >>> ['0g', '0i', '0r', '0u', '0z', '100g', '100i', '100r', '100u', '100z']
+    ['0g', '0i', '0r', '0u', '0z', '100g', '100i', '100r', '100u', '100z']
 
 Each of these templates is normalized from 0 to 1 in phase, and from 0 to 1 in
 magnitude. For example, plotting template ``'100'`` we see:
@@ -172,6 +183,8 @@ magnitude. For example, plotting template ``'100'`` we see:
 
 For more information on these templates, see the discussion in Sesar (2010).
 
+.. test
+
 Generated Lightcurves
 ---------------------
 Using the RR Lyrae templates, it is possible to simulate observations of RR
@@ -186,7 +199,7 @@ are based on one of the 483 Stripe 82 RR Lyrae compiled by Sesar (2010):
     >>> gen = RRLyraeGenerated(lcid, random_state=0)
     >>> mag = gen.generated('g', [51080.0, 51080.5], err=0.3)
     >>> mag.round(2)
-    array(17.74, 17.04)
+    array([ 17.74,  17.04])
 
 This will create observations drawn from the best-fit template with the given
 magnitude error. Here let's use the observed times and errors to compare a

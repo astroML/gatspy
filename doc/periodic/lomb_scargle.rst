@@ -1,5 +1,20 @@
 .. _periodic_lomb_scargle:
 
+.. testsetup:: *
+
+   import numpy as np
+   from gatspy import datasets, periodic
+
+   rrlyrae = datasets.fetch_rrlyrae()
+   lcid = rrlyrae.ids[0]
+   t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
+   mask = (filts == 'r')
+   t_r, mag_r, dmag_r = t[mask], mag[mask], dmag[mask]
+   model = periodic.LombScargleFast()
+   model.fit(t_r, mag_r, dmag_r)
+   period = model.best_period
+
+
 Lomb-Scargle Periodogram
 ========================
 One of the best known methods for detecting periodicity in time series is the
@@ -70,7 +85,7 @@ This can be done using the ``find_best_period`` method of any of the above
 estimators. Let's use :class:`~gatspy.periodic.LombScargleFast` to do this:
 
     >>> model = periodic.LombScargleFast()
-    >>> model.fit(t_r, mag_r, dmag_r);
+    >>> model = model.fit(t_r, mag_r, dmag_r)
     >>> period = model.best_period
     Finding optimal frequency:
      - Estimated peak width = 0.00189
@@ -230,7 +245,7 @@ oversampling factor (say, 5) and compute the grid based on this.
 We can see all of this in play when we ask the model for the best period:
 
     >>> model = periodic.LombScargleFast()
-    >>> model.fit(t_r, mag_r, dmag_r);
+    >>> model = model.fit(t_r, mag_r, dmag_r)
     >>> period = model.best_period
     Finding optimal frequency:
      - Estimated peak width = 0.00189
@@ -247,7 +262,7 @@ preferred pattern for the default optimizer:
     >>> model = periodic.LombScargleFast()
     >>> model.optimizer.period_range = (0.5, 0.7)
     >>> model.optimizer.first_pass_coverage = 10
-    >>> model.fit(t_r, mag_r, dmag_r);
+    >>> model = model.fit(t_r, mag_r, dmag_r)
     >>> period = model.best_period
     Finding optimal frequency:
      - Estimated peak width = 0.00189

@@ -2,6 +2,22 @@
 
 .. currentmodule:: gatspy.periodic
 
+.. testsetup:: *
+
+   import numpy as np
+   from gatspy import datasets, periodic
+
+   rrlyrae = datasets.fetch_rrlyrae()
+   lcid = rrlyrae.ids[0]
+   t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
+   model = periodic.LombScargleMultibandFast()
+   model.fit(t, mag, dmag, filts)
+   period = model.best_period
+
+   tfit = np.linspace(0, period, 1000)
+   magfit = model.predict(tfit, filts='g')
+
+
 Multiband Lomb-Scargle Periodogram
 ==================================
 Though classical periodogram approaches only handle a single band of data,
@@ -22,7 +38,7 @@ use :class:`LombScargleMultibandFast`, which is less flexible than
     >>> t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
 
     >>> model = periodic.LombScargleMultibandFast()
-    >>> model.fit(t, mag, dmag, filts);
+    >>> model = model.fit(t, mag, dmag, filts)
     >>> period = model.best_period
     Finding optimal frequency:
      - Estimated peak width = 0.00189
@@ -37,7 +53,6 @@ use :class:`LombScargleMultibandFast`, which is less flexible than
 With the model fit in this way, we can then use the ``predict()`` method to
 look at the model prediction for any given band:
 
-    >>> import numpy as np
     >>> tfit = np.linspace(0, period, 1000)
     >>> magfit = model.predict(tfit, filts='g')
     >>> magfit[:4]
@@ -96,6 +111,7 @@ single-band periodograms to this regularized multiband model on six months
 of sparsely-sampled LSST-style data:
 
 .. plot::
+
     import numpy as np
     import matplotlib.pyplot as plt
     import matplotlib as mpl

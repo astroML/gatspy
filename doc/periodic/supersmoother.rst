@@ -2,6 +2,11 @@
 
 .. currentmodule:: gatspy.periodic
 
+.. testsetup:: *
+
+    from gatspy import datasets, periodic
+    from gatspy.periodic import *
+
 SuperSmoother
 =============
 The supersmoother is a non-parametric adaptive smoother which has been used
@@ -26,10 +31,9 @@ of this example:
     >>> t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
     >>> mask = (filts == 'r')
     >>> t_r, mag_r, dmag_r = t[mask], mag[mask], dmag[mask]
-
     >>> model = periodic.SuperSmoother()
     >>> model.optimizer.period_range = (0.61, 0.62)
-    >>> model.fit(t_r, mag_r, dmag_r);
+    >>> model = model.fit(t_r, mag_r, dmag_r)
     >>> period = model.best_period
     Finding optimal frequency:
      - Estimated peak width = 0.00189
