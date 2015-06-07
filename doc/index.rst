@@ -11,9 +11,8 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   datasets
-   periodic
-   API
+   periodic/index
+   datasets/index
 
 
 Indices and tables

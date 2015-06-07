@@ -1,19 +1,17 @@
-.. _datasets:
+.. _datasets_sesar2010rrlyrae:
 
-******************************
-Datasets (``gatspy.datasets``)
-******************************
-
-``gatspy`` provides several observed and simulated datasets for use with the
-time series tools in the package.
-
-Sesar 2010 RR Lyrae
-===================
+Sesar 2010 RR Lyrae (Stripe 82)
+===============================
 
 The primary dataset available is the 483 RR Lyrae from Sesar 2010.
 This dataset contains observations of 483 RR Lyrae stars in Stripe 82 over
-approximately a decade, and can be downloaded and accessed via the
-:func:`~gatspy.datasets.fetch_rrlyrae` function. For example:
+approximately a decade, along with observational metadata, derived metadata,
+and templates derived from the code.
+
+Observed Light Curves
+---------------------
+The photometric light curves for these stars can be downloaded and accessed
+via the :func:`~gatspy.datasets.fetch_rrlyrae` function. For example:
 
     >>> from gatspy.datasets import fetch_rrlyrae
     >>> rrlyrae = fetch_rrlyrae()
