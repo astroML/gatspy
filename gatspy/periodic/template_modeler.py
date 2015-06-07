@@ -15,47 +15,42 @@ from .modeler import PeriodicModeler, PeriodicModelerMultiband
 __all__ = ['RRLyraeTemplateModeler', 'RRLyraeTemplateModelerMultiband']
 
 
-class RRLyraeTemplateModeler(PeriodicModeler):
-    """Template-fitting periods for single-band RR Lyrae
-
-    This class contains functionality to evaluate the fit of the Sesar 2010
-    RR Lyrae templates to single-band data.
-
-    Parameters
-    ----------
-    filts : list or iterable of characters (optional)
-        The filters of the templates to be used. Items should be among 'ugriz'.
-        Default is 'ugriz'; i.e. all available templates.
-    optimizer : PeriodicOptimizer instance (optional)
-        Optimizer to use to find the best period. If not specified, the
-        LinearScanOptimizer will be used.
-
-    See Also
-    --------
-    RRLyraeTemplateModelerMultiband : multiband version of template model
+class BaseTemplateModeler(PeriodicModeler):
     """
-    raw_templates = fetch_rrlyrae_templates()
+    Base class for single-band template models
 
-    @classmethod
-    def _interpolated_template(cls, template_id):
+    To extend this, overload the ``_template_ids`` and ``_get_template_by_id``
+    methods.
+    """
+
+    def __init__(self, optimizer=None, fit_period=False, optimizer_kwds=None):
+        self.templates = self._build_interpolated_templates()
+        if len(self.templates) == 0:
+            raise ValueError('No templates available!')
+        PeriodicModeler.__init__(self, optimizer=optimizer,
+                                 fit_period=fit_period,
+                                 optimizer_kwds=optimizer_kwds)
+
+    def _build_interpolated_templates(self):
+        self.templates = [self._interpolated_template(tid)
+                          for tid in self._template_ids()]
+        return self.templates
+
+    def _interpolated_template(self, templateid):
         """Return an interpolator for the given template"""
-        phase, y = cls.raw_templates.get_template(template_id)
+        phase, y = self._get_template_by_id(templateid)
 
-        # explicitly add phase=1 to avoid extrapolation
+        # double-check that phase ranges from 0 to 1
+        assert phase.min() >= 0
+        assert phase.max() <= 1
+
+        # at the start and end points, we need to add ~5 points to make sure
+        # the spline & derivatives wrap appropriately
         phase = np.concatenate([phase[-5:] - 1, phase, phase[:5] + 1])
         y = np.concatenate([y[-5:], y, y[:5]])
 
+        # Univariate spline allows for derivatives; use this!
         return UnivariateSpline(phase, y, s=0, k=5)
-
-    def __init__(self, filts='ugriz', optimizer=None):
-        filts = list(filts)
-        self.templates = [self._interpolated_template(tmpid)
-                          for tmpid in self.raw_templates.ids
-                          if tmpid[-1] in filts]
-        if len(self.templates) == 0:
-            raise ValueError('Filters {0} are not within templates'
-                             ''.format(filts))
-        PeriodicModeler.__init__(self, optimizer)
 
     def _fit(self, t, y, dy):
         if dy.size == 1:
@@ -119,9 +114,72 @@ class RRLyraeTemplateModeler(PeriodicModeler):
         """Optimize the model for the given period & template"""
         theta_0 = [self.y.min(), self.y.max() - self.y.min(), 0]
         result = minimize(self._chi2, theta_0, jac=bool(use_gradient),
-                          bounds=[(None, None), (0, None), (0, 1)],
+                          bounds=[(None, None), (0, None), (None, None)],
                           args=(period, tmpid, use_gradient))
         return result.x
+
+    #------------------------------------------------------------
+    # Overload the following two functions in base classes
+
+    def _template_ids(self):
+        """Return the list of template ids"""
+        raise NotImplementedError()
+
+    def _get_template_by_id(self, template_id):
+        """Get a particular template
+
+        Parameters
+        ----------
+        template_id : simple type
+            Template ID used by base class to define templates
+        
+        Returns
+        -------
+        phase, y : ndarrays
+            arrays containing the sorted phase and associated y-values.
+        """
+        raise NotImplementedError()
+    
+
+
+class RRLyraeTemplateModeler(BaseTemplateModeler):
+    """Template-fitting periods for single-band RR Lyrae
+
+    This class contains functionality to evaluate the fit of the Sesar 2010
+    RR Lyrae templates to single-band data.
+
+    Parameters
+    ----------
+    filts : list or iterable of characters (optional)
+        The filters of the templates to be used. Items should be among 'ugriz'.
+        Default is 'ugriz'; i.e. all available templates.
+    optimizer : PeriodicOptimizer instance (optional)
+        Optimizer to use to find the best period. If not specified, the
+        LinearScanOptimizer will be used.
+    fit_period : bool (optional)
+        If True, then fit for the best period when fit() method is called.
+    optimizer_kwds : dict (optional
+        Dictionary of keyword arguments for constructing the optimizer
+
+    See Also
+    --------
+    RRLyraeTemplateModelerMultiband : multiband version of template model
+    """
+    _raw_templates = fetch_rrlyrae_templates()
+
+    def __init__(self, filts='ugriz', optimizer=None,
+                 fit_period=False, optimizer_kwds=None):
+        self.filts = list(filts)
+        BaseTemplateModeler.__init__(self, optimizer=optimizer,
+                                     fit_period=fit_period,
+                                     optimizer_kwds=optimizer_kwds)
+
+    def _template_ids(self):
+        return (tid for tid in self._raw_templates.ids
+                if tid[-1] in self.filts)
+
+    def _get_template_by_id(self, tid):
+        return self._raw_templates.get_template(tid)
 
 
 class RRLyraeTemplateModelerMultiband(PeriodicModelerMultiband):
