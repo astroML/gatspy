@@ -1,5 +1,0 @@
-include *.md
-include *.py
-recursive-include gatspy *.py
-include LICENSE
-include Makefile
