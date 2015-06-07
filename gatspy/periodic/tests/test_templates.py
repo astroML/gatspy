@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_allclose
+from numpy.testing import assert_allclose, assert_raises
 
 from .. import RRLyraeTemplateModeler, RRLyraeTemplateModelerMultiband
 from ...datasets import fetch_rrlyrae_templates, fetch_rrlyrae
@@ -60,3 +60,7 @@ def test_multiband_fit():
         yfit_band.append(model.predict(tfit, period))
 
     assert_allclose(yfit_all, yfit_band)
+
+
+def test_bad_args():
+    assert_raises(ValueError, RRLyraeTemplateModeler, filts='abc')

@@ -27,7 +27,6 @@ def test_periodogram_auto(N=100, period=1):
 
     for Model in [LombScargle, LombScargleAstroML, LombScargleFast]:
         yield check_model, Model
-    
 
 
 def test_lomb_scargle_std_vs_centered(N=100, period=1):
