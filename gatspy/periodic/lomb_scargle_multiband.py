@@ -193,6 +193,12 @@ class LombScargleMultibandFast(PeriodicModelerMultiband):
         chi2_0 = np.array([np.sum(model.yw_ ** 2) for model in self.models_])
         return np.dot(chi2_0 / chi2_0.sum(), powers)
 
+    def _score_frequency_grid(self, f0, df, N):
+        powers = np.array([model._score_frequency_grid(f0, df, N)
+                           for model in self.models_])
+        chi2_0 = np.array([np.sum(model.yw_ ** 2) for model in self.models_])
+        return np.dot(chi2_0 / chi2_0.sum(), powers)
+
     def _best_params(self, omega):
         return np.asarray([model._best_params(omega)
                            for model in self.models_])
