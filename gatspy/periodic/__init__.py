@@ -7,6 +7,7 @@ from __future__ import absolute_import
 __all__ = ['LombScargle', 'LombScargleFast', 'LombScargleAstroML',
            'LombScargleMultiband', 'LombScargleMultibandFast',
            'SuperSmoother', 'SuperSmootherMultiband',
+           'RRLyraeTemplateModeler', 'RRLyraeTemplateModelerMultiband',
            'NaiveMultiband']
 
 from .lomb_scargle import *
