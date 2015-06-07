@@ -6,6 +6,9 @@
 - Refactored datasets objects to be picklable for easier parallel analysis
 - New feature: ``gatspy.periodic.LombScargleFast`` implements the fast,
   O[N log(N)] periodogram of Press et al.
+- New feature: ``gatspy.periodic.RRLyraeTemplateModeler`` implements a
+  template-based fitting method, using the RR Lyrae templates from Sesar (2010)
+- sphinx-based documentation build added: http://astroML.org/gatspy/
 
 ## (v0.1.1) Bug Fix (28 January 2015)
 
