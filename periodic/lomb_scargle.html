@@ -209,7 +209,12 @@ at <img class="math" src="../_images/math/0c479dcb6ef4ceaf2dba254bede5607d454c5c
 <img class="math" src="../_images/math/4b04319842095b4ea29fb3d84f7c56c250e719cb.png" alt="w = 2\pi/(t_{max} - t_{min})"/>. The grid should be chosen such that
 multiple grid poins cover each potential peak, so we need to choose an
 oversampling factor (say, 5) and compute the grid based on this.</p>
-<p>We can see all of this in play when we ask the model for the best period:</p>
+<p>We can see all of this in play when we ask the model for the best period.
+Since we&#8217;re looking at RR Lyrae which have typical periods of around 0.5 days,
+we&#8217;ll choose a range around this.
+Note that the units of <code class="docutils literal"><span class="pre">period_range</span></code> should match the units of the times
+passed to the <code class="docutils literal"><span class="pre">fit()</span></code> algorithm. Here the input times are in days, so the
+<code class="docutils literal"><span class="pre">period_range</span></code> is specified as <code class="docutils literal"><span class="pre">(min_period,</span> <span class="pre">max_period)</span></code> in days:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">periodic</span><span class="o">.</span><span class="n">LombScargleFast</span><span class="p">(</span><span class="n">fit_period</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">period_range</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span><span class="p">)</span>
@@ -238,7 +243,8 @@ preferred pattern for the default optimizer:</p>
 </pre></div>
 </div>
 <p>Before you do any period optimization, be sure to set these quantities
-appropriately!</p>
+appropriately! And note that becuase the grid spacing is equal in frequency,
+probing small periods is much more expensive than probing large frequencies.</p>
 </div>
 </div>
 

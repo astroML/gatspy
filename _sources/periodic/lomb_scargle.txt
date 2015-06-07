@@ -249,7 +249,12 @@ at :math:`t_{max}`, then the peak width *in frequency* is approximately
 multiple grid poins cover each potential peak, so we need to choose an
 oversampling factor (say, 5) and compute the grid based on this.
 
-We can see all of this in play when we ask the model for the best period:
+We can see all of this in play when we ask the model for the best period.
+Since we're looking at RR Lyrae which have typical periods of around 0.5 days,
+we'll choose a range around this.
+Note that the units of ``period_range`` should match the units of the times
+passed to the ``fit()`` algorithm. Here the input times are in days, so the
+``period_range`` is specified as ``(min_period, max_period)`` in days:
 
     >>> model = periodic.LombScargleFast(fit_period=True)
     >>> model.optimizer.period_range = (0.2, 1.2)
@@ -278,4 +283,5 @@ preferred pattern for the default optimizer:
      - Computing periods at 495 steps
 
 Before you do any period optimization, be sure to set these quantities
-appropriately!
+appropriately! And note that becuase the grid spacing is equal in frequency,
+probing small periods is much more expensive than probing large frequencies.
