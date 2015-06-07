@@ -36,7 +36,7 @@ class RRLyraeGenerated(object):
     0.61431831
     >>> mag = gen.generated('g', [51080.0, 51080.5], err=0.3)
     >>> mag.round(2)
-    array(17.74, 17.04)
+    array([ 17.74,  17.04])
     """
     lcdata = fetch_rrlyrae()
     templates = fetch_rrlyrae_templates()
