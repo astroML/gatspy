@@ -284,4 +284,5 @@ preferred pattern for the default optimizer:
 
 Before you do any period optimization, be sure to set these quantities
 appropriately! And note that becuase the grid spacing is equal in frequency,
-probing small periods is much more expensive than probing large frequencies.
+probing small periods (high frequencies) is much more expensive than probing
+large periods (small frequencies).
