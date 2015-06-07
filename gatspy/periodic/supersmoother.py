@@ -35,8 +35,10 @@ class SuperSmoother(PeriodicModeler):
     >>> ssm = SuperSmoother().fit(t, y, dy)
     >>> ssm.best_period
     Finding optimal frequency:
-     - Using omega_step = 0.01277
-     - Computing periods at 2051 steps from 0.20 to 1.20
+     - Estimated peak width = 0.0639
+     - Using 5 steps per peak; omega_step = 0.0128
+     - User-specified period range:  0.2 to 1.2
+     - Computing periods at 2051 steps
     Zooming-in on 5 candidate peaks:
      - Computing periods at 1000 steps
     0.62819846183431927

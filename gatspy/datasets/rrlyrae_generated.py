@@ -34,9 +34,9 @@ class RRLyraeGenerated(object):
     >>> gen = RRLyraeGenerated(lcid, random_state=0)
     >>> gen.period
     0.61431831
-    >>> t, mag, dmag = gen.observed('g')
-    >>> t[:4]
-    array([ 51081.349522,  51819.42063 ,  52288.079734,  52551.353026])
+    >>> mag = gen.generated('g', [51080.0, 51080.5], err=0.3)
+    >>> mag.round(2)
+    array([ 17.74,  17.04])
     """
     lcdata = fetch_rrlyrae()
     templates = fetch_rrlyrae_templates()

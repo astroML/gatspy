@@ -69,10 +69,13 @@ class LinearScanOptimizer(PeriodicOptimizer):
         # print some updates if desired
         if self.verbose:
             print("Finding optimal frequency:")
-            print(" - Using omega_step = {0:.5f}".format(omega_step))
-            print(" - Computing periods at {0:.0f} steps "
-                  "from {1:.2f} to {2:.2f}".format(len(periods), periods.min(),
-                                                   periods.max()))
+            print(" - Estimated peak width = {0:.3g}".format(width))
+            print(" - Using {0} steps per peak; "
+                  "omega_step = {1:.3g}".format(self.first_pass_coverage,
+                                                omega_step))
+            print(" - User-specified period range: "
+                  " {0:.2g} to {1:.2g}".format(periods.min(), periods.max()))
+            print(" - Computing periods at {0:.0f} steps".format(len(periods)))
             sys.stdout.flush()
 
         # Compute the score on the initial grid
