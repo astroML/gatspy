@@ -40,8 +40,9 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.pngmath',
+    #'sphinx.ext.doctest',
+    'sphinx.ext.viewcode',
     'numpy_ext.numpydoc',
-    #'sphinx.ext.linkcode',
 ]
 
 

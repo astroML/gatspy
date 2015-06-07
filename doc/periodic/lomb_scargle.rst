@@ -70,7 +70,7 @@ This can be done using the ``find_best_period`` method of any of the above
 estimators. Let's use :class:`~gatspy.periodic.LombScargleFast` to do this:
 
     >>> model = periodic.LombScargleFast()
-    >>> model.fit(t_r, mag_r, dmag_r)
+    >>> model.fit(t_r, mag_r, dmag_r);
     >>> period = model.best_period
     Finding optimal frequency:
      - Estimated peak width = 0.00189
@@ -196,4 +196,66 @@ purpose: it gives us an accurate period determination.
 
 Adjusting the Optimizer
 -----------------------
-`TODO`
+Finding the best period requires use of an optimizer. For typical optimization
+problems, this is done using some sort of automated minimization scheme such as
+gradient descent, or perhaps via a Bayesian sampling scheme such as MCMC.
+Unfortunately, these typical methods fail because there are so many peaks in
+the periodogram frequency. Typically periodogram studies fall back on a brute
+force search grid, finding the grid point which maximizes the power/score.
+
+A brute force search has two parameters that must be specified: the
+**range of the grid**, and the **step spacing of the grid**.
+
+The **range of the grid** must be chosen based on your intuition about the data.
+Often people wrongly think they can use some sort of Nyquist-type limit to
+choose a search range (i.e. evaluating based on the minimum or mean time
+between subsequent observations); unfortunately this line of reasoning does
+not apply, even approximately, to unequally-spaced observations.
+This can't be stressed enough, as such misuse of Nyquist-type arguments comes
+up often in the literature: **The periodogram of an unequally-spaced time
+series is generally sensitive to periods far smaller than the minimum time
+between observations.** Thus the search range is an entirely free parameter,
+which must be set by the user based on intuition about the data.
+
+The **spacing of the grid** is easier to determine automatically. The grid
+spacing must be much smaller than the width a typical periodogram peak, or
+you risk entirely missing peaks within the scan. The typical width of a
+periodogram peak is inversely proportional to the **range** of the data; that
+is, if the first observation is at :math:`t_{min}` and the last observation is
+at :math:`t_{max}`, then the peak width *in frequency* is approximately
+:math:`w = 2\pi/(t_{max} - t_{min})`. The grid should be chosen such that
+multiple grid poins cover each potential peak, so we need to choose an
+oversampling factor (say, 5) and compute the grid based on this.
+
+We can see all of this in play when we ask the model for the best period:
+
+    >>> model = periodic.LombScargleFast()
+    >>> model.fit(t_r, mag_r, dmag_r);
+    >>> period = model.best_period
+    Finding optimal frequency:
+     - Estimated peak width = 0.00189
+     - Using 5 steps per peak; omega_step = 0.000378
+     - User-specified period range:  0.2 to 1.2
+     - Computing periods at 69190 steps
+    Zooming-in on 5 candidate peaks:
+     - Computing periods at 995 steps
+
+These values can be adjusted via the ``optimizer`` argument to the model; this
+can be done either at or after instantiation. After instantiation is the
+preferred pattern for the default optimizer:
+
+    >>> model = periodic.LombScargleFast()
+    >>> model.optimizer.period_range = (0.5, 0.7)
+    >>> model.optimizer.first_pass_coverage = 10
+    >>> model.fit(t_r, mag_r, dmag_r);
+    >>> period = model.best_period
+    Finding optimal frequency:
+     - Estimated peak width = 0.00189
+     - Using 10 steps per peak; omega_step = 0.000189
+     - User-specified period range:  0.5 to 0.7
+     - Computing periods at 18979 steps
+    Zooming-in on 5 candidate peaks:
+     - Computing periods at 495 steps
+
+Before you do any period optimization, be sure to set these quantities
+appropriately!
