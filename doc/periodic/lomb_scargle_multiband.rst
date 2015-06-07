@@ -1,5 +1,7 @@
 .. _periodic_lomb_scargle_multiband:
 
+.. currentmodule:: gatspy.periodic
+
 Multiband Lomb-Scargle Periodogram
 ==================================
 Though classical periodogram approaches only handle a single band of data,
@@ -94,7 +96,6 @@ single-band periodograms to this regularized multiband model on six months
 of sparsely-sampled LSST-style data:
 
 .. plot::
-
     import numpy as np
     import matplotlib.pyplot as plt
     import matplotlib as mpl
@@ -103,15 +104,11 @@ of sparsely-sampled LSST-style data:
     mpl.rc('axes', color_cycle=["#4C72B0", "#55A868", "#C44E52",
                                 "#8172B2", "#CCB974"])
 
-    from gatspy.datasets import RRLyraeGenerated
-    from gatspy.periodic import (LombScargleFast,
-                                 LombScargleMultiband,
-                                 NaiveMultiband)
+    from gatspy import datasets, periodic
 
     # Choose a Sesar 2010 object to base our fits on
     lcid = 1019544
-    rrlyrae = RRLyraeGenerated(lcid, random_state=0)
-    print("Extinction A_r = {0:.4f}".format(rrlyrae.obsmeta['rExt']))
+    rrlyrae = datasets.RRLyraeGenerated(lcid, random_state=0)
 
     # Generate data in a 6-month observing season
     Nobs = 60
@@ -133,7 +130,8 @@ of sparsely-sampled LSST-style data:
     masks = [(filts == band) for band in 'ugriz']
 
     periods = np.linspace(0.2, 0.9, 1000)
-    model = NaiveMultiband(BaseModel=LombScargleFast).fit(t, mags, dy, filts)
+    model = periodic.NaiveMultiband(BaseModel=periodic.LombScargleFast)
+    model.fit(t, mags, dy, filts)
     P = model.scores(periods)
 
     fig = plt.figure(figsize=(10, 4))
@@ -162,7 +160,7 @@ of sparsely-sampled LSST-style data:
     ax[1].xaxis.set_major_formatter(plt.NullFormatter())
     ax[1].set_ylabel('power + offset')
 
-    LS_multi = LombScargleMultiband(Nterms_base=1, Nterms_band=0)
+    LS_multi = periodic.LombScargleMultiband(Nterms_base=1, Nterms_band=0)
     LS_multi.fit(t, mags, dy, filts)
     P_multi = LS_multi.periodogram(periods)
     ax[2].plot(periods, P_multi, lw=1, color='gray')
