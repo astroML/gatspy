@@ -190,3 +190,16 @@ pseudoxml:
 	$(SPHINXBUILD) -b pseudoxml $(ALLSPHINXOPTS) $(BUILDDIR)/pseudoxml
 	@echo
 	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."
+
+
+publish: html
+	if test -d _build/gatspy; \
+	then echo "using existing cloned gatspy directory"; \
+	else cd _build && \
+	git clone git@github.com:astroML/gatspy; \
+	fi && \
+	cd _build/gatspy && git checkout gh-pages && \
+	rsync -r ../html/* ./ && \
+	git add * && \
+	git commit -a -m 'Make install' && \
+	git push origin gh-pages
