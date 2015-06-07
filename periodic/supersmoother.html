@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>SuperSmoother &mdash; gatspy 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="gatspy 0.2 documentation" href="../index.html" />
+    <link rel="up" title="Tools for Periodic Timeseries (gatspy.periodic)" href="index.html" />
+    <link rel="next" title="Template-based Period Fitting" href="template.html" />
+    <link rel="prev" title="Multiband Lomb-Scargle Periodogram" href="lomb_scargle_multiband.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="template.html" title="Template-based Period Fitting"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="lomb_scargle_multiband.html" title="Multiband Lomb-Scargle Periodogram"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Tools for Periodic Timeseries (<code class="docutils literal"><span class="pre">gatspy.periodic</span></code>)</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="supersmoother">
+<h1>SuperSmoother<a class="headerlink" href="#supersmoother" title="Permalink to this headline">¶</a></h1>
+<p>The supersmoother is a non-parametric adaptive smoother which has been used
+within the astronomical literature as an estimator of periodic content. For
+each candidate frequency, the supersmoother algorithm is applied to the phased
+data and the model scatter is computed. The period for which the model error
+is minimized is reported as the best period.</p>
+<div class="section" id="single-band">
+<h2>Single Band<a class="headerlink" href="#single-band" title="Permalink to this headline">¶</a></h2>
+<p>The standard, single-band supersmoother is implemented in the
+<a class="reference internal" href="API.html#gatspy.periodic.SuperSmoother" title="gatspy.periodic.SuperSmoother"><code class="xref py py-class docutils literal"><span class="pre">SuperSmoother</span></code></a> algorithm. The main parts of the API discussion from
+<a class="reference internal" href="lomb_scargle.html#periodic-lomb-scargle"><span>Lomb-Scargle Periodogram</span></a> apply here as well. Here is an example of using
+the supersmoother to find the best period of an RR Lyrae star. Note that the
+supersmoother algorithm is much slower than even the slow version of Lomb
+Scargle; for this reason we&#8217;ll narrow the period search range for the sake
+of this example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gatspy</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">periodic</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">fetch_rrlyrae</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">dmag</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_lightcurve</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">filts</span> <span class="o">==</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">mag</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dmag</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">periodic</span><span class="o">.</span><span class="n">SuperSmoother</span><span class="p">(</span><span class="n">fit_period</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">period_range</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.61</span><span class="p">,</span> <span class="mf">0.62</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span><span class="p">)</span>
+<span class="go">Finding optimal frequency:</span>
+<span class="go"> - Estimated peak width = 0.00189</span>
+<span class="go"> - Using 5 steps per peak; omega_step = 0.000378</span>
+<span class="go"> - User-specified period range:  0.61 to 0.62</span>
+<span class="go"> - Computing periods at 441 steps</span>
+<span class="go">Zooming-in on 5 candidate peaks:</span>
+<span class="go"> - Computing periods at 995 steps</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="s">&quot;{0:.6f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">best_period</span><span class="p">))</span>
+<span class="go">0.614320</span>
+</pre></div>
+</div>
+<p>Let&#8217;s take a look at the best-fit supersmoother model at this period:</p>
+<p>(<a class="reference external" href="../periodic/supersmoother-1.py">Source code</a>, <a class="reference external" href="../periodic/supersmoother-1.png">png</a>, <a class="reference external" href="../periodic/supersmoother-1.hires.png">hires.png</a>, <a class="reference external" href="../periodic/supersmoother-1.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="../_images/supersmoother-1.png" src="../_images/supersmoother-1.png" />
+</div>
+<p>As you can see, the supersmoother method is very flexible and essentially
+creates a smooth nonparametric model at each frequency. We can construct the
+analog of the Lomb-Scargle periodogram using the supersmoother as well:</p>
+<p>(<a class="reference external" href="../periodic/supersmoother-2.py">Source code</a>, <a class="reference external" href="../periodic/supersmoother-2.png">png</a>, <a class="reference external" href="../periodic/supersmoother-2.hires.png">hires.png</a>, <a class="reference external" href="../periodic/supersmoother-2.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="../_images/supersmoother-2.png" src="../_images/supersmoother-2.png" />
+</div>
+<p>The supersmoother periodogram shows a clear spike at a period of around
+0.62 days.</p>
+</div>
+<div class="section" id="multi-band">
+<h2>Multi Band<a class="headerlink" href="#multi-band" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal"><span class="pre">gatspy.periodic</span></code> module also contains a multiband version of the
+supersmoother. Unlike the multiband lomb-scargle, there is no attempt here to
+make the smoothing on each band consistent: the multiband model consists of
+separate smooths on each band, with the weighted <img class="math" src="../_images/math/8bd0685e3bf9101859d24cf0e851651f182364c9.png" alt="\chi^2"/> added to produce
+the final score. Here is an example of this periodogram computed on some test
+data:</p>
+<p>(<a class="reference external" href="../periodic/supersmoother-3.py">Source code</a>, <a class="reference external" href="../periodic/supersmoother-3.png">png</a>, <a class="reference external" href="../periodic/supersmoother-3.hires.png">hires.png</a>, <a class="reference external" href="../periodic/supersmoother-3.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="../_images/supersmoother-3.png" src="../_images/supersmoother-3.png" />
+</div>
+<p>By combining the five models, we find a &#8220;periodogram&#8221; which isolates the
+unknown peak.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">SuperSmoother</a><ul>
+<li><a class="reference internal" href="#single-band">Single Band</a></li>
+<li><a class="reference internal" href="#multi-band">Multi Band</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="lomb_scargle_multiband.html"
+                        title="previous chapter">Multiband Lomb-Scargle Periodogram</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="template.html"
+                        title="next chapter">Template-based Period Fitting</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/periodic/supersmoother.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Jake VanderPlas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="../_sources/periodic/supersmoother.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

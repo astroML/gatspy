@@ -1,0 +1,307 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Lomb-Scargle Periodogram &mdash; gatspy 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="gatspy 0.2 documentation" href="../index.html" />
+    <link rel="up" title="Tools for Periodic Timeseries (gatspy.periodic)" href="index.html" />
+    <link rel="next" title="Multiband Lomb-Scargle Periodogram" href="lomb_scargle_multiband.html" />
+    <link rel="prev" title="Tools for Periodic Timeseries (gatspy.periodic)" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="lomb_scargle_multiband.html" title="Multiband Lomb-Scargle Periodogram"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Tools for Periodic Timeseries (gatspy.periodic)"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Tools for Periodic Timeseries (<code class="docutils literal"><span class="pre">gatspy.periodic</span></code>)</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="lomb-scargle-periodogram">
+<span id="periodic-lomb-scargle"></span><h1>Lomb-Scargle Periodogram<a class="headerlink" href="#lomb-scargle-periodogram" title="Permalink to this headline">¶</a></h1>
+<p>One of the best known methods for detecting periodicity in time series is the
+Lomb-Scargle Periodogram. <code class="docutils literal"><span class="pre">gatspy</span></code> has three main implementations of the
+classic periodogram:</p>
+<dl class="docutils">
+<dt><a class="reference internal" href="API.html#gatspy.periodic.LombScargleFast" title="gatspy.periodic.LombScargleFast"><code class="xref py py-class docutils literal"><span class="pre">LombScargleFast</span></code></a></dt>
+<dd>This class implements the fast, O[N logN] implementation of Lomb-Scargle.
+It is much faster than any of the above methods, especially as the number
+of data points and frequencies increases. It is limited to a floating mean
+model, and the frequencies must be computed on a regular grid.</dd>
+<dt><a class="reference internal" href="API.html#gatspy.periodic.LombScargle" title="gatspy.periodic.LombScargle"><code class="xref py py-class docutils literal"><span class="pre">LombScargle</span></code></a></dt>
+<dd>This basic method uses simple linear algebra to compute the periodogram.
+Though it is relatively slow, the approach allows for some enhancements such
+as floating mean, multiple Fourier terms, and regularization terms.</dd>
+<dt><a class="reference internal" href="API.html#gatspy.periodic.LombScargleAstroML" title="gatspy.periodic.LombScargleAstroML"><code class="xref py py-class docutils literal"><span class="pre">LombScargleAstroML</span></code></a></dt>
+<dd>This class depends on the Lomb-Scargle implementation in
+<a class="reference external" href="http://www.astroml.org">astroML</a>. This is a cython implementation, and
+is slightly faster than <a class="reference internal" href="API.html#gatspy.periodic.LombScargle" title="gatspy.periodic.LombScargle"><code class="xref py py-class docutils literal"><span class="pre">LombScargle</span></code></a>, though it
+does not handle higher-order fits or regularization.</dd>
+</dl>
+<p>For the basic no-frills Lomb-Scargle algorithm, the best option to use is
+<a class="reference internal" href="API.html#gatspy.periodic.LombScargleFast" title="gatspy.periodic.LombScargleFast"><code class="xref py py-class docutils literal"><span class="pre">LombScargleFast</span></code></a>. Keep in mind that aside from
+options used at model instantiation, the API of the three is identical.</p>
+<div class="section" id="api-of-periodic-models">
+<h2>API of Periodic Models<a class="headerlink" href="#api-of-periodic-models" title="Permalink to this headline">¶</a></h2>
+<p>The periodogram models here follow in the vein of the
+<a class="reference external" href="http://scikit-learn.org/">scikit-learn</a> API, which makes clear the separation
+between several parts of the problem:</p>
+<ul class="simple">
+<li>the choice of model: this happens at class instantiation.</li>
+<li>the fitting of the model to data: this happens with the <code class="docutils literal"><span class="pre">fit()</span></code> method.</li>
+<li>the application of the model to new data: this happens with the <code class="docutils literal"><span class="pre">predict()</span></code>
+method.</li>
+<li>the evaluation of the model fit: this happens with the <code class="docutils literal"><span class="pre">score()</span></code> method.</li>
+</ul>
+<p>The models in <code class="docutils literal"><span class="pre">gatspy</span></code> differ from those in <code class="docutils literal"><span class="pre">scikit-learn</span></code> in several
+important ways:</p>
+<ol class="arabic simple">
+<li>The <code class="docutils literal"><span class="pre">fit()</span></code> method optionally accepts errors in the magnitude inputs.
+For multiband methods, the fit method also accepts a specification of the
+filter/band in which the magnitude is observed.</li>
+<li>The <code class="docutils literal"><span class="pre">predict()</span></code> and <code class="docutils literal"><span class="pre">score()</span></code> methods require specification of a period.
+If this period is not supplied, the best period will be found automatically
+via an exhaustive grid search, which can be very slow for some datasets!</li>
+</ol>
+<p>We&#8217;ll see examples of this below.</p>
+</div>
+<div class="section" id="basic-lomb-scargle-periodogram">
+<h2>Basic Lomb-Scargle Periodogram<a class="headerlink" href="#basic-lomb-scargle-periodogram" title="Permalink to this headline">¶</a></h2>
+<p>We&#8217;ll start by looking at the basic Lomb-Scargle Periodogram, using the
+<a class="reference internal" href="API.html#gatspy.periodic.LombScargleFast" title="gatspy.periodic.LombScargleFast"><code class="xref py py-class docutils literal"><span class="pre">LombScargleFast</span></code></a> model.
+Let&#8217;s start by loading one r-band RR Lyrae lightcurve using the
+<a class="reference internal" href="../datasets/API.html#gatspy.datasets.fetch_rrlyrae" title="gatspy.datasets.fetch_rrlyrae"><code class="xref py py-func docutils literal"><span class="pre">gatspy.datasets.fetch_rrlyrae()</span></code></a> function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gatspy</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">periodic</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">fetch_rrlyrae</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">dmag</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_lightcurve</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">filts</span> <span class="o">==</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">mag</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dmag</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Given this data, we&#8217;d like to find the best period with the periodogram.
+This can be done using the <code class="docutils literal"><span class="pre">find_best_period</span></code> method of any of the above
+estimators, once the <code class="docutils literal"><span class="pre">period_range</span></code> attribute of the optimizer is set
+(see discussion below).</p>
+<p>Let&#8217;s quickly demonstrate this with <a class="reference internal" href="API.html#gatspy.periodic.LombScargleFast" title="gatspy.periodic.LombScargleFast"><code class="xref py py-class docutils literal"><span class="pre">LombScargleFast</span></code></a>.
+Because our data is from an RR Lyrae star, we&#8217;ll set a conservative period
+range of 0.2 to 1.2 days to make sure it contains the true period:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">periodic</span><span class="o">.</span><span class="n">LombScargleFast</span><span class="p">(</span><span class="n">fit_period</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">period_range</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span><span class="p">)</span>
+<span class="go">Finding optimal frequency:</span>
+<span class="go"> - Estimated peak width = 0.00189</span>
+<span class="go"> - Using 5 steps per peak; omega_step = 0.000378</span>
+<span class="go"> - User-specified period range:  0.2 to 1.2</span>
+<span class="go"> - Computing periods at 69190 steps</span>
+<span class="go">Zooming-in on 5 candidate peaks:</span>
+<span class="go"> - Computing periods at 995 steps</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="s">&quot;{0:.6f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">best_period</span><span class="p">))</span>
+<span class="go">0.614317</span>
+</pre></div>
+</div>
+<p>The periodogram optimizer uses a two-step grid search, first searching a
+relatively coarse grid to find several candidate frequencies, and finally
+zooming-in on these to compute the observed period to high precision.
+Let&#8217;s see how close this period is to the period measured by Sesar 2010
+using template fits:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">metadata</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">true_period</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s">&#39;P&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="s">&quot;{0:.6f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">true_period</span><span class="p">))</span>
+<span class="go">0.614318</span>
+</pre></div>
+</div>
+<p>The two periods differ to about <img class="math" src="../_images/math/269435a5d5273bd7237630944032e7b2e8f9ac59.png" alt="10^{-6}"/> days, or approximately one tenth
+of a second. To see more about what is going on in the periodogram, let&#8217;s plot
+the Lomb-Scargle periodogram as a function of period:</p>
+<p>(<a class="reference external" href="../periodic/lomb_scargle-1.py">Source code</a>, <a class="reference external" href="../periodic/lomb_scargle-1.png">png</a>, <a class="reference external" href="../periodic/lomb_scargle-1.hires.png">hires.png</a>, <a class="reference external" href="../periodic/lomb_scargle-1.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="../_images/lomb_scargle-1.png" src="../_images/lomb_scargle-1.png" />
+</div>
+<p>We see here why so many steps are needed to find the optimal period: the width
+of each of these peaks is so small that a coarser grid might easily miss a
+significant peak!</p>
+<p>The Lomb-Scargle model is essentially a least squares fit of a single sinusoid
+to the data; we can see the model fit using the <code class="docutils literal"><span class="pre">predict</span></code> method of the
+periodic model:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tfit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">best_period</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">tfit</span><span class="p">)</span>
+<span class="go">array([ 17.03381525,  17.02560232,  17.37830128,  17.03381525])</span>
+</pre></div>
+</div>
+<p>Let&#8217;s take a look at this model plotted over the phased data:</p>
+<p>(<a class="reference external" href="../periodic/lomb_scargle-2.py">Source code</a>, <a class="reference external" href="../periodic/lomb_scargle-2.png">png</a>, <a class="reference external" href="../periodic/lomb_scargle-2.hires.png">hires.png</a>, <a class="reference external" href="../periodic/lomb_scargle-2.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="../_images/lomb_scargle-2.png" src="../_images/lomb_scargle-2.png" />
+</div>
+<p>The model is clearly not a good fit for the data (RR Lyrae are much more
+complicated than a simple sine wave!) but the model serves a useful
+purpose: it gives us an accurate period determination.</p>
+</div>
+<div class="section" id="configuring-the-optimizer">
+<h2>Configuring the Optimizer<a class="headerlink" href="#configuring-the-optimizer" title="Permalink to this headline">¶</a></h2>
+<p>Finding the best period requires use of an optimizer. For typical optimization
+problems, this is done using some sort of automated minimization scheme such as
+gradient descent, or perhaps via a Bayesian sampling scheme such as MCMC.
+Unfortunately, these typical methods fail because there are so many peaks in
+the periodogram frequency. Typically periodogram studies fall back on a brute
+force search grid, finding the grid point which maximizes the power/score.</p>
+<p>A brute force search has two parameters that must be specified: the
+<strong>range of the grid</strong>, and the <strong>step spacing of the grid</strong>.</p>
+<p>The <strong>range of the grid</strong> must be chosen based on your intuition about the data.
+Often people wrongly think they can use some sort of Nyquist-type limit to
+choose a search range (i.e. evaluating based on the minimum or mean time
+between subsequent observations); unfortunately this line of reasoning does
+not apply, even approximately, to unequally-spaced observations.
+This can&#8217;t be stressed enough, as such misuse of Nyquist-type arguments comes
+up often in the literature: <strong>The periodogram of an unequally-spaced time
+series is generally sensitive to periods far smaller than the minimum time
+between observations.</strong> Thus the search range is an entirely free parameter,
+which must be set by the user based on intuition about the data.</p>
+<p>The <strong>spacing of the grid</strong> is easier to determine automatically. The grid
+spacing must be much smaller than the width a typical periodogram peak, or
+you risk entirely missing peaks within the scan. The typical width of a
+periodogram peak is inversely proportional to the <strong>range</strong> of the data; that
+is, if the first observation is at <img class="math" src="../_images/math/1212b474e0e738e501f3106b8eb2825bca472c7c.png" alt="t_{min}"/> and the last observation is
+at <img class="math" src="../_images/math/0c479dcb6ef4ceaf2dba254bede5607d454c5c49.png" alt="t_{max}"/>, then the peak width <em>in frequency</em> is approximately
+<img class="math" src="../_images/math/4b04319842095b4ea29fb3d84f7c56c250e719cb.png" alt="w = 2\pi/(t_{max} - t_{min})"/>. The grid should be chosen such that
+multiple grid poins cover each potential peak, so we need to choose an
+oversampling factor (say, 5) and compute the grid based on this.</p>
+<p>We can see all of this in play when we ask the model for the best period:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">periodic</span><span class="o">.</span><span class="n">LombScargleFast</span><span class="p">(</span><span class="n">fit_period</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">period_range</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span><span class="p">)</span>
+<span class="go">Finding optimal frequency:</span>
+<span class="go"> - Estimated peak width = 0.00189</span>
+<span class="go"> - Using 5 steps per peak; omega_step = 0.000378</span>
+<span class="go"> - User-specified period range:  0.2 to 1.2</span>
+<span class="go"> - Computing periods at 69190 steps</span>
+<span class="go">Zooming-in on 5 candidate peaks:</span>
+<span class="go"> - Computing periods at 995 steps</span>
+</pre></div>
+</div>
+<p>These values can be adjusted via the <code class="docutils literal"><span class="pre">optimizer</span></code> argument to the model; this
+can be done either at or after instantiation. After instantiation is the
+preferred pattern for the default optimizer:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">periodic</span><span class="o">.</span><span class="n">LombScargleFast</span><span class="p">(</span><span class="n">fit_period</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">period_range</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">),</span> <span class="n">first_pass_coverage</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span><span class="p">)</span>
+<span class="go">Finding optimal frequency:</span>
+<span class="go"> - Estimated peak width = 0.00189</span>
+<span class="go"> - Using 10 steps per peak; omega_step = 0.000189</span>
+<span class="go"> - User-specified period range:  0.5 to 0.7</span>
+<span class="go"> - Computing periods at 18979 steps</span>
+<span class="go">Zooming-in on 5 candidate peaks:</span>
+<span class="go"> - Computing periods at 495 steps</span>
+</pre></div>
+</div>
+<p>Before you do any period optimization, be sure to set these quantities
+appropriately!</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Lomb-Scargle Periodogram</a><ul>
+<li><a class="reference internal" href="#api-of-periodic-models">API of Periodic Models</a></li>
+<li><a class="reference internal" href="#basic-lomb-scargle-periodogram">Basic Lomb-Scargle Periodogram</a></li>
+<li><a class="reference internal" href="#configuring-the-optimizer">Configuring the Optimizer</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Tools for Periodic Timeseries (<code class="docutils literal"><span class="pre">gatspy.periodic</span></code>)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="lomb_scargle_multiband.html"
+                        title="next chapter">Multiband Lomb-Scargle Periodogram</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/periodic/lomb_scargle.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Jake VanderPlas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="../_sources/periodic/lomb_scargle.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

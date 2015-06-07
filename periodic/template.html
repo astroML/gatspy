@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Template-based Period Fitting &mdash; gatspy 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="gatspy 0.2 documentation" href="../index.html" />
+    <link rel="up" title="Tools for Periodic Timeseries (gatspy.periodic)" href="index.html" />
+    <link rel="next" title="API Documentation" href="API.html" />
+    <link rel="prev" title="SuperSmoother" href="supersmoother.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="API.html" title="API Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="supersmoother.html" title="SuperSmoother"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Tools for Periodic Timeseries (<code class="docutils literal"><span class="pre">gatspy.periodic</span></code>)</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="template-based-period-fitting">
+<span id="periodic-template"></span><h1>Template-based Period Fitting<a class="headerlink" href="#template-based-period-fitting" title="Permalink to this headline">¶</a></h1>
+<p>Though it can be very slow in practice, a template-based fitting method is
+perhaps the best way to narrow-in on the period of astronomical objects,
+particularly if the templates fit the data well. The reason for the slow
+performance is that template models require a nonlinear optimization for
+each period.</p>
+<p>Note that while it is possible to use the period optimizer with the template
+method, we skip it here because it is very computationally intensive.</p>
+<div class="section" id="single-band-template-model">
+<h2>Single Band Template Model<a class="headerlink" href="#single-band-template-model" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><code class="docutils literal"><span class="pre">gatspy</span></code> implements a template-based model using the Sesar 2010 RR Lyrae</div></blockquote>
+<p>templates in the <a class="reference internal" href="API.html#gatspy.periodic.RRLyraeTemplateModeler" title="gatspy.periodic.RRLyraeTemplateModeler"><code class="xref py py-class docutils literal"><span class="pre">RRLyraeTemplateModeler</span></code></a> class.
+We&#8217;ll demonstrate its use here, starting with fetching some RR Lyrae data:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gatspy</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">periodic</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">fetch_rrlyrae</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">dmag</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_lightcurve</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">filts</span> <span class="o">==</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">mag</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dmag</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Next we will define the template model and fit it to the data:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">periodic</span><span class="o">.</span><span class="n">RRLyraeTemplateModeler</span><span class="p">(</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>With this model fit, we can now compute the light curve for any given period.
+This fit will try all available templates and use the one which provides
+the closest fit:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">t_fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mag_fit</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">t_fit</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Plotting the results, we see the best fit template at this phase:</p>
+<p>(<a class="reference external" href="../periodic/template-1.py">Source code</a>, <a class="reference external" href="../periodic/template-1.png">png</a>, <a class="reference external" href="../periodic/template-1.hires.png">hires.png</a>, <a class="reference external" href="../periodic/template-1.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="../_images/template-1.png" src="../_images/template-1.png" />
+</div>
+</div>
+<div class="section" id="multiband-template-fitting">
+<h2>Multiband Template Fitting<a class="headerlink" href="#multiband-template-fitting" title="Permalink to this headline">¶</a></h2>
+<p>The multiband template model makes use of templates within each band, and fits
+each individually. This is implemented in
+<a class="reference internal" href="API.html#gatspy.periodic.RRLyraeTemplateModelerMultiband" title="gatspy.periodic.RRLyraeTemplateModelerMultiband"><code class="xref py py-class docutils literal"><span class="pre">RRLyraeTemplateModelerMultiband</span></code></a>. The API for this
+modeler is similar to that discussed in the
+<a class="reference internal" href="lomb_scargle_multiband.html#periodic-lomb-scargle-multiband"><span>Multiband Lomb-Scargle Periodogram</span></a>.</p>
+<p>The following figure shows the template fits to a multiband lightcurve:</p>
+<p>(<a class="reference external" href="../periodic/template-2.py">Source code</a>, <a class="reference external" href="../periodic/template-2.png">png</a>, <a class="reference external" href="../periodic/template-2.hires.png">hires.png</a>, <a class="reference external" href="../periodic/template-2.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="../_images/template-2.png" src="../_images/template-2.png" />
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Template-based Period Fitting</a><ul>
+<li><a class="reference internal" href="#single-band-template-model">Single Band Template Model</a></li>
+<li><a class="reference internal" href="#multiband-template-fitting">Multiband Template Fitting</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="supersmoother.html"
+                        title="previous chapter">SuperSmoother</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="API.html"
+                        title="next chapter">API Documentation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/periodic/template.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Jake VanderPlas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="../_sources/periodic/template.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

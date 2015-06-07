@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Multiband Lomb-Scargle Periodogram &mdash; gatspy 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="gatspy 0.2 documentation" href="../index.html" />
+    <link rel="up" title="Tools for Periodic Timeseries (gatspy.periodic)" href="index.html" />
+    <link rel="next" title="SuperSmoother" href="supersmoother.html" />
+    <link rel="prev" title="Lomb-Scargle Periodogram" href="lomb_scargle.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="supersmoother.html" title="SuperSmoother"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="lomb_scargle.html" title="Lomb-Scargle Periodogram"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Tools for Periodic Timeseries (<code class="docutils literal"><span class="pre">gatspy.periodic</span></code>)</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="multiband-lomb-scargle-periodogram">
+<span id="periodic-lomb-scargle-multiband"></span><h1>Multiband Lomb-Scargle Periodogram<a class="headerlink" href="#multiband-lomb-scargle-periodogram" title="Permalink to this headline">¶</a></h1>
+<p>Though classical periodogram approaches only handle a single band of data,
+multiband extensions have been recently proposed. <code class="docutils literal"><span class="pre">gatspy</span></code> implements one
+which was suggested by
+<a class="reference external" href="http://adsabs.harvard.edu/abs/2015arXiv150201344V">VanderPlas et al.</a>
+The interface is almost identical to that discussed in
+<a class="reference internal" href="lomb_scargle.html#periodic-lomb-scargle"><span>Lomb-Scargle Periodogram</span></a>, with the exception of the <code class="docutils literal"><span class="pre">fit()</span></code> method and
+<code class="docutils literal"><span class="pre">predict()</span></code> method requiring a specification of the filters.</p>
+<p>Two versions of the multiband periodogram are available:</p>
+<dl class="docutils">
+<dt><a class="reference internal" href="API.html#gatspy.periodic.LombScargleMultiband" title="gatspy.periodic.LombScargleMultiband"><code class="xref py py-class docutils literal"><span class="pre">LombScargleMultiband</span></code></a></dt>
+<dd>This class implements the flexible multiband model described in VanderPlas
+(2015). In particular, it uses regularization to push common variation into
+a base model, which effectively simplifies the overall model and leads to
+less background signal in the periodogram.</dd>
+<dt><a class="reference internal" href="API.html#gatspy.periodic.LombScargleMultibandFast" title="gatspy.periodic.LombScargleMultibandFast"><code class="xref py py-class docutils literal"><span class="pre">LombScargleMultibandFast</span></code></a></dt>
+<dd>This class is a faster version of the multiband periodogram without
+regularization. This means that it cannot fit the same range of models as
+<a class="reference internal" href="API.html#gatspy.periodic.LombScargleMultiband" title="gatspy.periodic.LombScargleMultiband"><code class="xref py py-class docutils literal"><span class="pre">LombScargleMultiband</span></code></a>.</dd>
+</dl>
+<p>Here is a quick example of finding the best period in multiband data. We&#8217;ll
+use <a class="reference internal" href="API.html#gatspy.periodic.LombScargleMultibandFast" title="gatspy.periodic.LombScargleMultibandFast"><code class="xref py py-class docutils literal"><span class="pre">LombScargleMultibandFast</span></code></a> here.
+We start by loading the lightcurve (for more information, see <a class="reference internal" href="../datasets/index.html#datasets"><span>Datasets (gatspy.datasets)</span></a>):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gatspy</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">periodic</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">fetch_rrlyrae</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">dmag</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_lightcurve</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>With this lightcurve specified, we can now build and fit the model:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">periodic</span><span class="o">.</span><span class="n">LombScargleMultibandFast</span><span class="p">(</span><span class="n">fit_period</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">period_range</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">dmag</span><span class="p">,</span> <span class="n">filts</span><span class="p">)</span>
+<span class="go">Finding optimal frequency:</span>
+<span class="go"> - Estimated peak width = 0.00189</span>
+<span class="go"> - Using 5 steps per peak; omega_step = 0.000378</span>
+<span class="go"> - User-specified period range:  0.5 to 0.7</span>
+<span class="go"> - Computing periods at 9490 steps</span>
+<span class="go">Zooming-in on 5 candidate peaks:</span>
+<span class="go"> - Computing periods at 1000 steps</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="s">&#39;{0:.6f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">best_period</span><span class="p">))</span>
+<span class="go">0.614317</span>
+</pre></div>
+</div>
+<p>Once the model is fit, we can then use the <code class="docutils literal"><span class="pre">predict()</span></code> method to
+look at the model prediction for any given band:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">tfit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">best_period</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">magfit</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">tfit</span><span class="p">,</span> <span class="n">filts</span><span class="o">=</span><span class="s">&#39;g&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">magfit</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+<span class="go">array([ 17.1411512 ,  17.13947457,  17.13780707,  17.13614876])</span>
+</pre></div>
+</div>
+<p>Below is a plot of the magnitudes at this best-fit period:</p>
+<p>(<a class="reference external" href="../periodic/lomb_scargle_multiband-1.py">Source code</a>, <a class="reference external" href="../periodic/lomb_scargle_multiband-1.png">png</a>, <a class="reference external" href="../periodic/lomb_scargle_multiband-1.hires.png">hires.png</a>, <a class="reference external" href="../periodic/lomb_scargle_multiband-1.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="../_images/lomb_scargle_multiband-1.png" src="../_images/lomb_scargle_multiband-1.png" />
+</div>
+<p>We see that the simplest multiband model is just a set of offset sine fits to
+the individual bands.</p>
+<p>A more sophisticated multiband approach involves model simplification via a
+regularization term that pushes common variation into a &#8220;base model&#8221;; this
+is slightly slower to compute, but can be accomplished with the
+<a class="reference internal" href="API.html#gatspy.periodic.LombScargleMultiband" title="gatspy.periodic.LombScargleMultiband"><code class="xref py py-class docutils literal"><span class="pre">LombScargleMultiband</span></code></a> model. For example, here is a comparison of the
+single-band periodograms to this regularized multiband model on six months
+of sparsely-sampled LSST-style data:</p>
+<p>(<a class="reference external" href="../periodic/lomb_scargle_multiband-2.py">Source code</a>, <a class="reference external" href="../periodic/lomb_scargle_multiband-2.png">png</a>, <a class="reference external" href="../periodic/lomb_scargle_multiband-2.hires.png">hires.png</a>, <a class="reference external" href="../periodic/lomb_scargle_multiband-2.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="../_images/lomb_scargle_multiband-2.png" src="../_images/lomb_scargle_multiband-2.png" />
+</div>
+<p>Notice in this figure that periodograms built from individual bands fail to
+locate the frequency, while the periodogram built from the entire dataset has
+a strong spike in power at the correct frequency.</p>
+<p>For more information on these multiband methods, see the
+<a class="reference external" href="http://adsabs.harvard.edu/abs/2015arXiv150201344V">VanderPlas et al.</a>
+paper, and the associated figure code at
+<a class="reference external" href="http://github.com/jakevdp/multiband_LS/">http://github.com/jakevdp/multiband_LS/</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="lomb_scargle.html"
+                        title="previous chapter">Lomb-Scargle Periodogram</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="supersmoother.html"
+                        title="next chapter">SuperSmoother</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/periodic/lomb_scargle_multiband.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Jake VanderPlas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="../_sources/periodic/lomb_scargle_multiband.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

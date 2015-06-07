@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Sesar 2010 RR Lyrae (Stripe 82) &mdash; gatspy 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="gatspy 0.2 documentation" href="../index.html" />
+    <link rel="up" title="Datasets (gatspy.datasets)" href="index.html" />
+    <link rel="next" title="API Documentation" href="API.html" />
+    <link rel="prev" title="Datasets (gatspy.datasets)" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="API.html" title="API Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Datasets (gatspy.datasets)"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Datasets (<code class="docutils literal"><span class="pre">gatspy.datasets</span></code>)</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="datasets-sesar2010rrlyrae"></span><div class="section" id="sesar-2010-rr-lyrae-stripe-82">
+<h1>Sesar 2010 RR Lyrae (Stripe 82)<a class="headerlink" href="#sesar-2010-rr-lyrae-stripe-82" title="Permalink to this headline">¶</a></h1>
+<p>The primary dataset available is the 483 RR Lyrae from Sesar 2010.
+This dataset contains observations of 483 RR Lyrae stars in Stripe 82 over
+approximately a decade, along with observational metadata, derived metadata,
+and templates derived from the code.</p>
+<div class="section" id="observed-light-curves">
+<h2>Observed Light Curves<a class="headerlink" href="#observed-light-curves" title="Permalink to this headline">¶</a></h2>
+<p>The photometric light curves for these stars can be downloaded and accessed
+via the <a class="reference internal" href="API.html#gatspy.datasets.fetch_rrlyrae" title="gatspy.datasets.fetch_rrlyrae"><code class="xref py py-func docutils literal"><span class="pre">fetch_rrlyrae()</span></code></a> function. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gatspy.datasets</span> <span class="kn">import</span> <span class="n">fetch_rrlyrae</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">fetch_rrlyrae</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+<span class="go">483</span>
+</pre></div>
+</div>
+<p>As you can see, the result of the download is an object which contains the data
+for all 483 lightcurves. You can fetch an individual lightcurve using the
+<code class="docutils literal"><span class="pre">get_lightcurve</span></code> method, which takes a lightcurve id as an argument:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">dmag</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_lightcurve</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let&#8217;s use matplotlib to visualize this data, and get a feel for what is there:</p>
+<p>(<a class="reference external" href="../datasets/rrlyrae-1.py">Source code</a>, <a class="reference external" href="../datasets/rrlyrae-1.png">png</a>, <a class="reference external" href="../datasets/rrlyrae-1.hires.png">hires.png</a>, <a class="reference external" href="../datasets/rrlyrae-1.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="../_images/rrlyrae-1.png" src="../_images/rrlyrae-1.png" />
+</div>
+<p>This gives a nice visual indication of what the data look like.</p>
+</div>
+<div class="section" id="rr-lyrae-metadata">
+<h2>RR Lyrae Metadata<a class="headerlink" href="#rr-lyrae-metadata" title="Permalink to this headline">¶</a></h2>
+<p>Along with the main lightcurve observations, the dataset tools give access to
+two sets of metadata associated with the lightcurves. There is the observational
+metadata available from the <code class="docutils literal"><span class="pre">get_obsmeta()</span></code> method, and the fit metadata
+available in the <code class="docutils literal"><span class="pre">get_metadata()</span></code> method.</p>
+<p>The observational metadata includes quantities like RA, Dec, extinction, etc.
+Details are in Table 3 of Sesar (2010).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">obsmeta</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_obsmeta</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">obsmeta</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+<span class="go">(&#39;id&#39;, &#39;RA&#39;, &#39;DEC&#39;, &#39;rExt&#39;, &#39;d&#39;, &#39;RGC&#39;, &#39;u&#39;, &#39;g&#39;, &#39;r&#39;, &#39;i&#39;, &#39;z&#39;, &#39;V&#39;, &#39;ugmin&#39;, &#39;ugmin_err&#39;, &#39;grmin&#39;, &#39;grmin_err&#39;)</span>
+</pre></div>
+</div>
+<p>The fit metadata includes quantities like the period, type of RR Lyrae, etc.
+Details are in Table 2 of Sesar (2010).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">metadata</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">metadata</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+<span class="go">(&#39;id&#39;, &#39;type&#39;, &#39;P&#39;, &#39;uA&#39;, &#39;u0&#39;, &#39;uE&#39;, &#39;uT&#39;, &#39;gA&#39;, &#39;g0&#39;, &#39;gE&#39;, &#39;gT&#39;, &#39;rA&#39;, &#39;r0&#39;, &#39;rE&#39;, &#39;rT&#39;, &#39;iA&#39;, &#39;i0&#39;, &#39;iE&#39;, &#39;iT&#39;, &#39;zA&#39;, &#39;z0&#39;, &#39;zE&#39;, &#39;zT&#39;)</span>
+</pre></div>
+</div>
+<p>For example, we can use the period from the metadata to phase the lightcurve as
+follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">period</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s">&#39;P&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">phase</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span> <span class="o">/</span> <span class="n">period</span><span class="p">)</span> <span class="o">%</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>Using this, we can plot the phased lightcurve, which lets us more easily see
+the structure across the observations:</p>
+<p>(<a class="reference external" href="../datasets/rrlyrae-2.py">Source code</a>, <a class="reference external" href="../datasets/rrlyrae-2.png">png</a>, <a class="reference external" href="../datasets/rrlyrae-2.hires.png">hires.png</a>, <a class="reference external" href="../datasets/rrlyrae-2.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="../_images/rrlyrae-2.png" src="../_images/rrlyrae-2.png" />
+</div>
+<p>These periods were determined within Sesar 2010 via a template fitting approach.</p>
+</div>
+<div class="section" id="rr-lyrae-templates">
+<h2>RR Lyrae Templates<a class="headerlink" href="#rr-lyrae-templates" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal"><span class="pre">gatspy</span></code> also provides a loader for the empirical RR Lyrae templates derived
+in Sesar 2010. These are available via the
+<a class="reference internal" href="API.html#gatspy.datasets.fetch_rrlyrae_templates" title="gatspy.datasets.fetch_rrlyrae_templates"><code class="xref py py-func docutils literal"><span class="pre">fetch_rrlyrae_templates()</span></code></a> function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gatspy.datasets</span> <span class="kn">import</span> <span class="n">fetch_rrlyrae_templates</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">templates</span> <span class="o">=</span> <span class="n">fetch_rrlyrae_templates</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">templates</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+<span class="go">98</span>
+</pre></div>
+</div>
+<p>There are 98 templates spread among the five bands, which can be referenced
+by their id:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">templates</span><span class="o">.</span><span class="n">ids</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span>
+<span class="go">[&#39;0g&#39;, &#39;0i&#39;, &#39;0r&#39;, &#39;0u&#39;, &#39;0z&#39;, &#39;100g&#39;, &#39;100i&#39;, &#39;100r&#39;, &#39;100u&#39;, &#39;100z&#39;]</span>
+</pre></div>
+</div>
+<p>Each of these templates is normalized from 0 to 1 in phase, and from 0 to 1 in
+magnitude. For example, plotting template <code class="docutils literal"><span class="pre">'100'</span></code> we see:</p>
+<p>(<a class="reference external" href="../datasets/rrlyrae-3.py">Source code</a>, <a class="reference external" href="../datasets/rrlyrae-3.png">png</a>, <a class="reference external" href="../datasets/rrlyrae-3.hires.png">hires.png</a>, <a class="reference external" href="../datasets/rrlyrae-3.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="../_images/rrlyrae-3.png" src="../_images/rrlyrae-3.png" />
+</div>
+<p>For more information on these templates, see the discussion in Sesar (2010).</p>
+</div>
+<div class="section" id="generated-lightcurves">
+<h2>Generated Lightcurves<a class="headerlink" href="#generated-lightcurves" title="Permalink to this headline">¶</a></h2>
+<p>Using the RR Lyrae templates, it is possible to simulate observations of RR
+Lyrae stars. <code class="docutils literal"><span class="pre">gatspy</span></code> provides the <a class="reference internal" href="API.html#gatspy.datasets.RRLyraeGenerated" title="gatspy.datasets.RRLyraeGenerated"><code class="xref py py-class docutils literal"><span class="pre">RRLyraeGenerated</span></code></a>
+class as an interface for this.
+In order to make the observations as realistic as possible, these lightcurves
+are based on one of the 483 Stripe 82 RR Lyrae compiled by Sesar (2010):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gatspy.datasets</span> <span class="kn">import</span> <span class="n">fetch_rrlyrae</span><span class="p">,</span> <span class="n">RRLyraeGenerated</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">fetch_rrlyrae</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gen</span> <span class="o">=</span> <span class="n">RRLyraeGenerated</span><span class="p">(</span><span class="n">lcid</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mag</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generated</span><span class="p">(</span><span class="s">&#39;g&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mf">51080.0</span><span class="p">,</span> <span class="mf">51080.5</span><span class="p">],</span> <span class="n">err</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mag</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">array([ 17.74,  17.04])</span>
+</pre></div>
+</div>
+<p>This will create observations drawn from the best-fit template with the given
+magnitude error. Here let&#8217;s use the observed times and errors to compare a
+realization of the generated light curve to the true observed data:</p>
+<p>(<a class="reference external" href="../datasets/rrlyrae-4.py">Source code</a>, <a class="reference external" href="../datasets/rrlyrae-4.png">png</a>, <a class="reference external" href="../datasets/rrlyrae-4.hires.png">hires.png</a>, <a class="reference external" href="../datasets/rrlyrae-4.pdf">pdf</a>)</p>
+<div class="figure">
+<img alt="../_images/rrlyrae-4.png" src="../_images/rrlyrae-4.png" />
+</div>
+<p>Here the observed data are the faint circles, while the generated data are the
+small points with errorbars. With this tool, it is easy to mimic observations
+of fainter RR Lyrae which follow the properties of the RR Lyrae observed in
+Stripe 82.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Sesar 2010 RR Lyrae (Stripe 82)</a><ul>
+<li><a class="reference internal" href="#observed-light-curves">Observed Light Curves</a></li>
+<li><a class="reference internal" href="#rr-lyrae-metadata">RR Lyrae Metadata</a></li>
+<li><a class="reference internal" href="#rr-lyrae-templates">RR Lyrae Templates</a></li>
+<li><a class="reference internal" href="#generated-lightcurves">Generated Lightcurves</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Datasets (<code class="docutils literal"><span class="pre">gatspy.datasets</span></code>)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="API.html"
+                        title="next chapter">API Documentation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/datasets/rrlyrae.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Jake VanderPlas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="../_sources/datasets/rrlyrae.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

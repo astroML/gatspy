@@ -1,0 +1,897 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>API Documentation &mdash; gatspy 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="gatspy 0.2 documentation" href="../index.html" />
+    <link rel="up" title="Tools for Periodic Timeseries (gatspy.periodic)" href="index.html" />
+    <link rel="prev" title="Template-based Period Fitting" href="template.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="template.html" title="Template-based Period Fitting"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Tools for Periodic Timeseries (<code class="docutils literal"><span class="pre">gatspy.periodic</span></code>)</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="periodic-api"></span><div class="section" id="module-gatspy.periodic">
+<span id="api-documentation"></span><h1>API Documentation<a class="headerlink" href="#module-gatspy.periodic" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="periodic-modeling-for-astronomical-time-series">
+<h2>Periodic Modeling for Astronomical Time Series<a class="headerlink" href="#periodic-modeling-for-astronomical-time-series" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gatspy.periodic.LombScargle">
+<em class="property">class </em><code class="descclassname">gatspy.periodic.</code><code class="descname">LombScargle</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>center_data=True</em>, <em>fit_offset=True</em>, <em>Nterms=1</em>, <em>regularization=None</em>, <em>regularize_by_trace=True</em>, <em>fit_period=False</em>, <em>optimizer_kwds=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/periodic/lomb_scargle.html#LombScargle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.periodic.LombScargle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lomb-Scargle Periodogram Implementation</p>
+<p>This is a generalized periodogram implementation using the matrix formalism
+outlined in VanderPlas &amp; Ivezic 2015. It allows computation of periodograms
+and best-fit models for both the classic normalized periodogram and
+truncated Fourier series generalizations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>optimizer</strong> : PeriodicOptimizer instance</p>
+<blockquote>
+<div><p>Optimizer to use to find the best period. If not specified, the
+LinearScanOptimizer will be used.</p>
+</div></blockquote>
+<p><strong>center_data</strong> : boolean (default = True)</p>
+<blockquote>
+<div><p>If True, then compute the weighted mean of the input data and subtract
+before fitting the model.</p>
+</div></blockquote>
+<p><strong>fit_offset</strong> : boolean (default = True)</p>
+<blockquote>
+<div><p>If True, then fit a floating-mean sinusoid model.</p>
+</div></blockquote>
+<p><strong>Nterms</strong> : int (default = 1)</p>
+<blockquote>
+<div><p>Number of Fourier frequencies to fit in the model</p>
+</div></blockquote>
+<p><strong>regularization</strong> : float, vector or None (default = None)</p>
+<blockquote>
+<div><p>If specified, then add this regularization penalty to the
+least squares fit.</p>
+</div></blockquote>
+<p><strong>regularize_by_trace</strong> : boolean (default = True)</p>
+<blockquote>
+<div><p>If True, multiply regularization by the trace of the matrix</p>
+</div></blockquote>
+<p><strong>fit_period</strong> : bool (optional)</p>
+<blockquote>
+<div><p>If True, then fit for the best period when fit() method is called.</p>
+</div></blockquote>
+<p><strong>optimizer_kwds</strong> : dict (optional</p>
+<blockquote class="last">
+<div><p>Dictionary of keyword arguments for constructing the optimizer</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#gatspy.periodic.LombScargleAstroML" title="gatspy.periodic.LombScargleAstroML"><code class="xref py py-obj docutils literal"><span class="pre">LombScargleAstroML</span></code></a>, <a class="reference internal" href="#gatspy.periodic.LombScargleMultiband" title="gatspy.periodic.LombScargleMultiband"><code class="xref py py-obj docutils literal"><span class="pre">LombScargleMultiband</span></code></a>, <a class="reference internal" href="#gatspy.periodic.LombScargleMultibandFast" title="gatspy.periodic.LombScargleMultibandFast"><code class="xref py py-obj docutils literal"><span class="pre">LombScargleMultibandFast</span></code></a></p>
+</div>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dy</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">omega</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span> <span class="o">=</span> <span class="n">LombScargle</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">period_range</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span><span class="o">.</span><span class="n">best_period</span>
+<span class="go">Finding optimal frequency:</span>
+<span class="go"> - Estimated peak width = 0.0639</span>
+<span class="go"> - Using 5 steps per peak; omega_step = 0.0128</span>
+<span class="go"> - User-specified period range:  0.2 to 1.2</span>
+<span class="go"> - Computing periods at 2051 steps</span>
+<span class="go">Zooming-in on 5 candidate peaks:</span>
+<span class="go"> - Computing periods at 1000 steps</span>
+<span class="go">0.62827068275990694</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="go">array([-0.01445853, -0.92762251])</span>
+</pre></div>
+</div>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">best_period</span></code></td>
+<td>Lazy evaluation of the best period given the model</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="gatspy.periodic.LombScargleFast">
+<em class="property">class </em><code class="descclassname">gatspy.periodic.</code><code class="descname">LombScargleFast</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>center_data=True</em>, <em>fit_offset=True</em>, <em>use_fft=True</em>, <em>ls_kwds=None</em>, <em>Nterms=1</em>, <em>fit_period=False</em>, <em>optimizer_kwds=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/periodic/lomb_scargle_fast.html#LombScargleFast"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.periodic.LombScargleFast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fast FFT-based Lomb-Scargle Periodogram Implementation</p>
+<p>This implements the O[N log N] lomb-scargle periodogram, described in
+Press &amp; Rybicki (1989) [1].
+To compute the periodogram via the fast algorithm, use the
+<code class="docutils literal"><span class="pre">score_frequency_grid()</span></code> method. The <code class="docutils literal"><span class="pre">score()</span></code> method of
+<code class="docutils literal"><span class="pre">periodogram()</span></code> method will default to the slower algorithm.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>optimizer</strong> : PeriodicOptimizer instance</p>
+<blockquote>
+<div><p>Optimizer to use to find the best period. If not specified, the
+LinearScanOptimizer will be used.</p>
+</div></blockquote>
+<p><strong>center_data</strong> : boolean (default = True)</p>
+<blockquote>
+<div><p>If True, then compute the weighted mean of the input data and subtract
+before fitting the model.</p>
+</div></blockquote>
+<p><strong>fit_offset</strong> : boolean (default = True)</p>
+<blockquote>
+<div><p>If True, then fit a floating-mean sinusoid model.</p>
+</div></blockquote>
+<p><strong>use_fft</strong> : boolean (default = True)</p>
+<blockquote>
+<div><p>Specify whether to use the Press &amp; Rybicki FFT algorithm to compute
+the result</p>
+</div></blockquote>
+<p><strong>ls_kwds</strong> : dict</p>
+<blockquote>
+<div><p>Dictionary of keywords to pass to the <code class="docutils literal"><span class="pre">lomb_scargle_fast</span></code> routine.</p>
+</div></blockquote>
+<p><strong>fit_period</strong> : bool (optional)</p>
+<blockquote>
+<div><p>If True, then fit for the best period when fit() method is called.</p>
+</div></blockquote>
+<p><strong>optimizer_kwds</strong> : dict (optional</p>
+<blockquote class="last">
+<div><p>Dictionary of keyword arguments for constructing the optimizer</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#gatspy.periodic.LombScargle" title="gatspy.periodic.LombScargle"><code class="xref py py-obj docutils literal"><span class="pre">LombScargle</span></code></a>, <a class="reference internal" href="#gatspy.periodic.LombScargleAstroML" title="gatspy.periodic.LombScargleAstroML"><code class="xref py py-obj docutils literal"><span class="pre">LombScargleAstroML</span></code></a></p>
+</div>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[R1]</a></td><td>Press W.H. and Rybicki, G.B, &#8220;Fast algorithm for spectral analysis
+of unevenly sampled data&#8221;. ApJ 1:338, p277, 1989</td></tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dy</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">omega</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span> <span class="o">=</span> <span class="n">LombScargleFast</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">period_range</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span><span class="o">.</span><span class="n">best_period</span>
+<span class="go">Finding optimal frequency:</span>
+<span class="go"> - Estimated peak width = 0.0639</span>
+<span class="go"> - Using 5 steps per peak; omega_step = 0.0128</span>
+<span class="go"> - User-specified period range:  0.2 to 1.2</span>
+<span class="go"> - Computing periods at 2051 steps</span>
+<span class="go">Zooming-in on 5 candidate peaks:</span>
+<span class="go"> - Computing periods at 1000 steps</span>
+<span class="go">0.62826265739259146</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="go">array([-0.02019474, -0.92910567])</span>
+</pre></div>
+</div>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">best_period</span></code></td>
+<td>Lazy evaluation of the best period given the model</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="gatspy.periodic.LombScargleAstroML">
+<em class="property">class </em><code class="descclassname">gatspy.periodic.</code><code class="descname">LombScargleAstroML</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>Nterms=1</em>, <em>fit_offset=True</em>, <em>center_data=True</em>, <em>slow_version=False</em>, <em>fit_period=False</em>, <em>optimizer_kwds=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/periodic/lomb_scargle.html#LombScargleAstroML"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.periodic.LombScargleAstroML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lomb-Scargle Periodogram Implementation using AstroML</p>
+<p>This is a generalized periodogram implementation which uses the periodogram
+functions from astroML. Compared to LombScargle, this implementation is
+both faster and more memory-efficient.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>optimizer</strong> : PeriodicOptimizer instance</p>
+<blockquote>
+<div><p>Optimizer to use to find the best period. If not specified, the
+LinearScanOptimizer will be used.</p>
+</div></blockquote>
+<p><strong>Nterms</strong> : int (default = 1)</p>
+<blockquote>
+<div><p>Number of terms for the fit. Only Nterms=1 is currently supported.</p>
+</div></blockquote>
+<p><strong>center_data</strong> : boolean (default = True)</p>
+<blockquote>
+<div><p>If True, then compute the weighted mean of the input data and subtract
+before fitting the model.</p>
+</div></blockquote>
+<p><strong>fit_offset</strong> : boolean (default = True)</p>
+<blockquote>
+<div><p>If True, then fit a floating-mean sinusoid model.</p>
+</div></blockquote>
+<p><strong>slow_version</strong> : boolean (default = False)</p>
+<blockquote>
+<div><p>If True, use the slower pure-python version from astroML. Otherwise,
+use the faster version of the code from astroML_addons</p>
+</div></blockquote>
+<p><strong>fit_period</strong> : bool (optional)</p>
+<blockquote>
+<div><p>If True, then fit for the best period when fit() method is called.</p>
+</div></blockquote>
+<p><strong>optimizer_kwds</strong> : dict (optional</p>
+<blockquote class="last">
+<div><p>Dictionary of keyword arguments for constructing the optimizer</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#gatspy.periodic.LombScargle" title="gatspy.periodic.LombScargle"><code class="xref py py-obj docutils literal"><span class="pre">LombScargle</span></code></a>, <a class="reference internal" href="#gatspy.periodic.LombScargleMultiband" title="gatspy.periodic.LombScargleMultiband"><code class="xref py py-obj docutils literal"><span class="pre">LombScargleMultiband</span></code></a>, <a class="reference internal" href="#gatspy.periodic.LombScargleMultibandFast" title="gatspy.periodic.LombScargleMultibandFast"><code class="xref py py-obj docutils literal"><span class="pre">LombScargleMultibandFast</span></code></a></p>
+</div>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dy</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">omega</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span> <span class="o">=</span> <span class="n">LombScargleAstroML</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">period_range</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span><span class="o">.</span><span class="n">best_period</span>
+<span class="go">Finding optimal frequency:</span>
+<span class="go"> - Estimated peak width = 0.0639</span>
+<span class="go"> - Using 5 steps per peak; omega_step = 0.0128</span>
+<span class="go"> - User-specified period range:  0.2 to 1.2</span>
+<span class="go"> - Computing periods at 2051 steps</span>
+<span class="go">Zooming-in on 5 candidate peaks:</span>
+<span class="go"> - Computing periods at 1000 steps</span>
+<span class="go">0.62827068275990694</span>
+</pre></div>
+</div>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">best_period</span></code></td>
+<td>Lazy evaluation of the best period given the model</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="gatspy.periodic.LombScargleMultiband">
+<em class="property">class </em><code class="descclassname">gatspy.periodic.</code><code class="descname">LombScargleMultiband</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>Nterms_base=1</em>, <em>Nterms_band=1</em>, <em>reg_base=None</em>, <em>reg_band=1e-06</em>, <em>regularize_by_trace=True</em>, <em>center_data=True</em>, <em>fit_period=False</em>, <em>optimizer_kwds=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/periodic/lomb_scargle_multiband.html#LombScargleMultiband"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.periodic.LombScargleMultiband" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiband Periodogram Implementation</p>
+<p>This implements the generalized multi-band periodogram described in
+VanderPlas &amp; Ivezic 2015.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>optimizer</strong> : PeriodicOptimizer instance</p>
+<blockquote>
+<div><p>Optimizer to use to find the best period. If not specified, the
+LinearScanOptimizer will be used.</p>
+</div></blockquote>
+<p><strong>Nterms_base</strong> : integer (default = 1)</p>
+<blockquote>
+<div><p>number of frequency terms to use for the base model common to all bands</p>
+</div></blockquote>
+<p><strong>Nterms_band</strong> : integer (default = 1)</p>
+<blockquote>
+<div><p>number of frequency terms to use for the residuals between the base
+model and each individual band</p>
+</div></blockquote>
+<p><strong>reg_base</strong> : float or None (default = None)</p>
+<blockquote>
+<div><p>amount of regularization to use on the base model parameters</p>
+</div></blockquote>
+<p><strong>reg_band</strong> : float or None (default = 1E-6)</p>
+<blockquote>
+<div><p>amount of regularization to use on the band model parameters</p>
+</div></blockquote>
+<p><strong>regularize_by_trace</strong> : bool (default = True)</p>
+<blockquote>
+<div><p>if True, then regularization is expressed in units of the trace of
+the normal matrix</p>
+</div></blockquote>
+<p><strong>center_data</strong> : boolean (default = True)</p>
+<blockquote class="last">
+<div><p>if True, then center the y data prior to the fit</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#gatspy.periodic.LombScargle" title="gatspy.periodic.LombScargle"><code class="xref py py-obj docutils literal"><span class="pre">LombScargle</span></code></a>, <a class="reference internal" href="#gatspy.periodic.LombScargleFast" title="gatspy.periodic.LombScargleFast"><code class="xref py py-obj docutils literal"><span class="pre">LombScargleFast</span></code></a>, <a class="reference internal" href="#gatspy.periodic.LombScargleMultibandFast" title="gatspy.periodic.LombScargleMultibandFast"><code class="xref py py-obj docutils literal"><span class="pre">LombScargleMultibandFast</span></code></a></p>
+</div>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">best_period</span></code></td>
+<td>Lazy evaluation of the best period given the model</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="gatspy.periodic.LombScargleMultibandFast">
+<em class="property">class </em><code class="descclassname">gatspy.periodic.</code><code class="descname">LombScargleMultibandFast</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>Nterms=1</em>, <em>BaseModel=None</em>, <em>fit_period=False</em>, <em>optimizer_kwds=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/periodic/lomb_scargle_multiband.html#LombScargleMultibandFast"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.periodic.LombScargleMultibandFast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fast Multiband Periodogram Implementation</p>
+<p>This implements the specialized multi-band periodogram described in
+VanderPlas &amp; Ivezic 2015 (with Nbase=0 and Nband=1) which is essentially
+a weighted sum of the standard periodograms for each band.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>optimizer</strong> : PeriodicOptimizer instance</p>
+<blockquote>
+<div><p>Optimizer to use to find the best period. If not specified, the
+LinearScanOptimizer will be used.</p>
+</div></blockquote>
+<p><strong>Nterms</strong> : integer (default = 1)</p>
+<blockquote>
+<div><p>Number of fourier terms to use in the model</p>
+</div></blockquote>
+<p><strong>BaseModel</strong> : PeriodicModeler class (optional)</p>
+<blockquote>
+<div><p>The base model to use for each individual band.
+By default it will use <a class="reference internal" href="#gatspy.periodic.LombScargleFast" title="gatspy.periodic.LombScargleFast"><code class="xref py py-class docutils literal"><span class="pre">LombScargleFast</span></code></a> if Nterms == 1, and
+<a class="reference internal" href="#gatspy.periodic.LombScargle" title="gatspy.periodic.LombScargle"><code class="xref py py-class docutils literal"><span class="pre">LombScargle</span></code></a> otherwise.</p>
+</div></blockquote>
+<p><strong>fit_period</strong> : bool (optional)</p>
+<blockquote>
+<div><p>If True, then fit for the best period when fit() method is called.</p>
+</div></blockquote>
+<p><strong>optimizer_kwds</strong> : dict (optional</p>
+<blockquote class="last">
+<div><p>Dictionary of keyword arguments for constructing the optimizer</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#gatspy.periodic.LombScargle" title="gatspy.periodic.LombScargle"><code class="xref py py-obj docutils literal"><span class="pre">LombScargle</span></code></a>, <a class="reference internal" href="#gatspy.periodic.LombScargleFast" title="gatspy.periodic.LombScargleFast"><code class="xref py py-obj docutils literal"><span class="pre">LombScargleFast</span></code></a>, <a class="reference internal" href="#gatspy.periodic.LombScargleMultiband" title="gatspy.periodic.LombScargleMultiband"><code class="xref py py-obj docutils literal"><span class="pre">LombScargleMultiband</span></code></a></p>
+</div>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">best_period</span></code></td>
+<td>Lazy evaluation of the best period given the model</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="gatspy.periodic.SuperSmoother">
+<em class="property">class </em><code class="descclassname">gatspy.periodic.</code><code class="descname">SuperSmoother</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>fit_period=False</em>, <em>optimizer_kwds=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/periodic/supersmoother.html#SuperSmoother"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.periodic.SuperSmoother" title="Permalink to this definition">¶</a></dt>
+<dd><p>Periodogram based on Friedman&#8217;s SuperSmoother.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>optimizer</strong> : PeriodicOptimizer instance</p>
+<blockquote>
+<div><p>Optimizer to use to find the best period. If not specified, the
+LinearScanOptimizer will be used.</p>
+</div></blockquote>
+<p><strong>fit_period</strong> : bool (optional)</p>
+<blockquote>
+<div><p>If True, then fit for the best period when fit() method is called.</p>
+</div></blockquote>
+<p><strong>optimizer_kwds</strong> : dict (optional</p>
+<blockquote class="last">
+<div><p>Dictionary of keyword arguments for constructing the optimizer</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#gatspy.periodic.LombScargle" title="gatspy.periodic.LombScargle"><code class="xref py py-obj docutils literal"><span class="pre">LombScargle</span></code></a></p>
+</div>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dy</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">omega</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ssm</span> <span class="o">=</span> <span class="n">SuperSmoother</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ssm</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">period_range</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ssm</span><span class="o">.</span><span class="n">best_period</span>
+<span class="go">Finding optimal frequency:</span>
+<span class="go"> - Estimated peak width = 0.0639</span>
+<span class="go"> - Using 5 steps per peak; omega_step = 0.0128</span>
+<span class="go"> - User-specified period range:  0.2 to 1.2</span>
+<span class="go"> - Computing periods at 2051 steps</span>
+<span class="go">Zooming-in on 5 candidate peaks:</span>
+<span class="go"> - Computing periods at 1000 steps</span>
+<span class="go">0.62819846183431927</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ssm</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="go">array([-0.02195035, -0.92119149])</span>
+</pre></div>
+</div>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">best_period</span></code></td>
+<td>Lazy evaluation of the best period given the model</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="gatspy.periodic.SuperSmootherMultiband">
+<em class="property">class </em><code class="descclassname">gatspy.periodic.</code><code class="descname">SuperSmootherMultiband</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>BaseModel=&lt;class 'gatspy.periodic.supersmoother.SuperSmoother'&gt;</em>, <em>fit_period=False</em>, <em>optimizer_kwds=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/periodic/supersmoother.html#SuperSmootherMultiband"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.periodic.SuperSmootherMultiband" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple multi-band SuperSmoother, with each band smoothed independently</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>optimizer</strong> : PeriodicOptimizer instance</p>
+<blockquote>
+<div><p>Optimizer to use to find the best period. If not specified, the
+LinearScanOptimizer will be used.</p>
+</div></blockquote>
+<p><strong>BaseModel</strong> : class type (default = SuperSmoother)</p>
+<blockquote>
+<div><p>The base model to use for each individual band.</p>
+</div></blockquote>
+<p><strong>fit_period</strong> : bool (optional)</p>
+<blockquote>
+<div><p>If True, then fit for the best period when fit() method is called.</p>
+</div></blockquote>
+<p><strong>optimizer_kwds</strong> : dict (optional</p>
+<blockquote class="last">
+<div><p>Dictionary of keyword arguments for constructing the optimizer</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">best_period</span></code></td>
+<td>Lazy evaluation of the best period given the model</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="gatspy.periodic.RRLyraeTemplateModeler">
+<em class="property">class </em><code class="descclassname">gatspy.periodic.</code><code class="descname">RRLyraeTemplateModeler</code><span class="sig-paren">(</span><em>filts='ugriz'</em>, <em>optimizer=None</em>, <em>fit_period=False</em>, <em>optimizer_kwds=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/periodic/template_modeler.html#RRLyraeTemplateModeler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.periodic.RRLyraeTemplateModeler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Template-fitting periods for single-band RR Lyrae</p>
+<p>This class contains functionality to evaluate the fit of the Sesar 2010
+RR Lyrae templates to single-band data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filts</strong> : list or iterable of characters (optional)</p>
+<blockquote>
+<div><p>The filters of the templates to be used. Items should be among &#8216;ugriz&#8217;.
+Default is &#8216;ugriz&#8217;; i.e. all available templates.</p>
+</div></blockquote>
+<p><strong>optimizer</strong> : PeriodicOptimizer instance (optional)</p>
+<blockquote>
+<div><p>Optimizer to use to find the best period. If not specified, the
+LinearScanOptimizer will be used.</p>
+</div></blockquote>
+<p><strong>fit_period</strong> : bool (optional)</p>
+<blockquote>
+<div><p>If True, then fit for the best period when fit() method is called.</p>
+</div></blockquote>
+<p><strong>optimizer_kwds</strong> : dict (optional</p>
+<blockquote class="last">
+<div><p>Dictionary of keyword arguments for constructing the optimizer</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="#gatspy.periodic.RRLyraeTemplateModelerMultiband" title="gatspy.periodic.RRLyraeTemplateModelerMultiband"><code class="xref py py-obj docutils literal"><span class="pre">RRLyraeTemplateModelerMultiband</span></code></a></dt>
+<dd>multiband version of template model</dd>
+</dl>
+</div>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">best_period</span></code></td>
+<td>Lazy evaluation of the best period given the model</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="gatspy.periodic.RRLyraeTemplateModelerMultiband">
+<em class="property">class </em><code class="descclassname">gatspy.periodic.</code><code class="descname">RRLyraeTemplateModelerMultiband</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>fit_period=False</em>, <em>optimizer_kwds=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/periodic/template_modeler.html#RRLyraeTemplateModelerMultiband"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.periodic.RRLyraeTemplateModelerMultiband" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiband version of RR Lyrae template-fitting modeler</p>
+<p>This class contains functionality to evaluate the fit of the Sesar 2010
+RR Lyrae templates to multiband data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>optimizer</strong> : PeriodicOptimizer instance (optional)</p>
+<blockquote class="last">
+<div><p>Optimizer to use to find the best period. If not specified, the
+LinearScanOptimizer will be used.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="#gatspy.periodic.RRLyraeTemplateModeler" title="gatspy.periodic.RRLyraeTemplateModeler"><code class="xref py py-obj docutils literal"><span class="pre">RRLyraeTemplateModeler</span></code></a></dt>
+<dd>single band version of template model</dd>
+</dl>
+</div>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">best_period</span></code></td>
+<td>Lazy evaluation of the best period given the model</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="gatspy.periodic.NaiveMultiband">
+<em class="property">class </em><code class="descclassname">gatspy.periodic.</code><code class="descname">NaiveMultiband</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>BaseModel=&lt;class 'gatspy.periodic.lomb_scargle.LombScargle'&gt;</em>, <em>fit_period=False</em>, <em>optimizer_kwds=None</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/periodic/naive_multiband.html#NaiveMultiband"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.periodic.NaiveMultiband" title="Permalink to this definition">¶</a></dt>
+<dd><p>Naive version of multiband fitting</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>optimizer</strong> : PeriodicOptimizer instance</p>
+<blockquote>
+<div><p>Optimizer to use to find the best period. If not specified, the
+LinearScanOptimizer will be used.</p>
+</div></blockquote>
+<p><strong>BaseModel</strong> : PeriodicModeler instance</p>
+<blockquote>
+<div><p>Single-band model to use on data from each band.</p>
+</div></blockquote>
+<p><strong>fit_period</strong> : bool (optional)</p>
+<blockquote>
+<div><p>If True, then fit for the best period when fit() method is called.</p>
+</div></blockquote>
+<p><strong>optimizer_kwds</strong> : dict (optional</p>
+<blockquote>
+<div><p>Dictionary of keyword arguments for constructing the optimizer</p>
+</div></blockquote>
+<p><strong>*args, **kwargs :</strong></p>
+<blockquote class="last">
+<div><p>additional arguments are passed to BaseModel on construction.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">best_period</span></code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+</tbody>
+</table>
+<dl class="method">
+<dt id="gatspy.periodic.NaiveMultiband.best_periods">
+<code class="descname">best_periods</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/periodic/naive_multiband.html#NaiveMultiband.best_periods"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.periodic.NaiveMultiband.best_periods" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the scores under the various models</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>periods</strong> : array_like</p>
+<blockquote>
+<div><p>array of periods at which to compute scores</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>best_periods</strong> : dict</p>
+<blockquote class="last">
+<div><p>Dictionary of best periods. Dictionary keys are the unique filter
+names passed to fit()</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="gatspy.periodic.NaiveMultiband.scores">
+<code class="descname">scores</code><span class="sig-paren">(</span><em>periods</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/periodic/naive_multiband.html#NaiveMultiband.scores"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.periodic.NaiveMultiband.scores" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the scores under the various models</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>periods</strong> : array_like</p>
+<blockquote>
+<div><p>array of periods at which to compute scores</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>scores</strong> : dict</p>
+<blockquote class="last">
+<div><p>Dictionary of scores. Dictionary keys are the unique filter names
+passed to fit()</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">API Documentation</a><ul>
+<li><a class="reference internal" href="#periodic-modeling-for-astronomical-time-series">Periodic Modeling for Astronomical Time Series</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="template.html"
+                        title="previous chapter">Template-based Period Fitting</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/periodic/API.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Jake VanderPlas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="../_sources/periodic/API.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

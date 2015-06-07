@@ -1,0 +1,688 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>API Documentation &mdash; gatspy 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="gatspy 0.2 documentation" href="../index.html" />
+    <link rel="up" title="Datasets (gatspy.datasets)" href="index.html" />
+    <link rel="prev" title="Sesar 2010 RR Lyrae (Stripe 82)" href="rrlyrae.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rrlyrae.html" title="Sesar 2010 RR Lyrae (Stripe 82)"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Datasets (<code class="docutils literal"><span class="pre">gatspy.datasets</span></code>)</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="datasets-api"></span><div class="section" id="module-gatspy.datasets">
+<span id="api-documentation"></span><h1>API Documentation<a class="headerlink" href="#module-gatspy.datasets" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="datasets-for-astronomical-time-series">
+<h2>Datasets for Astronomical Time Series<a class="headerlink" href="#datasets-for-astronomical-time-series" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="gatspy.datasets.fetch_rrlyrae_templates">
+<code class="descclassname">gatspy.datasets.</code><code class="descname">fetch_rrlyrae_templates</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/datasets/rrlyrae.html#fetch_rrlyrae_templates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.datasets.fetch_rrlyrae_templates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access the RR Lyrae template data (table 1 of Sesar 2010)</p>
+<p>These return approximately 23 ugriz RR Lyrae templates, with normalized
+phase and amplitude.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">templates: <a class="reference internal" href="#gatspy.datasets.RRLyraeTemplates" title="gatspy.datasets.RRLyraeTemplates"><code class="xref py py-class docutils literal"><span class="pre">RRLyraeTemplates</span></code></a> object</p>
+<blockquote>
+<div><p>collection of RRLyrae templates.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Other Parameters:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first"><strong>data_home</strong> : str (optional)</p>
+<blockquote>
+<div><p>Specify the local cache directory for the dataset. If not used, it
+will default to the <code class="docutils literal"><span class="pre">astroML</span></code> default location.</p>
+</div></blockquote>
+<p><strong>url</strong> : str (optional)</p>
+<blockquote>
+<div><p>Specify the URL of the datasets. Defaults to webpage associated with
+Sesar 2010.</p>
+</div></blockquote>
+<p><strong>force_download</strong> : bool (optional)</p>
+<blockquote class="last">
+<div><p>If true, then force re-downloading data even if it is already cached
+locally. Default is False.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="gatspy.datasets.fetch_rrlyrae">
+<code class="descclassname">gatspy.datasets.</code><code class="descname">fetch_rrlyrae</code><span class="sig-paren">(</span><em>partial=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/datasets/rrlyrae.html#fetch_rrlyrae"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.datasets.fetch_rrlyrae" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch RR Lyrae light curves from Sesar 2010</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>partial</strong> : bool (optional)</p>
+<blockquote>
+<div><p>If true, return the partial dataset (reduced to 1 band per night)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>rrlyrae</strong> : <a class="reference internal" href="#gatspy.datasets.RRLyraeLC" title="gatspy.datasets.RRLyraeLC"><code class="xref py py-class docutils literal"><span class="pre">RRLyraeLC</span></code></a> object</p>
+<blockquote>
+<div><p>This object contains pointers to the RR Lyrae data.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Other Parameters:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><p class="first"><strong>data_home</strong> : str (optional)</p>
+<blockquote>
+<div><p>Specify the local cache directory for the dataset. If not used, it
+will default to the <code class="docutils literal"><span class="pre">astroML</span></code> default location.</p>
+</div></blockquote>
+<p><strong>url</strong> : str (optional)</p>
+<blockquote>
+<div><p>Specify the URL of the datasets. Defaults to webpage associated with
+Sesar 2010.</p>
+</div></blockquote>
+<p><strong>force_download</strong> : bool (optional)</p>
+<blockquote class="last">
+<div><p>If true, then force re-downloading data even if it is already cached
+locally. Default is False.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">fetch_rrlyrae</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+<span class="go">[1013184, 1019544, 1027882, 1052471, 1056152]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">dmag</span><span class="p">,</span> <span class="n">bands</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_lightcurve</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+<span class="go">array([ 51081.347856,  51081.349522,  51081.346189,  51081.347022])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mag</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+<span class="go">array([ 18.702,  17.553,  17.236,  17.124])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dmag</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+<span class="go">array([ 0.021,  0.005,  0.005,  0.006])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bands</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+<span class="go">array([&#39;u&#39;, &#39;g&#39;, &#39;r&#39;, &#39;i&#39;], </span>
+<span class="go">      dtype=&#39;&lt;U1&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="gatspy.datasets.fetch_rrlyrae_lc_params">
+<code class="descclassname">gatspy.datasets.</code><code class="descname">fetch_rrlyrae_lc_params</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/datasets/rrlyrae.html#fetch_rrlyrae_lc_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.datasets.fetch_rrlyrae_lc_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch data from table 2 of Sesar 2010</p>
+<p>This table includes observationally-derived parameters for all the
+Sesar 2010 lightcurves.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="gatspy.datasets.fetch_rrlyrae_fitdata">
+<code class="descclassname">gatspy.datasets.</code><code class="descname">fetch_rrlyrae_fitdata</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/datasets/rrlyrae.html#fetch_rrlyrae_fitdata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.datasets.fetch_rrlyrae_fitdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch data from table 3 of Sesar 2010</p>
+<p>This table includes parameters derived from template fits to all the
+Sesar 2010 lightcurves.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="gatspy.datasets.RRLyraeLC">
+<em class="property">class </em><code class="descclassname">gatspy.datasets.</code><code class="descname">RRLyraeLC</code><span class="sig-paren">(</span><em>tablename='table1.tar.gz'</em>, <em>dirname='table1'</em>, <em>cache_kwargs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/datasets/rrlyrae.html#RRLyraeLC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.datasets.RRLyraeLC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Container for accessing RR Lyrae Light Curve data.</p>
+<p>This should generally not be instantiated directly, but rather is returned
+by <a class="reference internal" href="#gatspy.datasets.fetch_rrlyrae" title="gatspy.datasets.fetch_rrlyrae"><code class="xref py py-func docutils literal"><span class="pre">fetch_rrlyrae()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>tablename</strong> : str (optional)</p>
+<blockquote>
+<div><p>Name of the table file to be downloaded. Default=&#8217;table1.tar.gz&#8217;.</p>
+</div></blockquote>
+<p><strong>dirname</strong> : str (optional)</p>
+<blockquote>
+<div><p>subdirectory in which the table file is located. Default=&#8217;table1&#8217;.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Other Parameters:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first"><strong>data_home</strong> : str (optional)</p>
+<blockquote>
+<div><p>Specify the local cache directory for the dataset. If not used, it
+will default to the <code class="docutils literal"><span class="pre">astroML</span></code> default location.</p>
+</div></blockquote>
+<p><strong>url</strong> : str (optional)</p>
+<blockquote>
+<div><p>Specify the URL of the datasets. Defaults to webpage associated with
+Sesar 2010.</p>
+</div></blockquote>
+<p><strong>force_download</strong> : bool (optional)</p>
+<blockquote class="last">
+<div><p>If true, then force re-downloading data even if it is already cached
+locally. Default is False.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">fetch_rrlyrae</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+<span class="go">483</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">dmag</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_lightcurve</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+<span class="go">array([ 51081.347856,  51081.349522,  51081.346189,  51081.347022])</span>
+</pre></div>
+</div>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">filenames</span></code></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">ids</span></code></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">ids_gen</span></code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+</tbody>
+</table>
+<dl class="method">
+<dt id="gatspy.datasets.RRLyraeLC.get_lightcurve">
+<code class="descname">get_lightcurve</code><span class="sig-paren">(</span><em>star_id</em>, <em>return_1d=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/datasets/rrlyrae.html#RRLyraeLC.get_lightcurve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.datasets.RRLyraeLC.get_lightcurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the light curves for the given ID</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>star_id</strong> : int</p>
+<blockquote>
+<div><p>A valid integer star id representing an object in the dataset</p>
+</div></blockquote>
+<p><strong>return_1d</strong> : boolean (default=True)</p>
+<blockquote>
+<div><p>Specify whether to return 1D arrays of (t, y, dy, filts) or
+2D arrays of (t, y, dy) where each column is a filter.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>t, y, dy</strong> : np.ndarrays (if return_1d == False)</p>
+<blockquote>
+<div><p>Times, magnitudes, and magnitude errors.
+The shape of each array is [Nobs, 5], where the columns refer
+to [u,g,r,i,z] bands. Non-observations are indicated by NaN.</p>
+</div></blockquote>
+<p><strong>t, y, dy, filts</strong> : np.ndarrays (if return_1d == True)</p>
+<blockquote class="last">
+<div><p>Times, magnitudes, magnitude errors, and filters
+The shape of each array is [Nobs], and non-observations are
+filtered out.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="gatspy.datasets.RRLyraeLC.get_metadata">
+<code class="descname">get_metadata</code><span class="sig-paren">(</span><em>lcid</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/datasets/rrlyrae.html#RRLyraeLC.get_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.datasets.RRLyraeLC.get_metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the parameters derived from the fit for the given id.
+This is table 2 of Sesar 2010</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gatspy.datasets.RRLyraeLC.get_obsmeta">
+<code class="descname">get_obsmeta</code><span class="sig-paren">(</span><em>lcid</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/datasets/rrlyrae.html#RRLyraeLC.get_obsmeta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.datasets.RRLyraeLC.get_obsmeta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the observation metadata for the given id.
+This is table 3 of Sesar 2010</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gatspy.datasets.PartialRRLyraeLC">
+<em class="property">class </em><code class="descclassname">gatspy.datasets.</code><code class="descname">PartialRRLyraeLC</code><span class="sig-paren">(</span><em>tablename='table1.tar.gz'</em>, <em>dirname='table1'</em>, <em>offset=0</em>, <em>cache_kwargs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/datasets/rrlyrae.html#PartialRRLyraeLC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.datasets.PartialRRLyraeLC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to get a partial Stripe 82 light curve: one band per night.</p>
+<p>This should generally not be instantiated directly, but rather is returned
+by <a class="reference internal" href="#gatspy.datasets.fetch_rrlyrae" title="gatspy.datasets.fetch_rrlyrae"><code class="xref py py-func docutils literal"><span class="pre">fetch_rrlyrae()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>tablename</strong> : str (optional)</p>
+<blockquote>
+<div><p>Name of the table file to be downloaded. Default=&#8217;table1.tar.gz&#8217;.</p>
+</div></blockquote>
+<p><strong>dirname</strong> : str (optional)</p>
+<blockquote>
+<div><p>subdirectory in which the table file is located. Default=&#8217;table1&#8217;.</p>
+</div></blockquote>
+<p><strong>offset</strong> : int (optional)</p>
+<blockquote>
+<div><p>the integer index offset for choosing the desired bands.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Other Parameters:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first"><strong>data_home</strong> : str (optional)</p>
+<blockquote>
+<div><p>Specify the local cache directory for the dataset. If not used, it
+will default to the <code class="docutils literal"><span class="pre">astroML</span></code> default location.</p>
+</div></blockquote>
+<p><strong>url</strong> : str (optional)</p>
+<blockquote>
+<div><p>Specify the URL of the datasets. Defaults to webpage associated with
+Sesar 2010.</p>
+</div></blockquote>
+<p><strong>force_download</strong> : bool (optional)</p>
+<blockquote class="last">
+<div><p>If true, then force re-downloading data even if it is already cached
+locally. Default is False.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">fetch_rrlyrae</span><span class="p">(</span><span class="n">partial</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+<span class="go">483</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">dmag</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_lightcurve</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
+<span class="go">array([ 51081.347856,  51819.42063 ,  52288.076401,  52551.350526])</span>
+</pre></div>
+</div>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">filenames</span></code></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">ids</span></code></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">ids_gen</span></code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="gatspy.datasets.RRLyraeTemplates">
+<em class="property">class </em><code class="descclassname">gatspy.datasets.</code><code class="descname">RRLyraeTemplates</code><span class="sig-paren">(</span><em>tablename='RRLyr_ugriz_templates.tar.gz'</em>, <em>cache_kwargs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/datasets/rrlyrae.html#RRLyraeTemplates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.datasets.RRLyraeTemplates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Container to access the RR Lyrae templates from Sesar 2010</p>
+<p>This should generally not be instantiated directly, but rather is returned
+by <a class="reference internal" href="#gatspy.datasets.fetch_rrlyrae_templates" title="gatspy.datasets.fetch_rrlyrae_templates"><code class="xref py py-func docutils literal"><span class="pre">fetch_rrlyrae_templates()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>tablename</strong> : str (optional)</p>
+<blockquote>
+<div><p>Name of the file from which templates will be extracted.
+Default is &#8216;RRLyr_ugriz_templates.tar.gz&#8217;</p>
+</div></blockquote>
+<p><strong>cache_kwargs</strong> : dict (optional)</p>
+<blockquote class="last">
+<div><p>Additional keyword arguments passed to the data cache. Valid options
+are <code class="docutils literal"><span class="pre">data_home</span></code>, <code class="docutils literal"><span class="pre">url</span></code>, and <code class="docutils literal"><span class="pre">force_download</span></code></p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">templates</span> <span class="o">=</span> <span class="n">fetch_rrlyrae_templates</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">templates</span><span class="o">.</span><span class="n">ids</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+<span class="go">[&#39;0g&#39;, &#39;0i&#39;, &#39;0r&#39;, &#39;0u&#39;, &#39;0z&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">phase</span><span class="p">,</span> <span class="n">mag</span> <span class="o">=</span> <span class="n">templates</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="s">&#39;0g&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">phase</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+<span class="go">array([ 0.   ,  0.002,  0.004,  0.006,  0.008])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mag</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span>
+<span class="go">array([ 0.   ,  0.   ,  0.   ,  0.   ,  0.001])</span>
+</pre></div>
+</div>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#gatspy.datasets.RRLyraeTemplates.filenames" title="gatspy.datasets.RRLyraeTemplates.filenames"><code class="xref py py-obj docutils literal"><span class="pre">filenames</span></code></a></td>
+<td>List of template filenames</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#gatspy.datasets.RRLyraeTemplates.ids" title="gatspy.datasets.RRLyraeTemplates.ids"><code class="xref py py-obj docutils literal"><span class="pre">ids</span></code></a></td>
+<td>List of template ids</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="gatspy.datasets.RRLyraeTemplates.filenames">
+<code class="descname">filenames</code><a class="headerlink" href="#gatspy.datasets.RRLyraeTemplates.filenames" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of template filenames</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gatspy.datasets.RRLyraeTemplates.get_template">
+<code class="descname">get_template</code><span class="sig-paren">(</span><em>template_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/datasets/rrlyrae.html#RRLyraeTemplates.get_template"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.datasets.RRLyraeTemplates.get_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a particular lightcurve template</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>template_id</strong> : str</p>
+<blockquote>
+<div><p>id of desired template</p>
+</div></blockquote>
+<p><strong>Returns</strong></p>
+<p><strong>&#8212;&#8212;-</strong></p>
+<p><strong>phase</strong> : ndarray</p>
+<blockquote>
+<div><p>array of phases</p>
+</div></blockquote>
+<p><strong>mag</strong> : ndarray</p>
+<blockquote class="last">
+<div><p>array of normalized magnitudes</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gatspy.datasets.RRLyraeTemplates.ids">
+<code class="descname">ids</code><a class="headerlink" href="#gatspy.datasets.RRLyraeTemplates.ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of template ids</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gatspy.datasets.RRLyraeGenerated">
+<em class="property">class </em><code class="descclassname">gatspy.datasets.</code><code class="descname">RRLyraeGenerated</code><span class="sig-paren">(</span><em>lcid</em>, <em>random_state=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/datasets/rrlyrae_generated.html#RRLyraeGenerated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.datasets.RRLyraeGenerated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate RR Lyrae light curves from Sesar 2010 lightcurves</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>lcid</strong> : int</p>
+<blockquote>
+<div><p>Valid light curve ID from the Sesar 2010 RR Lyrae dataset</p>
+</div></blockquote>
+<p><strong>random_state</strong> : int</p>
+<blockquote class="last">
+<div><p>Random number generator seed</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">fetch_rrlyrae</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gen</span> <span class="o">=</span> <span class="n">RRLyraeGenerated</span><span class="p">(</span><span class="n">lcid</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gen</span><span class="o">.</span><span class="n">period</span>
+<span class="go">0.61431831</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mag</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generated</span><span class="p">(</span><span class="s">&#39;g&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mf">51080.0</span><span class="p">,</span> <span class="mf">51080.5</span><span class="p">],</span> <span class="n">err</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mag</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">array([ 17.74,  17.04])</span>
+</pre></div>
+</div>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#gatspy.datasets.RRLyraeGenerated.period" title="gatspy.datasets.RRLyraeGenerated.period"><code class="xref py py-obj docutils literal"><span class="pre">period</span></code></a></td>
+<td>Period (in days) of the RR Lyrae</td>
+</tr>
+</tbody>
+</table>
+<table border="1" class="docutils">
+<colgroup>
+<col width="12%" />
+<col width="88%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>lcdata</td>
+<td>(RRLyraeLC object) Container for the RR Lyrae light curve dataset</td>
+</tr>
+<tr class="row-even"><td>templates</td>
+<td>(RRLyraeTemplates object) Container for the RR Lyrae template dataset</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+</tbody>
+</table>
+<dl class="method">
+<dt id="gatspy.datasets.RRLyraeGenerated.generated">
+<code class="descname">generated</code><span class="sig-paren">(</span><em>band</em>, <em>t</em>, <em>err=None</em>, <em>corrected=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/datasets/rrlyrae_generated.html#RRLyraeGenerated.generated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.datasets.RRLyraeGenerated.generated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return generated magnitudes in the specified band</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>band</strong> : str</p>
+<blockquote>
+<div><p>desired bandpass: should be one of [&#8216;u&#8217;, &#8216;g&#8217;, &#8216;r&#8217;, &#8216;i&#8217;, &#8216;z&#8217;]</p>
+</div></blockquote>
+<p><strong>t</strong> : array_like</p>
+<blockquote>
+<div><p>array of times (in days)</p>
+</div></blockquote>
+<p><strong>err</strong> : float or array_like</p>
+<blockquote>
+<div><p>gaussian error in observations</p>
+</div></blockquote>
+<p><strong>corrected</strong> : bool (optional)</p>
+<blockquote>
+<div><p>If true, correct for extinction</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>mag</strong> : ndarray</p>
+<blockquote class="last">
+<div><p>magnitudes at the specified times under the generated model.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="gatspy.datasets.RRLyraeGenerated.observed">
+<code class="descname">observed</code><span class="sig-paren">(</span><em>band</em>, <em>corrected=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/datasets/rrlyrae_generated.html#RRLyraeGenerated.observed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.datasets.RRLyraeGenerated.observed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return observed values in the given band</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>band</strong> : str</p>
+<blockquote>
+<div><p>desired bandpass: should be one of [&#8216;u&#8217;, &#8216;g&#8217;, &#8216;r&#8217;, &#8216;i&#8217;, &#8216;z&#8217;]</p>
+</div></blockquote>
+<p><strong>corrected</strong> : bool (optional)</p>
+<blockquote>
+<div><p>If true, correct for extinction</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>t, mag, dmag</strong> : ndarrays</p>
+<blockquote class="last">
+<div><p>The times, magnitudes, and magnitude errors for the specified band.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gatspy.datasets.RRLyraeGenerated.period">
+<code class="descname">period</code><a class="headerlink" href="#gatspy.datasets.RRLyraeGenerated.period" title="Permalink to this definition">¶</a></dt>
+<dd><p>Period (in days) of the RR Lyrae</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">API Documentation</a><ul>
+<li><a class="reference internal" href="#datasets-for-astronomical-time-series">Datasets for Astronomical Time Series</a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="rrlyrae.html"
+                        title="previous chapter">Sesar 2010 RR Lyrae (Stripe 82)</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/datasets/API.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Jake VanderPlas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="../_sources/datasets/API.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

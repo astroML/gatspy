@@ -1,0 +1,373 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>gatspy.periodic.lomb_scargle &mdash; gatspy 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="gatspy 0.2 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for gatspy.periodic.lomb_scargle</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">absolute_import</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;LombScargle&#39;</span><span class="p">,</span> <span class="s">&#39;LombScargleAstroML&#39;</span><span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.modeler</span> <span class="kn">import</span> <span class="n">PeriodicModeler</span>
+
+
+<span class="k">class</span> <span class="nc">LeastSquaresMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mixin for matrix-based Least Squares periodic analysis&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_construct_X</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">weighted</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_construct_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weighted</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_construct_X_M</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct the weighted normal matrix of the problem&quot;&quot;&quot;</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_X</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">weighted</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;regularization&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">regularization</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">diag</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s">&#39;K&#39;</span><span class="p">)[::</span><span class="n">M</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">regularize_by_trace</span><span class="p">:</span>
+                <span class="n">diag</span> <span class="o">+=</span> <span class="n">diag</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regularization</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">diag</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regularization</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">M</span>
+
+    <span class="k">def</span> <span class="nf">_compute_ymean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute the (weighted) mean of the y data&quot;&quot;&quot;</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;dy&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">))</span>
+
+        <span class="c"># if dy is a scalar, we use the simple mean</span>
+        <span class="k">if</span> <span class="n">dy</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">dy</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="o">/</span> <span class="n">w</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_construct_y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weighted</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;dy&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">)</span>
+        <span class="n">center_data</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;center_data&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">center_data</span><span class="p">)</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">dy</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">center_data</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_ymean</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="n">dy</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">weighted</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">y</span> <span class="o">/</span> <span class="n">dy</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">y</span>
+
+    <span class="k">def</span> <span class="nf">_best_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">omega</span><span class="p">):</span>
+        <span class="n">Xw</span><span class="p">,</span> <span class="n">XTX</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_X_M</span><span class="p">(</span><span class="n">omega</span><span class="p">)</span>
+        <span class="n">XTy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Xw</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yw_</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">XTX</span><span class="p">,</span> <span class="n">XTy</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">periods</span><span class="p">):</span>
+        <span class="n">omegas</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">periods</span>
+
+        <span class="c"># Set up the reference chi2. Note that this entire function would</span>
+        <span class="c"># be much simpler if we did not allow center_data=False.</span>
+        <span class="c"># We keep it just to make sure our math is correct</span>
+        <span class="n">chi2_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yw_</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yw_</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">center_data</span><span class="p">:</span>
+            <span class="n">chi2_ref</span> <span class="o">=</span> <span class="n">chi2_0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">yref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_y</span><span class="p">(</span><span class="n">weighted</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">center_data</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">chi2_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">yref</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">yref</span><span class="p">)</span>
+        <span class="n">chi2_0_minus_chi2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">omegas</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="c"># Iterate through the omegas and compute the power for each</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">omega</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">omegas</span><span class="o">.</span><span class="n">flat</span><span class="p">):</span>
+            <span class="n">Xw</span><span class="p">,</span> <span class="n">XTX</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_X_M</span><span class="p">(</span><span class="n">omega</span><span class="p">)</span>
+            <span class="n">XTy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Xw</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yw_</span><span class="p">)</span>
+            <span class="n">chi2_0_minus_chi2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">XTy</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">XTX</span><span class="p">,</span> <span class="n">XTy</span><span class="p">))</span>
+
+        <span class="c"># construct and return the power from the chi2 difference</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">center_data</span><span class="p">:</span>
+            <span class="n">P</span> <span class="o">=</span> <span class="n">chi2_0_minus_chi2</span> <span class="o">/</span> <span class="n">chi2_ref</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">P</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">chi2_0_minus_chi2</span> <span class="o">-</span> <span class="n">chi2_0</span><span class="p">)</span> <span class="o">/</span> <span class="n">chi2_ref</span>
+
+        <span class="k">return</span> <span class="n">P</span>
+
+
+<div class="viewcode-block" id="LombScargle"><a class="viewcode-back" href="../../../periodic/API.html#gatspy.periodic.LombScargle">[docs]</a><span class="k">class</span> <span class="nc">LombScargle</span><span class="p">(</span><span class="n">LeastSquaresMixin</span><span class="p">,</span> <span class="n">PeriodicModeler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Lomb-Scargle Periodogram Implementation</span>
+
+<span class="sd">    This is a generalized periodogram implementation using the matrix formalism</span>
+<span class="sd">    outlined in VanderPlas &amp; Ivezic 2015. It allows computation of periodograms</span>
+<span class="sd">    and best-fit models for both the classic normalized periodogram and</span>
+<span class="sd">    truncated Fourier series generalizations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    optimizer : PeriodicOptimizer instance</span>
+<span class="sd">        Optimizer to use to find the best period. If not specified, the</span>
+<span class="sd">        LinearScanOptimizer will be used.</span>
+<span class="sd">    center_data : boolean (default = True)</span>
+<span class="sd">        If True, then compute the weighted mean of the input data and subtract</span>
+<span class="sd">        before fitting the model.</span>
+<span class="sd">    fit_offset : boolean (default = True)</span>
+<span class="sd">        If True, then fit a floating-mean sinusoid model.</span>
+<span class="sd">    Nterms : int (default = 1)</span>
+<span class="sd">        Number of Fourier frequencies to fit in the model</span>
+<span class="sd">    regularization : float, vector or None (default = None)</span>
+<span class="sd">        If specified, then add this regularization penalty to the</span>
+<span class="sd">        least squares fit.</span>
+<span class="sd">    regularize_by_trace : boolean (default = True)</span>
+<span class="sd">        If True, multiply regularization by the trace of the matrix</span>
+<span class="sd">    fit_period : bool (optional)</span>
+<span class="sd">        If True, then fit for the best period when fit() method is called.</span>
+<span class="sd">    optimizer_kwds : dict (optional</span>
+<span class="sd">        Dictionary of keyword arguments for constructing the optimizer</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; rng = np.random.RandomState(0)</span>
+<span class="sd">    &gt;&gt;&gt; t = 100 * rng.rand(100)</span>
+<span class="sd">    &gt;&gt;&gt; dy = 0.1</span>
+<span class="sd">    &gt;&gt;&gt; omega = 10</span>
+<span class="sd">    &gt;&gt;&gt; y = np.sin(omega * t) + dy * rng.randn(100)</span>
+<span class="sd">    &gt;&gt;&gt; ls = LombScargle().fit(t, y, dy)</span>
+<span class="sd">    &gt;&gt;&gt; ls.optimizer.period_range = (0.2, 1.2)</span>
+<span class="sd">    &gt;&gt;&gt; ls.best_period</span>
+<span class="sd">    Finding optimal frequency:</span>
+<span class="sd">     - Estimated peak width = 0.0639</span>
+<span class="sd">     - Using 5 steps per peak; omega_step = 0.0128</span>
+<span class="sd">     - User-specified period range:  0.2 to 1.2</span>
+<span class="sd">     - Computing periods at 2051 steps</span>
+<span class="sd">    Zooming-in on 5 candidate peaks:</span>
+<span class="sd">     - Computing periods at 1000 steps</span>
+<span class="sd">    0.62827068275990694</span>
+<span class="sd">    &gt;&gt;&gt; ls.predict([0, 0.5])</span>
+<span class="sd">    array([-0.01445853, -0.92762251])</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    LombScargleAstroML</span>
+<span class="sd">    LombScargleMultiband</span>
+<span class="sd">    LombScargleMultibandFast</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">center_data</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">fit_offset</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">Nterms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">regularization</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">regularize_by_trace</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">fit_period</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">optimizer_kwds</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">center_data</span> <span class="o">=</span> <span class="n">center_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_offset</span> <span class="o">=</span> <span class="n">fit_offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nterms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Nterms</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regularization</span> <span class="o">=</span> <span class="n">regularization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regularize_by_trace</span> <span class="o">=</span> <span class="n">regularize_by_trace</span>
+        <span class="n">PeriodicModeler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">fit_period</span><span class="o">=</span><span class="n">fit_period</span><span class="p">,</span>
+                                 <span class="n">optimizer_kwds</span><span class="o">=</span><span class="n">optimizer_kwds</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">center_data</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_offset</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Not centering data or fitting offset can lead &quot;</span>
+                          <span class="s">&quot;to poor results&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nterms</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Nterms must be non-negative&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nterms</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">fit_offset</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Empty model: try larger Nterms.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_construct_X</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">weighted</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct the design matrix for the problem&quot;&quot;&quot;</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;t&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;dy&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">)</span>
+        <span class="n">fit_offset</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;fit_offset&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_offset</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">fit_offset</span><span class="p">:</span>
+            <span class="n">offsets</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">))]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">offsets</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">cols</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(([</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">omega</span> <span class="o">*</span> <span class="n">t</span><span class="p">),</span>
+                     <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">omega</span> <span class="o">*</span> <span class="n">t</span><span class="p">)]</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nterms</span><span class="p">)),</span> <span class="n">offsets</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">weighted</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span> <span class="o">/</span> <span class="n">dy</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">cols</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yw_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_y</span><span class="p">(</span><span class="n">weighted</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ymean_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_ymean</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">period</span><span class="p">):</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">period</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">outshape</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_best_params</span><span class="p">(</span><span class="n">omega</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_X</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">weighted</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">t</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ymean_</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">theta</span><span class="p">),</span> <span class="n">outshape</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">periods</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">LeastSquaresMixin</span><span class="o">.</span><span class="n">_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">periods</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="LombScargleAstroML"><a class="viewcode-back" href="../../../periodic/API.html#gatspy.periodic.LombScargleAstroML">[docs]</a><span class="k">class</span> <span class="nc">LombScargleAstroML</span><span class="p">(</span><span class="n">LombScargle</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Lomb-Scargle Periodogram Implementation using AstroML</span>
+
+<span class="sd">    This is a generalized periodogram implementation which uses the periodogram</span>
+<span class="sd">    functions from astroML. Compared to LombScargle, this implementation is</span>
+<span class="sd">    both faster and more memory-efficient.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    optimizer : PeriodicOptimizer instance</span>
+<span class="sd">        Optimizer to use to find the best period. If not specified, the</span>
+<span class="sd">        LinearScanOptimizer will be used.</span>
+<span class="sd">    Nterms : int (default = 1)</span>
+<span class="sd">        Number of terms for the fit. Only Nterms=1 is currently supported.</span>
+<span class="sd">    center_data : boolean (default = True)</span>
+<span class="sd">        If True, then compute the weighted mean of the input data and subtract</span>
+<span class="sd">        before fitting the model.</span>
+<span class="sd">    fit_offset : boolean (default = True)</span>
+<span class="sd">        If True, then fit a floating-mean sinusoid model.</span>
+<span class="sd">    slow_version : boolean (default = False)</span>
+<span class="sd">        If True, use the slower pure-python version from astroML. Otherwise,</span>
+<span class="sd">        use the faster version of the code from astroML_addons</span>
+<span class="sd">    fit_period : bool (optional)</span>
+<span class="sd">        If True, then fit for the best period when fit() method is called.</span>
+<span class="sd">    optimizer_kwds : dict (optional</span>
+<span class="sd">        Dictionary of keyword arguments for constructing the optimizer</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; rng = np.random.RandomState(0)</span>
+<span class="sd">    &gt;&gt;&gt; t = 100 * rng.rand(100)</span>
+<span class="sd">    &gt;&gt;&gt; dy = 0.1</span>
+<span class="sd">    &gt;&gt;&gt; omega = 10</span>
+<span class="sd">    &gt;&gt;&gt; y = np.sin(omega * t) + dy * rng.randn(100)</span>
+<span class="sd">    &gt;&gt;&gt; ls = LombScargleAstroML().fit(t, y, dy)</span>
+<span class="sd">    &gt;&gt;&gt; ls.optimizer.period_range = (0.2, 1.2)</span>
+<span class="sd">    &gt;&gt;&gt; ls.best_period</span>
+<span class="sd">    Finding optimal frequency:</span>
+<span class="sd">     - Estimated peak width = 0.0639</span>
+<span class="sd">     - Using 5 steps per peak; omega_step = 0.0128</span>
+<span class="sd">     - User-specified period range:  0.2 to 1.2</span>
+<span class="sd">     - Computing periods at 2051 steps</span>
+<span class="sd">    Zooming-in on 5 candidate peaks:</span>
+<span class="sd">     - Computing periods at 1000 steps</span>
+<span class="sd">    0.62827068275990694</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    LombScargle</span>
+<span class="sd">    LombScargleMultiband</span>
+<span class="sd">    LombScargleMultibandFast</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Nterms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fit_offset</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">center_data</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">slow_version</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">fit_period</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">optimizer_kwds</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">Nterms</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Only Nterms=1 is supported&quot;</span><span class="p">)</span>
+
+        <span class="n">LombScargle</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">Nterms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                             <span class="n">center_data</span><span class="o">=</span><span class="n">center_data</span><span class="p">,</span> <span class="n">fit_offset</span><span class="o">=</span><span class="n">fit_offset</span><span class="p">,</span>
+                             <span class="n">fit_period</span><span class="o">=</span><span class="n">fit_period</span><span class="p">,</span>
+                             <span class="n">optimizer_kwds</span><span class="o">=</span><span class="n">optimizer_kwds</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">slow_version</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">astroML.time_series._periodogram</span> <span class="kn">import</span> <span class="n">lomb_scargle</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">astroML.time_series</span> <span class="kn">import</span> <span class="n">lomb_scargle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_LS_func</span> <span class="o">=</span> <span class="n">lomb_scargle</span>
+
+    <span class="k">def</span> <span class="nf">_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">periods</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_LS_func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">periods</span><span class="p">,</span>
+                             <span class="n">generalized</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_offset</span><span class="p">,</span>
+                             <span class="n">subtract_mean</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">center_data</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Jake VanderPlas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

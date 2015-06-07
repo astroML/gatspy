@@ -1,0 +1,313 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>gatspy.periodic.lomb_scargle_multiband &mdash; gatspy 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="gatspy 0.2 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for gatspy.periodic.lomb_scargle_multiband</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Multiband generalizations of Lomb-Scargle Periodograms</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;LombScargleMultiband&#39;</span><span class="p">,</span> <span class="s">&#39;LombScargleMultibandFast&#39;</span><span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.modeler</span> <span class="kn">import</span> <span class="n">PeriodicModelerMultiband</span>
+<span class="kn">from</span> <span class="nn">.lomb_scargle</span> <span class="kn">import</span> <span class="n">LombScargle</span><span class="p">,</span> <span class="n">LeastSquaresMixin</span>
+<span class="kn">from</span> <span class="nn">.lomb_scargle_fast</span> <span class="kn">import</span> <span class="n">LombScargleFast</span>
+
+
+<div class="viewcode-block" id="LombScargleMultiband"><a class="viewcode-back" href="../../../periodic/API.html#gatspy.periodic.LombScargleMultiband">[docs]</a><span class="k">class</span> <span class="nc">LombScargleMultiband</span><span class="p">(</span><span class="n">LeastSquaresMixin</span><span class="p">,</span> <span class="n">PeriodicModelerMultiband</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Multiband Periodogram Implementation</span>
+
+<span class="sd">    This implements the generalized multi-band periodogram described in</span>
+<span class="sd">    VanderPlas &amp; Ivezic 2015.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    optimizer : PeriodicOptimizer instance</span>
+<span class="sd">        Optimizer to use to find the best period. If not specified, the</span>
+<span class="sd">        LinearScanOptimizer will be used.</span>
+<span class="sd">    Nterms_base : integer (default = 1)</span>
+<span class="sd">        number of frequency terms to use for the base model common to all bands</span>
+<span class="sd">    Nterms_band : integer (default = 1)</span>
+<span class="sd">        number of frequency terms to use for the residuals between the base</span>
+<span class="sd">        model and each individual band</span>
+<span class="sd">    reg_base : float or None (default = None)</span>
+<span class="sd">        amount of regularization to use on the base model parameters</span>
+<span class="sd">    reg_band : float or None (default = 1E-6)</span>
+<span class="sd">        amount of regularization to use on the band model parameters</span>
+<span class="sd">    regularize_by_trace : bool (default = True)</span>
+<span class="sd">        if True, then regularization is expressed in units of the trace of</span>
+<span class="sd">        the normal matrix</span>
+<span class="sd">    center_data : boolean (default = True)</span>
+<span class="sd">        if True, then center the y data prior to the fit</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    LombScargle</span>
+<span class="sd">    LombScargleFast</span>
+<span class="sd">    LombScargleMultibandFast</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Nterms_base</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">Nterms_band</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">reg_base</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">reg_band</span><span class="o">=</span><span class="mf">1E-6</span><span class="p">,</span> <span class="n">regularize_by_trace</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">center_data</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">fit_period</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">optimizer_kwds</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nterms_base</span> <span class="o">=</span> <span class="n">Nterms_base</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nterms_band</span> <span class="o">=</span> <span class="n">Nterms_band</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reg_base</span> <span class="o">=</span> <span class="n">reg_base</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reg_band</span> <span class="o">=</span> <span class="n">reg_band</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regularize_by_trace</span> <span class="o">=</span> <span class="n">regularize_by_trace</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">center_data</span> <span class="o">=</span> <span class="n">center_data</span>
+        <span class="n">PeriodicModelerMultiband</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span>
+                                          <span class="n">fit_period</span><span class="o">=</span><span class="n">fit_period</span><span class="p">,</span>
+                                          <span class="n">optimizer_kwds</span><span class="o">=</span><span class="n">optimizer_kwds</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">filts</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ymean_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_ymean</span><span class="p">()</span>
+
+        <span class="n">masks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">filts</span> <span class="o">==</span> <span class="n">filt</span><span class="p">)</span> <span class="k">for</span> <span class="n">filt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_filts_</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ymean_by_filt_</span> <span class="o">=</span> <span class="p">[</span><span class="n">LeastSquaresMixin</span><span class="o">.</span><span class="n">_compute_ymean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                                                <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
+                                                                <span class="n">dy</span><span class="o">=</span><span class="n">dy</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span>
+                               <span class="k">for</span> <span class="n">mask</span> <span class="ow">in</span> <span class="n">masks</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">yw_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_y</span><span class="p">(</span><span class="n">weighted</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regularization</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_regularization</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">_compute_ymean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;y&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;dy&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">)</span>
+        <span class="n">filts</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;filts&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filts</span><span class="p">)</span>
+
+        <span class="n">ymean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">filt</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">filts</span><span class="p">):</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">filts</span> <span class="o">==</span> <span class="n">filt</span><span class="p">)</span>
+            <span class="n">ymean</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">LeastSquaresMixin</span><span class="o">.</span><span class="n">_compute_ymean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
+                                                           <span class="n">dy</span><span class="o">=</span><span class="n">dy</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">ymean</span>
+
+    <span class="k">def</span> <span class="nf">_construct_regularization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reg_base</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">reg_band</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">reg</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Nbase</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nterms_base</span>
+            <span class="n">Nband</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nterms_band</span>
+            <span class="n">reg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Nbase</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_filts_</span><span class="p">)</span> <span class="o">*</span> <span class="n">Nband</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reg_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">reg</span><span class="p">[:</span><span class="n">Nbase</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reg_base</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reg_band</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">reg</span><span class="p">[</span><span class="n">Nbase</span><span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reg_band</span>
+        <span class="k">return</span> <span class="n">reg</span>
+
+    <span class="k">def</span> <span class="nf">_construct_X</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">weighted</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;t&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;dy&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">)</span>
+        <span class="n">filts</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;filts&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filts</span><span class="p">)</span>
+
+        <span class="c"># X is a huge-ass matrix that has lots of zeros depending on</span>
+        <span class="c"># which filters are present...</span>
+        <span class="c">#</span>
+        <span class="c"># huge-ass, quantitatively speaking, is of shape</span>
+        <span class="c">#  [len(t), (1 + 2 * Nterms_base + nfilts * (1 + 2 * Nterms_band))]</span>
+
+        <span class="c"># TODO: the building of the matrix could be more efficient</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">))]</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(([</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">omega</span> <span class="o">*</span> <span class="n">t</span><span class="p">),</span>
+                     <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">omega</span> <span class="o">*</span> <span class="n">t</span><span class="p">)]</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nterms_base</span><span class="p">)),</span> <span class="n">cols</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">filt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_filts_</span><span class="p">:</span>
+            <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(([</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">omega</span> <span class="o">*</span> <span class="n">t</span><span class="p">),</span>
+                         <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">omega</span> <span class="o">*</span> <span class="n">t</span><span class="p">)]</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Nterms_band</span><span class="p">)),</span> <span class="n">cols</span><span class="p">)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">filts</span> <span class="o">==</span> <span class="n">filt</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Nterms_band</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">cols</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">weighted</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span> <span class="o">/</span> <span class="n">dy</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">cols</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">filts</span><span class="p">,</span> <span class="n">period</span><span class="p">):</span>
+        <span class="n">t</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">broadcast_arrays</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">filts</span><span class="p">)</span>
+        <span class="n">output_shape</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">filts</span> <span class="o">=</span> <span class="n">filts</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="n">period</span>
+
+        <span class="c"># TODO: broadcast this</span>
+        <span class="n">ymeans</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filts</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">filt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filts</span><span class="p">):</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_filts_</span> <span class="o">==</span> <span class="n">filt</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ymeans</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ymean_by_filt_</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
+        <span class="n">theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_best_params</span><span class="p">(</span><span class="n">omega</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_X</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">weighted</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">filts</span><span class="o">=</span><span class="n">filts</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">ymeans</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">theta</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">output_shape</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="LombScargleMultibandFast"><a class="viewcode-back" href="../../../periodic/API.html#gatspy.periodic.LombScargleMultibandFast">[docs]</a><span class="k">class</span> <span class="nc">LombScargleMultibandFast</span><span class="p">(</span><span class="n">PeriodicModelerMultiband</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Fast Multiband Periodogram Implementation</span>
+
+<span class="sd">    This implements the specialized multi-band periodogram described in</span>
+<span class="sd">    VanderPlas &amp; Ivezic 2015 (with Nbase=0 and Nband=1) which is essentially</span>
+<span class="sd">    a weighted sum of the standard periodograms for each band.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    optimizer : PeriodicOptimizer instance</span>
+<span class="sd">        Optimizer to use to find the best period. If not specified, the</span>
+<span class="sd">        LinearScanOptimizer will be used.</span>
+<span class="sd">    Nterms : integer (default = 1)</span>
+<span class="sd">        Number of fourier terms to use in the model</span>
+<span class="sd">    BaseModel : PeriodicModeler class (optional)</span>
+<span class="sd">        The base model to use for each individual band.</span>
+<span class="sd">        By default it will use :class:`LombScargleFast` if Nterms == 1, and</span>
+<span class="sd">        :class:`LombScargle` otherwise.</span>
+<span class="sd">    fit_period : bool (optional)</span>
+<span class="sd">        If True, then fit for the best period when fit() method is called.</span>
+<span class="sd">    optimizer_kwds : dict (optional</span>
+<span class="sd">        Dictionary of keyword arguments for constructing the optimizer</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    LombScargle</span>
+<span class="sd">    LombScargleFast</span>
+<span class="sd">    LombScargleMultiband</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Nterms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">BaseModel</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">fit_period</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">optimizer_kwds</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c"># Note: center_data must be True, or else the chi^2 weighting will fail</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Nterms</span> <span class="o">=</span> <span class="n">Nterms</span>
+
+        <span class="k">if</span> <span class="n">BaseModel</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">Nterms</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">BaseModel</span> <span class="o">=</span> <span class="n">LombScargleFast</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">BaseModel</span> <span class="o">=</span> <span class="n">LombScargle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">BaseModel</span> <span class="o">=</span> <span class="n">BaseModel</span>
+        <span class="n">PeriodicModelerMultiband</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span>
+                                          <span class="n">fit_period</span><span class="o">=</span><span class="n">fit_period</span><span class="p">,</span>
+                                          <span class="n">optimizer_kwds</span><span class="o">=</span><span class="n">optimizer_kwds</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">filts</span><span class="p">):</span>
+        <span class="n">masks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">filts</span> <span class="o">==</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_filts_</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models_</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">(</span><span class="n">Nterms</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Nterms</span><span class="p">,</span> <span class="n">center_data</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                       <span class="n">fit_offset</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">dy</span><span class="p">[</span><span class="n">m</span><span class="p">])</span>
+                        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">masks</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">periods</span><span class="p">):</span>
+        <span class="c"># Total score is the sum of powers weighted by chi2-normalization</span>
+        <span class="n">powers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">periods</span><span class="p">)</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models_</span><span class="p">])</span>
+        <span class="n">chi2_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">yw_</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models_</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">chi2_0</span> <span class="o">/</span> <span class="n">chi2_0</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">powers</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_score_frequency_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f0</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+        <span class="n">powers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">model</span><span class="o">.</span><span class="n">_score_frequency_grid</span><span class="p">(</span><span class="n">f0</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+                           <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models_</span><span class="p">])</span>
+        <span class="n">chi2_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">yw_</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models_</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">chi2_0</span> <span class="o">/</span> <span class="n">chi2_0</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">powers</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_best_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">omega</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">model</span><span class="o">.</span><span class="n">_best_params</span><span class="p">(</span><span class="n">omega</span><span class="p">)</span>
+                           <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models_</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">filts</span><span class="p">,</span> <span class="n">period</span><span class="p">):</span>
+        <span class="n">t</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">broadcast_arrays</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">filts</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">masks</span> <span class="o">=</span> <span class="p">((</span><span class="n">filts</span> <span class="o">==</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_filts_</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">model</span><span class="p">,</span> <span class="n">mask</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models_</span><span class="p">,</span> <span class="n">masks</span><span class="p">):</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Jake VanderPlas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

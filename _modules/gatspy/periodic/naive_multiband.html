@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>gatspy.periodic.naive_multiband &mdash; gatspy 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="gatspy 0.2 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for gatspy.periodic.naive_multiband</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Naive Multiband Methods</span>
+
+<span class="sd">This basically amounts to a band-by-band single band approach, followed by</span>
+<span class="sd">some sort of majority vote among the peaks of the individual periodograms.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">absolute_import</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;NaiveMultiband&#39;</span><span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">mode</span>
+
+<span class="kn">from</span> <span class="nn">.modeler</span> <span class="kn">import</span> <span class="n">PeriodicModelerMultiband</span>
+<span class="kn">from</span> <span class="nn">.lomb_scargle</span> <span class="kn">import</span> <span class="n">LombScargle</span>
+
+
+<span class="k">def</span> <span class="nf">mode_in_range</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1E-3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find the mode of values to within a certain range&quot;&quot;&quot;</span>
+    <span class="n">a_trunc</span> <span class="o">=</span> <span class="n">a</span> <span class="o">//</span> <span class="n">tol</span>
+    <span class="n">vals</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">mode</span><span class="p">(</span><span class="n">a_trunc</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">a_trunc</span> <span class="o">==</span> <span class="n">vals</span><span class="p">)</span>
+    <span class="c"># mean of each row</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="NaiveMultiband"><a class="viewcode-back" href="../../../periodic/API.html#gatspy.periodic.NaiveMultiband">[docs]</a><span class="k">class</span> <span class="nc">NaiveMultiband</span><span class="p">(</span><span class="n">PeriodicModelerMultiband</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Naive version of multiband fitting</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    optimizer : PeriodicOptimizer instance</span>
+<span class="sd">        Optimizer to use to find the best period. If not specified, the</span>
+<span class="sd">        LinearScanOptimizer will be used.</span>
+<span class="sd">    BaseModel : PeriodicModeler instance</span>
+<span class="sd">        Single-band model to use on data from each band.</span>
+<span class="sd">    fit_period : bool (optional)</span>
+<span class="sd">        If True, then fit for the best period when fit() method is called.</span>
+<span class="sd">    optimizer_kwds : dict (optional</span>
+<span class="sd">        Dictionary of keyword arguments for constructing the optimizer</span>
+<span class="sd">    *args, **kwargs :</span>
+<span class="sd">        additional arguments are passed to BaseModel on construction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">BaseModel</span><span class="o">=</span><span class="n">LombScargle</span><span class="p">,</span>
+                 <span class="n">fit_period</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">optimizer_kwds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">BaseModel</span> <span class="o">=</span> <span class="n">BaseModel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="n">PeriodicModelerMultiband</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span>
+                                          <span class="n">fit_period</span><span class="o">=</span><span class="n">fit_period</span><span class="p">,</span>
+                                          <span class="n">optimizer_kwds</span><span class="o">=</span><span class="n">optimizer_kwds</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">filts</span><span class="p">):</span>
+        <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">broadcast_arrays</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">filts</span><span class="p">)</span>
+        <span class="n">unique_filts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">filts</span><span class="p">)</span>
+
+        <span class="n">masks</span> <span class="o">=</span> <span class="p">[(</span><span class="n">filts</span> <span class="o">==</span> <span class="n">filt</span><span class="p">)</span> <span class="k">for</span> <span class="n">filt</span> <span class="ow">in</span> <span class="n">unique_filts</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models_</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">filt</span><span class="p">,</span>
+                              <span class="bp">self</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span>
+                                             <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span>
+                                             <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
+                                                                <span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
+                                                                <span class="n">dy</span><span class="p">[</span><span class="n">mask</span><span class="p">]))</span>
+                             <span class="k">for</span> <span class="n">filt</span><span class="p">,</span> <span class="n">mask</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">unique_filts</span><span class="p">,</span> <span class="n">masks</span><span class="p">)])</span>
+
+    <span class="k">def</span> <span class="nf">_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">filts</span><span class="p">,</span> <span class="n">period</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">filt</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models_</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">filts</span> <span class="o">==</span> <span class="n">filt</span><span class="p">)</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">periods</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;score is not implmented for NaiveMultiband&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="NaiveMultiband.scores"><a class="viewcode-back" href="../../../periodic/API.html#gatspy.periodic.NaiveMultiband.scores">[docs]</a>    <span class="k">def</span> <span class="nf">scores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">periods</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute the scores under the various models</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        periods : array_like</span>
+<span class="sd">            array of periods at which to compute scores</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        scores : dict</span>
+<span class="sd">            Dictionary of scores. Dictionary keys are the unique filter names</span>
+<span class="sd">            passed to fit()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">filt</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">periods</span><span class="p">))</span>
+                     <span class="k">for</span> <span class="p">(</span><span class="n">filt</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models_</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+</div>
+<div class="viewcode-block" id="NaiveMultiband.best_periods"><a class="viewcode-back" href="../../../periodic/API.html#gatspy.periodic.NaiveMultiband.best_periods">[docs]</a>    <span class="k">def</span> <span class="nf">best_periods</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute the scores under the various models</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        periods : array_like</span>
+<span class="sd">            array of periods at which to compute scores</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        best_periods : dict</span>
+<span class="sd">            Dictionary of best periods. Dictionary keys are the unique filter</span>
+<span class="sd">            names passed to fit()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models_</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span>
+
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">filt</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">best_period</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="p">(</span><span class="n">filt</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models_</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+</div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">best_period</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">best_periods</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">best_periods</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+        <span class="k">return</span> <span class="n">mode_in_range</span><span class="p">(</span><span class="n">best_periods</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1E-2</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Jake VanderPlas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

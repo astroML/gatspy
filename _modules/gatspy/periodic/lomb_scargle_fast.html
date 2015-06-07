@@ -1,0 +1,505 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>gatspy.periodic.lomb_scargle_fast &mdash; gatspy 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="gatspy 0.2 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for gatspy.periodic.lomb_scargle_fast</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Fast Lomb-Scargle Algorithm, following Press &amp; Rybicki 1989</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">division</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;LombScargleFast&#39;</span><span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.lomb_scargle</span> <span class="kn">import</span> <span class="n">LombScargle</span>
+
+<span class="c"># Precomputed factorials</span>
+<span class="n">FACTORIALS</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">720</span><span class="p">,</span> <span class="mi">5040</span><span class="p">,</span> <span class="mi">40320</span><span class="p">,</span> <span class="mi">362880</span><span class="p">,</span> <span class="mi">3628800</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">factorial</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute the factorial of N.</span>
+<span class="sd">    If N &lt;= 10, use a fast lookup table; otherwise use scipy.special.factorial</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">N</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">FACTORIALS</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">FACTORIALS</span><span class="p">[</span><span class="n">N</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">special</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">special</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="n">N</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">bitceil</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find the bit (i.e. power of 2) immediately greater than or equal to N</span>
+<span class="sd">    Note: this works for numbers up to 2 ** 64.</span>
+
+<span class="sd">    Roughly equivalent to int(2 ** np.ceil(np.log2(N)))</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Note: for Python 2.7 and 3.x, this is faster:</span>
+    <span class="c"># return 1 &lt;&lt; int(N - 1).bit_length()</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">]:</span>
+        <span class="n">N</span> <span class="o">|=</span> <span class="n">N</span> <span class="o">&gt;&gt;</span> <span class="n">i</span>
+    <span class="k">return</span> <span class="n">N</span> <span class="o">+</span> <span class="mi">1</span>
+
+
+<span class="k">def</span> <span class="nf">extirpolate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">M</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extirpolate the values (x, y) onto an integer grid range(N),</span>
+<span class="sd">    using lagrange polynomial weights on the M nearest points.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : array_like</span>
+<span class="sd">        array of abscissas</span>
+<span class="sd">    y : array_like</span>
+<span class="sd">        array of ordinates</span>
+<span class="sd">    N : int</span>
+<span class="sd">        number of integer bins to use. For best performance, N should be larger</span>
+<span class="sd">        than the maximum of x</span>
+<span class="sd">    M : int</span>
+<span class="sd">        number of adjoining points on which to extirpolate.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    yN : ndarray</span>
+<span class="sd">         N extirpolated values associated with range(N)</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; rng = np.random.RandomState(0)</span>
+<span class="sd">    &gt;&gt;&gt; x = 100 * rng.rand(20)</span>
+<span class="sd">    &gt;&gt;&gt; y = np.sin(x)</span>
+<span class="sd">    &gt;&gt;&gt; y_hat = extirpolate(x, y)</span>
+<span class="sd">    &gt;&gt;&gt; x_hat = np.arange(len(y_hat))</span>
+<span class="sd">    &gt;&gt;&gt; f = lambda x: np.sin(x / 10)</span>
+<span class="sd">    &gt;&gt;&gt; np.allclose(np.sum(y * f(x)), np.sum(y_hat * f(x_hat)))</span>
+<span class="sd">    True</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    This code is based on the C implementation of spread() presented in</span>
+<span class="sd">    Numerical Recipes in C, Second Edition (Press et al. 1989; p.583).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">broadcast_arrays</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">N</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">M</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c"># Now use legendre polynomial weights to populate the results array;</span>
+    <span class="c"># This is an efficient recursive implementation (See Press et al. 1989)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">y</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="c"># first take care of the easy cases where x is an integer</span>
+    <span class="n">integers</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">%</span> <span class="mi">1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="n">integers</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="n">y</span><span class="p">[</span><span class="n">integers</span><span class="p">])</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="o">~</span><span class="n">integers</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">integers</span><span class="p">]</span>
+
+    <span class="c"># For each remaining x, find the index describing the extirpolation range.</span>
+    <span class="c"># i.e. ilo[i] &lt; x[i] &lt; ilo[i] + M with x[i] in the center,</span>
+    <span class="c"># adjusted so that the limits are within the range 0...N</span>
+    <span class="n">ilo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">M</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">N</span> <span class="o">-</span> <span class="n">M</span><span class="p">)</span>
+    <span class="n">numerator</span> <span class="o">=</span> <span class="n">y</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">ilo</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">M</span><span class="p">)[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">denominator</span> <span class="o">=</span> <span class="n">factorial</span><span class="p">(</span><span class="n">M</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">denominator</span> <span class="o">*=</span> <span class="n">j</span> <span class="o">/</span> <span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="n">M</span><span class="p">)</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">ilo</span> <span class="o">+</span> <span class="p">(</span><span class="n">M</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">j</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">numerator</span> <span class="o">/</span> <span class="p">(</span><span class="n">denominator</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">ind</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">trig_sum</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">f0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">freq_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">oversampling</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">use_fft</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">Mfft</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute (approximate) trigonometric sums for a number of frequencies</span>
+
+<span class="sd">    This routine computes weighted sine and cosine sums:</span>
+
+<span class="sd">        S_j = sum_i { h_i * sin(2 pi * f_j * t_i) }</span>
+<span class="sd">        C_j = sum_i { h_i * cos(2 pi * f_j * t_i) }</span>
+
+<span class="sd">    Where f_j = freq_factor * (f0 + j * df) for the values j in 1 ... N.</span>
+<span class="sd">    The sums can be computed either by a brute force O[N^2] method, or</span>
+<span class="sd">    by an FFT-based O[Nlog(N)] method.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    t : array_like</span>
+<span class="sd">        array of input times</span>
+<span class="sd">    h : array_like</span>
+<span class="sd">        array weights for the sum</span>
+<span class="sd">    df : float</span>
+<span class="sd">        frequency spacing</span>
+<span class="sd">    N : int</span>
+<span class="sd">        number of frequency bins to return</span>
+<span class="sd">    f0 : float (optional, default=0)</span>
+<span class="sd">        The low frequency to use</span>
+<span class="sd">    freq_factor : float (optional, default=1)</span>
+<span class="sd">        Factor which multiplies the frequency</span>
+<span class="sd">    use_fft : bool</span>
+<span class="sd">        if True, use the approximate FFT algorithm to compute the result.</span>
+<span class="sd">        This uses the FFT with Press &amp; Rybicki&#39;s Lagrangian extirpolation.</span>
+<span class="sd">    oversampling : int (default = 5)</span>
+<span class="sd">        oversampling freq_factor for the approximation; roughtly the number of</span>
+<span class="sd">        time samples across the highest-frequency sinusoid. This parameter</span>
+<span class="sd">        contains the tradeoff between accuracy and speed. Not referenced</span>
+<span class="sd">        if use_fft is False.</span>
+<span class="sd">    Mfft : int</span>
+<span class="sd">        The number of adjacent points to use in the FFT approximation.</span>
+<span class="sd">        Not referenced if use_fft is False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    S, C : ndarrays</span>
+<span class="sd">        summation arrays for frequencies f = df * np.arange(1, N + 1)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">*=</span> <span class="n">freq_factor</span>
+    <span class="n">f0</span> <span class="o">*=</span> <span class="n">freq_factor</span>
+
+    <span class="k">assert</span> <span class="n">df</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">t</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">broadcast_arrays</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">h</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">use_fft</span><span class="p">:</span>
+        <span class="n">Mfft</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Mfft</span><span class="p">)</span>
+        <span class="k">assert</span><span class="p">(</span><span class="n">Mfft</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c"># required size of fft is the power of 2 above the oversampling rate</span>
+        <span class="n">Nfft</span> <span class="o">=</span> <span class="n">bitceil</span><span class="p">(</span><span class="n">N</span> <span class="o">*</span> <span class="n">oversampling</span><span class="p">)</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">f0</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">h</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">f0</span> <span class="o">*</span> <span class="p">(</span><span class="n">t</span> <span class="o">-</span> <span class="n">t0</span><span class="p">))</span>
+
+        <span class="n">tnorm</span> <span class="o">=</span> <span class="p">((</span><span class="n">t</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">*</span> <span class="n">Nfft</span> <span class="o">*</span> <span class="n">df</span><span class="p">)</span> <span class="o">%</span> <span class="n">Nfft</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">extirpolate</span><span class="p">(</span><span class="n">tnorm</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">Nfft</span><span class="p">,</span> <span class="n">Mfft</span><span class="p">)</span>
+
+        <span class="n">fftgrid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">t0</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">f0</span> <span class="o">+</span> <span class="n">df</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Nfft</span><span class="p">)</span>
+            <span class="n">fftgrid</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">t0</span> <span class="o">*</span> <span class="n">f</span><span class="p">)</span>
+        <span class="n">fftgrid</span> <span class="o">=</span> <span class="n">fftgrid</span><span class="p">[:</span><span class="n">N</span><span class="p">]</span>
+
+        <span class="n">C</span> <span class="o">=</span> <span class="n">Nfft</span> <span class="o">*</span> <span class="n">fftgrid</span><span class="o">.</span><span class="n">real</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">Nfft</span> <span class="o">*</span> <span class="n">fftgrid</span><span class="o">.</span><span class="n">imag</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">f0</span> <span class="o">+</span> <span class="n">df</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">f</span> <span class="o">*</span> <span class="n">t</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]))</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">f</span> <span class="o">*</span> <span class="n">t</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">S</span><span class="p">,</span> <span class="n">C</span>
+
+
+<span class="k">def</span> <span class="nf">lomb_scargle_fast</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">f0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Nf</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                      <span class="n">center_data</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">fit_offset</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                      <span class="n">use_fft</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">freq_oversampling</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">nyquist_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                      <span class="n">trig_sum_kwds</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute a lomb-scargle periodogram for the given data</span>
+
+<span class="sd">    This implements both an O[N^2] method if use_fft==False, or an</span>
+<span class="sd">    O[NlogN] method if use_fft==True.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    t, y, dy : array_like</span>
+<span class="sd">        times, values, and errors of the data points. These should be</span>
+<span class="sd">        broadcastable to the same shape. If dy is not specified, a</span>
+<span class="sd">        constant error will be used.</span>
+<span class="sd">    f0, df, Nf : (float, float, int)</span>
+<span class="sd">        parameters describing the frequency grid, f = f0 + df * arange(Nf).</span>
+<span class="sd">        Defaults, with T = t.max() - t.min():</span>
+<span class="sd">        - f0 = 0</span>
+<span class="sd">        - df is set such that there are ``freq_oversampling`` points per</span>
+<span class="sd">          peak width. ``freq_oversampling`` defaults to 5.</span>
+<span class="sd">        - Nf is set such that the highest frequency is ``nyquist_factor``</span>
+<span class="sd">          times the so-called &quot;average Nyquist frequency&quot;.</span>
+<span class="sd">          ``nyquist_factor`` defaults to 2.</span>
+<span class="sd">        Note that for unevenly-spaced data, the periodogram can be sensitive</span>
+<span class="sd">        to frequencies far higher than the average Nyquist frequency.</span>
+<span class="sd">    center_data : bool (default=True)</span>
+<span class="sd">        Specify whether to subtract the mean of the data before the fit</span>
+<span class="sd">    fit_offset : bool (default=True)</span>
+<span class="sd">        If True, then compute the floating-mean periodogram; i.e. let the mean</span>
+<span class="sd">        vary with the fit.</span>
+<span class="sd">    use_fft : bool (default=True)</span>
+<span class="sd">        If True, then use the Press &amp; Rybicki O[NlogN] algorithm to compute</span>
+<span class="sd">        the result. Otherwise, use a slower O[N^2] algorithm</span>
+
+<span class="sd">    Other Parameters</span>
+<span class="sd">    ----------------</span>
+<span class="sd">    freq_oversampling : float (default=5)</span>
+<span class="sd">        Oversampling factor for the frequency bins. Only referenced if</span>
+<span class="sd">        ``df`` is not specified</span>
+<span class="sd">    nyquist_factor : float (default=2)</span>
+<span class="sd">        Parameter controlling the highest probed frequency. Only referenced</span>
+<span class="sd">        if ``Nf`` is not specified.</span>
+<span class="sd">    trig_sum_kwds : dict or None (optional)</span>
+<span class="sd">        extra keyword arguments to pass to the ``trig_sum`` utility.</span>
+<span class="sd">        Options are ``oversampling`` and ``Mfft``. See documentation</span>
+<span class="sd">        of ``trig_sum`` for details.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Press W.H. and Rybicki, G.B, &quot;Fast algorithm for spectral analysis</span>
+<span class="sd">        of unevenly sampled data&quot;. ApJ 1:338, p277, 1989</span>
+<span class="sd">    .. [2] M. Zechmeister and M. Kurster, A&amp;A 496, 577-584 (2009)</span>
+<span class="sd">    .. [3] W. Press et al, Numerical Recipies in C (2002)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Validate and setup input data</span>
+    <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">broadcast_arrays</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">))</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">dy</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">w</span> <span class="o">/=</span> <span class="n">w</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="c"># Validate and setup frequency grid</span>
+    <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">peak_width</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">peak_width</span> <span class="o">/</span> <span class="n">freq_oversampling</span>
+    <span class="k">if</span> <span class="n">Nf</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">avg_Nyquist</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+        <span class="n">Nf</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="p">(</span><span class="n">nyquist_factor</span> <span class="o">*</span> <span class="n">avg_Nyquist</span> <span class="o">-</span> <span class="n">f0</span><span class="p">)</span> <span class="o">/</span> <span class="n">df</span><span class="p">)</span>
+    <span class="n">Nf</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">Nf</span><span class="p">)</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">df</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span><span class="p">(</span><span class="n">Nf</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">freq</span> <span class="o">=</span> <span class="n">f0</span> <span class="o">+</span> <span class="n">df</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">Nf</span><span class="p">)</span>
+
+    <span class="c"># Center the data. Even if we&#39;re fitting the offset,</span>
+    <span class="c"># this step makes the expressions below more succinct</span>
+    <span class="k">if</span> <span class="n">center_data</span> <span class="ow">or</span> <span class="n">fit_offset</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+    <span class="c"># set up arguments to trig_sum</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">trig_sum_kwds</span> <span class="ow">or</span> <span class="p">{})</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">f0</span><span class="o">=</span><span class="n">f0</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">use_fft</span><span class="o">=</span><span class="n">use_fft</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">Nf</span><span class="p">)</span>
+
+    <span class="c">#----------------------------------------------------------------------</span>
+    <span class="c"># 1. compute functions of the time-shift tau at each frequency</span>
+    <span class="n">Sh</span><span class="p">,</span> <span class="n">Ch</span> <span class="o">=</span> <span class="n">trig_sum</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">w</span> <span class="o">*</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">S2</span><span class="p">,</span> <span class="n">C2</span> <span class="o">=</span> <span class="n">trig_sum</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">freq_factor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fit_offset</span><span class="p">:</span>
+        <span class="n">S</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="n">trig_sum</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="c"># Filter &quot;invalid value in divide&quot; warnings for zero-frequency</span>
+            <span class="k">if</span> <span class="n">f0</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s">&quot;ignore&quot;</span><span class="p">)</span>
+            <span class="n">tan_2omega_tau</span> <span class="o">=</span> <span class="p">(</span><span class="n">S2</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">S</span> <span class="o">*</span> <span class="n">C</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">C2</span> <span class="o">-</span> <span class="p">(</span><span class="n">C</span> <span class="o">*</span> <span class="n">C</span> <span class="o">-</span> <span class="n">S</span> <span class="o">*</span> <span class="n">S</span><span class="p">))</span>
+            <span class="c"># fix NaN at zero frequency</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">tan_2omega_tau</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">tan_2omega_tau</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tan_2omega_tau</span> <span class="o">=</span> <span class="n">S2</span> <span class="o">/</span> <span class="n">C2</span>
+
+    <span class="c"># slower/less stable way: we&#39;ll use trig identities instead</span>
+    <span class="c"># omega_tau = 0.5 * np.arctan(tan_2omega_tau)</span>
+    <span class="c"># S2w, C2w = np.sin(2 * omega_tau), np.cos(2 * omega_tau)</span>
+    <span class="c"># Sw, Cw = np.sin(omega_tau), np.cos(omega_tau)</span>
+
+    <span class="n">S2w</span> <span class="o">=</span> <span class="n">tan_2omega_tau</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">tan_2omega_tau</span> <span class="o">*</span> <span class="n">tan_2omega_tau</span><span class="p">)</span>
+    <span class="n">C2w</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">tan_2omega_tau</span> <span class="o">*</span> <span class="n">tan_2omega_tau</span><span class="p">)</span>
+    <span class="n">Cw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">C2w</span><span class="p">)</span>
+    <span class="n">Sw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">S2w</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">C2w</span><span class="p">)</span>
+
+    <span class="c">#----------------------------------------------------------------------</span>
+    <span class="c"># 2. Compute the periodogram, following Zechmeister &amp; Kurster</span>
+    <span class="c">#    and using tricks from Press &amp; Rybicki.</span>
+    <span class="n">YY</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">YC</span> <span class="o">=</span> <span class="n">Ch</span> <span class="o">*</span> <span class="n">Cw</span> <span class="o">+</span> <span class="n">Sh</span> <span class="o">*</span> <span class="n">Sw</span>
+    <span class="n">YS</span> <span class="o">=</span> <span class="n">Sh</span> <span class="o">*</span> <span class="n">Cw</span> <span class="o">-</span> <span class="n">Ch</span> <span class="o">*</span> <span class="n">Sw</span>
+    <span class="n">CC</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">C2</span> <span class="o">*</span> <span class="n">C2w</span> <span class="o">+</span> <span class="n">S2</span> <span class="o">*</span> <span class="n">S2w</span><span class="p">)</span>
+    <span class="n">SS</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">C2</span> <span class="o">*</span> <span class="n">C2w</span> <span class="o">-</span> <span class="n">S2</span> <span class="o">*</span> <span class="n">S2w</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fit_offset</span><span class="p">:</span>
+        <span class="n">CC</span> <span class="o">-=</span> <span class="p">(</span><span class="n">C</span> <span class="o">*</span> <span class="n">Cw</span> <span class="o">+</span> <span class="n">S</span> <span class="o">*</span> <span class="n">Sw</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="n">SS</span> <span class="o">-=</span> <span class="p">(</span><span class="n">S</span> <span class="o">*</span> <span class="n">Cw</span> <span class="o">-</span> <span class="n">C</span> <span class="o">*</span> <span class="n">Sw</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="c"># Filter &quot;invalid value in divide&quot; warnings for zero-frequency</span>
+        <span class="k">if</span> <span class="n">fit_offset</span> <span class="ow">and</span> <span class="n">f0</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s">&quot;ignore&quot;</span><span class="p">)</span>
+
+        <span class="n">power</span> <span class="o">=</span> <span class="p">(</span><span class="n">YC</span> <span class="o">*</span> <span class="n">YC</span> <span class="o">/</span> <span class="n">CC</span> <span class="o">+</span> <span class="n">YS</span> <span class="o">*</span> <span class="n">YS</span> <span class="o">/</span> <span class="n">SS</span><span class="p">)</span> <span class="o">/</span> <span class="n">YY</span>
+
+        <span class="c"># fix NaN at zero frequency</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">power</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">power</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">freq</span><span class="p">,</span> <span class="n">power</span>
+
+
+<div class="viewcode-block" id="LombScargleFast"><a class="viewcode-back" href="../../../periodic/API.html#gatspy.periodic.LombScargleFast">[docs]</a><span class="k">class</span> <span class="nc">LombScargleFast</span><span class="p">(</span><span class="n">LombScargle</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Fast FFT-based Lomb-Scargle Periodogram Implementation</span>
+
+<span class="sd">    This implements the O[N log N] lomb-scargle periodogram, described in</span>
+<span class="sd">    Press &amp; Rybicki (1989) [1].</span>
+<span class="sd">    To compute the periodogram via the fast algorithm, use the</span>
+<span class="sd">    ``score_frequency_grid()`` method. The ``score()`` method of</span>
+<span class="sd">    ``periodogram()`` method will default to the slower algorithm.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    optimizer : PeriodicOptimizer instance</span>
+<span class="sd">        Optimizer to use to find the best period. If not specified, the</span>
+<span class="sd">        LinearScanOptimizer will be used.</span>
+<span class="sd">    center_data : boolean (default = True)</span>
+<span class="sd">        If True, then compute the weighted mean of the input data and subtract</span>
+<span class="sd">        before fitting the model.</span>
+<span class="sd">    fit_offset : boolean (default = True)</span>
+<span class="sd">        If True, then fit a floating-mean sinusoid model.</span>
+<span class="sd">    use_fft : boolean (default = True)</span>
+<span class="sd">        Specify whether to use the Press &amp; Rybicki FFT algorithm to compute</span>
+<span class="sd">        the result</span>
+<span class="sd">    ls_kwds : dict</span>
+<span class="sd">        Dictionary of keywords to pass to the ``lomb_scargle_fast`` routine.</span>
+<span class="sd">    fit_period : bool (optional)</span>
+<span class="sd">        If True, then fit for the best period when fit() method is called.</span>
+<span class="sd">    optimizer_kwds : dict (optional</span>
+<span class="sd">        Dictionary of keyword arguments for constructing the optimizer</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; rng = np.random.RandomState(0)</span>
+<span class="sd">    &gt;&gt;&gt; t = 100 * rng.rand(100)</span>
+<span class="sd">    &gt;&gt;&gt; dy = 0.1</span>
+<span class="sd">    &gt;&gt;&gt; omega = 10</span>
+<span class="sd">    &gt;&gt;&gt; y = np.sin(omega * t) + dy * rng.randn(100)</span>
+<span class="sd">    &gt;&gt;&gt; ls = LombScargleFast().fit(t, y, dy)</span>
+<span class="sd">    &gt;&gt;&gt; ls.optimizer.period_range = (0.2, 1.2)</span>
+<span class="sd">    &gt;&gt;&gt; ls.best_period</span>
+<span class="sd">    Finding optimal frequency:</span>
+<span class="sd">     - Estimated peak width = 0.0639</span>
+<span class="sd">     - Using 5 steps per peak; omega_step = 0.0128</span>
+<span class="sd">     - User-specified period range:  0.2 to 1.2</span>
+<span class="sd">     - Computing periods at 2051 steps</span>
+<span class="sd">    Zooming-in on 5 candidate peaks:</span>
+<span class="sd">     - Computing periods at 1000 steps</span>
+<span class="sd">    0.62826265739259146</span>
+<span class="sd">    &gt;&gt;&gt; ls.predict([0, 0.5])</span>
+<span class="sd">    array([-0.02019474, -0.92910567])</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    LombScargle</span>
+<span class="sd">    LombScargleAstroML</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Press W.H. and Rybicki, G.B, &quot;Fast algorithm for spectral analysis</span>
+<span class="sd">           of unevenly sampled data&quot;. ApJ 1:338, p277, 1989</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">center_data</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">fit_offset</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                 <span class="n">use_fft</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">ls_kwds</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Nterms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">fit_period</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">optimizer_kwds</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_fft</span> <span class="o">=</span> <span class="n">use_fft</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ls_kwds</span> <span class="o">=</span> <span class="n">ls_kwds</span>
+
+        <span class="k">if</span> <span class="n">Nterms</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;LombScargleFast supports only Nterms = 1&quot;</span><span class="p">)</span>
+
+        <span class="n">LombScargle</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+                             <span class="n">center_data</span><span class="o">=</span><span class="n">center_data</span><span class="p">,</span> <span class="n">fit_offset</span><span class="o">=</span><span class="n">fit_offset</span><span class="p">,</span>
+                             <span class="n">Nterms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">regularization</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                             <span class="n">fit_period</span><span class="o">=</span><span class="n">fit_period</span><span class="p">,</span>
+                             <span class="n">optimizer_kwds</span><span class="o">=</span><span class="n">optimizer_kwds</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_score_frequency_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f0</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+        <span class="n">freq</span><span class="p">,</span> <span class="n">P</span> <span class="o">=</span> <span class="n">lomb_scargle_fast</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">,</span>
+                                    <span class="n">f0</span><span class="o">=</span><span class="n">f0</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">Nf</span><span class="o">=</span><span class="n">N</span><span class="p">,</span>
+                                    <span class="n">center_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">center_data</span><span class="p">,</span>
+                                    <span class="n">fit_offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_offset</span><span class="p">,</span>
+                                    <span class="n">use_fft</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_fft</span><span class="p">,</span>
+                                    <span class="o">**</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ls_kwds</span> <span class="ow">or</span> <span class="p">{}))</span>
+        <span class="k">return</span> <span class="n">P</span>
+
+    <span class="k">def</span> <span class="nf">_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">periods</span><span class="p">):</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;The score() method defaults to a slower O[N^2] &quot;</span>
+                      <span class="s">&quot;algorithm. Use the score_frequency_grid() method &quot;</span>
+                      <span class="s">&quot;to access the fast FFT-based algorithm&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">LombScargle</span><span class="o">.</span><span class="n">_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">periods</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Jake VanderPlas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

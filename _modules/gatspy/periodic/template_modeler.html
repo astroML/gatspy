@@ -1,0 +1,312 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>gatspy.periodic.template_modeler &mdash; gatspy 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="gatspy 0.2 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for gatspy.periodic.template_modeler</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Implementation of a template modeler for RR Lyrae Stars.</span>
+
+<span class="sd">This is based on the algorithm described in Sesar 2010; the same paper is the</span>
+<span class="sd">source of the templates used here for the fit.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">UnivariateSpline</span>
+
+<span class="kn">from</span> <span class="nn">..datasets</span> <span class="kn">import</span> <span class="n">fetch_rrlyrae_templates</span>
+<span class="kn">from</span> <span class="nn">.modeler</span> <span class="kn">import</span> <span class="n">PeriodicModeler</span><span class="p">,</span> <span class="n">PeriodicModelerMultiband</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;RRLyraeTemplateModeler&#39;</span><span class="p">,</span> <span class="s">&#39;RRLyraeTemplateModelerMultiband&#39;</span><span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">BaseTemplateModeler</span><span class="p">(</span><span class="n">PeriodicModeler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for single-band template models</span>
+
+<span class="sd">    To extend this, overload the ``_template_ids`` and ``_get_template_by_id``</span>
+<span class="sd">    methods.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fit_period</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">optimizer_kwds</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">templates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_interpolated_templates</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">templates</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;No templates available!&#39;</span><span class="p">)</span>
+        <span class="n">PeriodicModeler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+                                 <span class="n">fit_period</span><span class="o">=</span><span class="n">fit_period</span><span class="p">,</span>
+                                 <span class="n">optimizer_kwds</span><span class="o">=</span><span class="n">optimizer_kwds</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_build_interpolated_templates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">templates</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_interpolated_template</span><span class="p">(</span><span class="n">tid</span><span class="p">)</span>
+                          <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_template_ids</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">templates</span>
+
+    <span class="k">def</span> <span class="nf">_interpolated_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">templateid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return an interpolator for the given template&quot;&quot;&quot;</span>
+        <span class="n">phase</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_template_by_id</span><span class="p">(</span><span class="n">templateid</span><span class="p">)</span>
+
+        <span class="c"># double-check that phase ranges from 0 to 1</span>
+        <span class="k">assert</span> <span class="n">phase</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="n">phase</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">1</span>
+
+        <span class="c"># at the start and end points, we need to add ~5 points to make sure</span>
+        <span class="c"># the spline &amp; derivatives wrap appropriately</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">phase</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:],</span> <span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="p">[:</span><span class="mi">5</span><span class="p">]])</span>
+
+        <span class="c"># Univariate spline allows for derivatives; use this!</span>
+        <span class="k">return</span> <span class="n">UnivariateSpline</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dy</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">ymean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">dy</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">ymean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="o">/</span> <span class="n">w</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chi2_0_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">y</span> <span class="o">-</span> <span class="n">ymean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">periods</span><span class="p">):</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">periods</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">period</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">periods</span><span class="o">.</span><span class="n">flat</span><span class="p">):</span>
+            <span class="n">theta_best</span><span class="p">,</span> <span class="n">chi2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eval_templates</span><span class="p">(</span><span class="n">period</span><span class="p">)</span>
+            <span class="n">scores</span><span class="o">.</span><span class="n">flat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">chi2</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">chi2_0_</span>
+
+        <span class="k">return</span> <span class="n">scores</span>
+
+    <span class="k">def</span> <span class="nf">_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">period</span><span class="p">):</span>
+        <span class="n">theta_best</span><span class="p">,</span> <span class="n">chi2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eval_templates</span><span class="p">(</span><span class="n">period</span><span class="p">)</span>
+        <span class="n">i_best</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">chi2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">theta_best</span><span class="p">[</span><span class="n">i_best</span><span class="p">],</span> <span class="n">period</span><span class="p">,</span> <span class="n">i_best</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_eval_templates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Evaluate the best template for the given period&quot;&quot;&quot;</span>
+        <span class="n">theta_best</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_optimize</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="n">tmpid</span><span class="p">)</span>
+                      <span class="k">for</span> <span class="n">tmpid</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">templates</span><span class="p">)]</span>
+        <span class="n">chi2</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_chi2</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">tmpid</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">tmpid</span><span class="p">,</span> <span class="n">theta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">theta_best</span><span class="p">)]</span>
+
+        <span class="k">return</span> <span class="n">theta_best</span><span class="p">,</span> <span class="n">chi2</span>
+
+    <span class="k">def</span> <span class="nf">_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">tmpid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compute model at t for the given parameters, period, &amp; template&quot;&quot;&quot;</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">templates</span><span class="p">[</span><span class="n">tmpid</span><span class="p">]</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span> <span class="o">/</span> <span class="n">period</span> <span class="o">-</span> <span class="n">theta</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">%</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">theta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">template</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_chi2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">tmpid</span><span class="p">,</span> <span class="n">return_gradient</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the chi2 for the given parameters, period, &amp; template</span>
+
+<span class="sd">        Optionally return the gradient for faster optimization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">templates</span><span class="p">[</span><span class="n">tmpid</span><span class="p">]</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">/</span> <span class="n">period</span> <span class="o">-</span> <span class="n">theta</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">%</span> <span class="mi">1</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">theta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">theta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">template</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span>
+        <span class="n">chi2</span> <span class="o">=</span> <span class="p">(((</span><span class="n">model</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">return_gradient</span><span class="p">:</span>
+            <span class="n">grad</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">model</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">gradient</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grad</span><span class="p">),</span>
+                                 <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grad</span> <span class="o">*</span> <span class="n">template</span><span class="p">(</span><span class="n">phase</span><span class="p">)),</span>
+                                 <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">grad</span> <span class="o">*</span> <span class="n">theta</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                                         <span class="o">*</span> <span class="n">template</span><span class="o">.</span><span class="n">derivative</span><span class="p">(</span><span class="mi">1</span><span class="p">)(</span><span class="n">phase</span><span class="p">))])</span>
+            <span class="k">return</span> <span class="n">chi2</span><span class="p">,</span> <span class="n">gradient</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">chi2</span>
+
+    <span class="k">def</span> <span class="nf">_optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">tmpid</span><span class="p">,</span> <span class="n">use_gradient</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Optimize the model for the given period &amp; template&quot;&quot;&quot;</span>
+        <span class="n">theta_0</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_chi2</span><span class="p">,</span> <span class="n">theta_0</span><span class="p">,</span> <span class="n">jac</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">use_gradient</span><span class="p">),</span>
+                          <span class="n">bounds</span><span class="o">=</span><span class="p">[(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">)],</span>
+                          <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">period</span><span class="p">,</span> <span class="n">tmpid</span><span class="p">,</span> <span class="n">use_gradient</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">x</span>
+
+    <span class="c">#------------------------------------------------------------</span>
+    <span class="c"># Overload the following two functions in base classes</span>
+
+    <span class="k">def</span> <span class="nf">_template_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the list of template ids&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_get_template_by_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a particular template</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        template_id : simple type</span>
+<span class="sd">            Template ID used by base class to define templates</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        phase, y : ndarrays</span>
+<span class="sd">            arrays containing the sorted phase and associated y-values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+    
+
+
+<div class="viewcode-block" id="RRLyraeTemplateModeler"><a class="viewcode-back" href="../../../periodic/API.html#gatspy.periodic.RRLyraeTemplateModeler">[docs]</a><span class="k">class</span> <span class="nc">RRLyraeTemplateModeler</span><span class="p">(</span><span class="n">BaseTemplateModeler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Template-fitting periods for single-band RR Lyrae</span>
+
+<span class="sd">    This class contains functionality to evaluate the fit of the Sesar 2010</span>
+<span class="sd">    RR Lyrae templates to single-band data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filts : list or iterable of characters (optional)</span>
+<span class="sd">        The filters of the templates to be used. Items should be among &#39;ugriz&#39;.</span>
+<span class="sd">        Default is &#39;ugriz&#39;; i.e. all available templates.</span>
+<span class="sd">    optimizer : PeriodicOptimizer instance (optional)</span>
+<span class="sd">        Optimizer to use to find the best period. If not specified, the</span>
+<span class="sd">        LinearScanOptimizer will be used.</span>
+<span class="sd">    fit_period : bool (optional)</span>
+<span class="sd">        If True, then fit for the best period when fit() method is called.</span>
+<span class="sd">    optimizer_kwds : dict (optional</span>
+<span class="sd">        Dictionary of keyword arguments for constructing the optimizer</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    RRLyraeTemplateModelerMultiband : multiband version of template model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_raw_templates</span> <span class="o">=</span> <span class="n">fetch_rrlyrae_templates</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filts</span><span class="o">=</span><span class="s">&#39;ugriz&#39;</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">fit_period</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">optimizer_kwds</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">filts</span><span class="p">)</span>
+        <span class="n">BaseTemplateModeler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+                                     <span class="n">fit_period</span><span class="o">=</span><span class="n">fit_period</span><span class="p">,</span>
+                                     <span class="n">optimizer_kwds</span><span class="o">=</span><span class="n">optimizer_kwds</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_template_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">tid</span> <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_templates</span><span class="o">.</span><span class="n">ids</span>
+                <span class="k">if</span> <span class="n">tid</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filts</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_template_by_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tid</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_templates</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="n">tid</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="RRLyraeTemplateModelerMultiband"><a class="viewcode-back" href="../../../periodic/API.html#gatspy.periodic.RRLyraeTemplateModelerMultiband">[docs]</a><span class="k">class</span> <span class="nc">RRLyraeTemplateModelerMultiband</span><span class="p">(</span><span class="n">PeriodicModelerMultiband</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Multiband version of RR Lyrae template-fitting modeler</span>
+
+<span class="sd">    This class contains functionality to evaluate the fit of the Sesar 2010</span>
+<span class="sd">    RR Lyrae templates to multiband data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    optimizer : PeriodicOptimizer instance (optional)</span>
+<span class="sd">        Optimizer to use to find the best period. If not specified, the</span>
+<span class="sd">        LinearScanOptimizer will be used.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    RRLyraeTemplateModeler : single band version of template model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">filts</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models_</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">filt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unique_filts_</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">filts</span> <span class="o">==</span> <span class="n">filt</span><span class="p">)</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">RRLyraeTemplateModeler</span><span class="p">(</span><span class="n">filts</span><span class="o">=</span><span class="n">filt</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dy</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">models_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modeldict_</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unique_filts_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models_</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">periods</span><span class="p">):</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">chi2_0_</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models_</span><span class="p">]</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">periods</span><span class="p">)</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models_</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">scores</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">filts</span><span class="p">,</span> <span class="n">period</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">filt</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">filts</span><span class="p">):</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">filts</span> <span class="o">==</span> <span class="n">filt</span><span class="p">)</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modeldict_</span><span class="p">[</span><span class="n">filt</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">period</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Jake VanderPlas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>gatspy.datasets.rrlyrae_generated &mdash; gatspy 0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="gatspy 0.2 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for gatspy.datasets.rrlyrae_generated</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Tools to generate light curves&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">absolute_import</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;RRLyraeGenerated&#39;</span><span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">fetch_rrlyrae_templates</span><span class="p">,</span> <span class="n">fetch_rrlyrae</span>
+
+
+<div class="viewcode-block" id="RRLyraeGenerated"><a class="viewcode-back" href="../../../datasets/API.html#gatspy.datasets.RRLyraeGenerated">[docs]</a><span class="k">class</span> <span class="nc">RRLyraeGenerated</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate RR Lyrae light curves from Sesar 2010 lightcurves</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lcid : int</span>
+<span class="sd">        Valid light curve ID from the Sesar 2010 RR Lyrae dataset</span>
+<span class="sd">    random_state : int</span>
+<span class="sd">        Random number generator seed</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lcdata : RRLyraeLC object</span>
+<span class="sd">        Container for the RR Lyrae light curve dataset</span>
+<span class="sd">    templates : RRLyraeTemplates object</span>
+<span class="sd">        Container for the RR Lyrae template dataset</span>
+<span class="sd">    period : float</span>
+<span class="sd">        Period of the RR Lyrae object</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; rrlyrae = fetch_rrlyrae()</span>
+<span class="sd">    &gt;&gt;&gt; lcid = rrlyrae.ids[0]</span>
+<span class="sd">    &gt;&gt;&gt; gen = RRLyraeGenerated(lcid, random_state=0)</span>
+<span class="sd">    &gt;&gt;&gt; gen.period</span>
+<span class="sd">    0.61431831</span>
+<span class="sd">    &gt;&gt;&gt; mag = gen.generated(&#39;g&#39;, [51080.0, 51080.5], err=0.3)</span>
+<span class="sd">    &gt;&gt;&gt; mag.round(2)</span>
+<span class="sd">    array([ 17.74,  17.04])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lcdata</span> <span class="o">=</span> <span class="n">fetch_rrlyrae</span><span class="p">()</span>
+    <span class="n">templates</span> <span class="o">=</span> <span class="n">fetch_rrlyrae_templates</span><span class="p">()</span>
+
+    <span class="c"># Extinction corrections: Table 1 from Berry et al. (2012, ApJ, 757, 166).</span>
+    <span class="n">ext_correction</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;u&#39;</span><span class="p">:</span> <span class="mf">1.810</span><span class="p">,</span>
+                      <span class="s">&#39;g&#39;</span><span class="p">:</span> <span class="mf">1.400</span><span class="p">,</span>
+                      <span class="s">&#39;r&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                      <span class="s">&#39;i&#39;</span><span class="p">:</span> <span class="mf">0.759</span><span class="p">,</span>
+                      <span class="s">&#39;z&#39;</span><span class="p">:</span> <span class="mf">0.561</span><span class="p">}</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_template_func</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">num</span><span class="p">,</span> <span class="n">band</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">A</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">template_id</span> <span class="o">=</span> <span class="s">&quot;{0:.0f}{1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">band</span><span class="p">)</span>
+        <span class="n">phase</span><span class="p">,</span> <span class="n">amp</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="n">template_id</span><span class="p">)</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">phase</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+        <span class="n">amp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">amp</span><span class="p">,</span> <span class="n">amp</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]])</span>
+        <span class="k">return</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">A</span> <span class="o">*</span> <span class="n">amp</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lcid</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lcid</span> <span class="o">=</span> <span class="n">lcid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lcdata</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obsmeta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lcdata</span><span class="o">.</span><span class="n">get_obsmeta</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">period</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Period (in days) of the RR Lyrae&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s">&#39;P&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="RRLyraeGenerated.observed"><a class="viewcode-back" href="../../../datasets/API.html#gatspy.datasets.RRLyraeGenerated.observed">[docs]</a>    <span class="k">def</span> <span class="nf">observed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">band</span><span class="p">,</span> <span class="n">corrected</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return observed values in the given band</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        band : str</span>
+<span class="sd">            desired bandpass: should be one of [&#39;u&#39;, &#39;g&#39;, &#39;r&#39;, &#39;i&#39;, &#39;z&#39;]</span>
+<span class="sd">        corrected : bool (optional)</span>
+<span class="sd">            If true, correct for extinction</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        t, mag, dmag : ndarrays</span>
+<span class="sd">            The times, magnitudes, and magnitude errors for the specified band.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">band</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s">&#39;ugriz&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;band=&#39;{0}&#39; not recognized&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">band</span><span class="p">))</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="s">&#39;ugriz&#39;</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">band</span><span class="p">)</span>
+        <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lcdata</span><span class="o">.</span><span class="n">get_lightcurve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lcid</span><span class="p">,</span> <span class="n">return_1d</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">corrected</span><span class="p">:</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obsmeta</span><span class="p">[</span><span class="s">&#39;rExt&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ext_correction</span><span class="p">[</span><span class="n">band</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="n">t</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">ext</span><span class="p">,</span> <span class="n">dy</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="RRLyraeGenerated.generated"><a class="viewcode-back" href="../../../datasets/API.html#gatspy.datasets.RRLyraeGenerated.generated">[docs]</a>    <span class="k">def</span> <span class="nf">generated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">band</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">corrected</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return generated magnitudes in the specified band</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        band : str</span>
+<span class="sd">            desired bandpass: should be one of [&#39;u&#39;, &#39;g&#39;, &#39;r&#39;, &#39;i&#39;, &#39;z&#39;]</span>
+<span class="sd">        t : array_like</span>
+<span class="sd">            array of times (in days)</span>
+<span class="sd">        err : float or array_like</span>
+<span class="sd">            gaussian error in observations</span>
+<span class="sd">        corrected : bool (optional)</span>
+<span class="sd">            If true, correct for extinction</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mag : ndarray</span>
+<span class="sd">            magnitudes at the specified times under the generated model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="n">band</span> <span class="o">+</span> <span class="s">&#39;T&#39;</span><span class="p">]</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="n">band</span> <span class="o">+</span> <span class="s">&#39;0&#39;</span><span class="p">]</span>
+        <span class="n">amp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="n">band</span> <span class="o">+</span> <span class="s">&#39;A&#39;</span><span class="p">]</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="n">band</span> <span class="o">+</span> <span class="s">&#39;E&#39;</span><span class="p">]</span>
+
+        <span class="c"># if there are nans or infinities, mask them</span>
+        <span class="n">bad_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">t</span><span class="p">[</span><span class="n">bad_vals</span><span class="p">]</span> <span class="o">=</span> <span class="n">t0</span>
+
+        <span class="k">if</span> <span class="n">corrected</span><span class="p">:</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obsmeta</span><span class="p">[</span><span class="s">&#39;rExt&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ext_correction</span><span class="p">[</span><span class="n">band</span><span class="p">]</span>
+
+        <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_template_func</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">band</span><span class="p">,</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">ext</span><span class="p">,</span> <span class="n">amp</span><span class="p">)</span>
+        <span class="n">mag</span> <span class="o">=</span> <span class="n">func</span><span class="p">(((</span><span class="n">t</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">)</span> <span class="o">%</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">mag</span><span class="p">[</span><span class="n">bad_vals</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="k">if</span> <span class="n">err</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">mag</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">err</span><span class="p">,</span> <span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">mag</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Jake VanderPlas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
