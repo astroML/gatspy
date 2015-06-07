@@ -15,6 +15,9 @@ If you use this package for a publication, please consider citing
 `our paper <http://adsabs.harvard.edu/abs/2015arXiv150201344V>`_ and
 `the code <http://dx.doi.org/10.5281/zenodo.14833>`_.
 
+For issues & contributions, see the source repository
+`on github <http://github.com/astroML/gatspy/>`_.
+
 Documentation
 =============
 
