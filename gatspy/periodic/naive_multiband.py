@@ -29,17 +29,27 @@ class NaiveMultiband(PeriodicModelerMultiband):
 
     Parameters
     ----------
+    optimizer : PeriodicOptimizer instance
+        Optimizer to use to find the best period. If not specified, the
+        LinearScanOptimizer will be used.
     BaseModel : PeriodicModeler instance
         Single-band model to use on data from each band.
+    fit_period : bool (optional)
+        If True, then fit for the best period when fit() method is called.
+    optimizer_kwds : dict (optional
+        Dictionary of keyword arguments for constructing the optimizer
     *args, **kwargs :
         additional arguments are passed to BaseModel on construction.
     """
     def __init__(self, optimizer=None, BaseModel=LombScargle,
+                 fit_period=False, optimizer_kwds=None,
                  *args, **kwargs):
         self.BaseModel = BaseModel
         self.args = args
         self.kwargs = kwargs
-        PeriodicModelerMultiband.__init__(self, optimizer)
+        PeriodicModelerMultiband.__init__(self, optimizer,
+                                          fit_period=fit_period,
+                                          optimizer_kwds=optimizer_kwds)
 
     def _fit(self, t, y, dy, filts):
         t, y, dy, filts = np.broadcast_arrays(t, y, dy, filts)

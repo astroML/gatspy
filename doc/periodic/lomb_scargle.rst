@@ -1,5 +1,8 @@
 .. _periodic_lomb_scargle:
 
+Lomb-Scargle Periodogram
+========================
+
 .. testsetup:: *
 
    import numpy as np
@@ -10,16 +13,19 @@
    t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
    mask = (filts == 'r')
    t_r, mag_r, dmag_r = t[mask], mag[mask], dmag[mask]
-   model = periodic.LombScargleFast()
+   model = periodic.LombScargleFast(fit_period=True)
+   model.optimizer.set(period_range=(0.2, 1.2), quiet=True)
    model.fit(t_r, mag_r, dmag_r)
-   period = model.best_period
 
-
-Lomb-Scargle Periodogram
-========================
 One of the best known methods for detecting periodicity in time series is the
 Lomb-Scargle Periodogram. ``gatspy`` has three main implementations of the
 classic periodogram:
+
+:class:`~gatspy.periodic.LombScargleFast` 
+  This class implements the fast, O[N logN] implementation of Lomb-Scargle.
+  It is much faster than any of the above methods, especially as the number
+  of data points and frequencies increases. It is limited to a floating mean
+  model, and the frequencies must be computed on a regular grid.
 
 :class:`~gatspy.periodic.LombScargle`
   This basic method uses simple linear algebra to compute the periodogram.
@@ -31,12 +37,6 @@ classic periodogram:
   `astroML <http://www.astroml.org>`_. This is a cython implementation, and
   is slightly faster than :class:`~gatspy.periodic.LombScargle`, though it
   does not handle higher-order fits or regularization.
-
-:class:`~gatspy.periodic.LombScargleFast` 
-  This class implements the fast, O[N logN] implementation of Lomb-Scargle.
-  It is much faster than any of the above methods, especially as the number
-  of data points and frequencies increases. It is limited to a floating mean
-  model, and the frequencies must be computed on a regular grid.
 
 For the basic no-frills Lomb-Scargle algorithm, the best option to use is
 :class:`~gatspy.periodic.LombScargleFast`. Keep in mind that aside from
@@ -82,11 +82,16 @@ Let's start by loading one r-band RR Lyrae lightcurve using the
 
 Given this data, we'd like to find the best period with the periodogram.
 This can be done using the ``find_best_period`` method of any of the above
-estimators. Let's use :class:`~gatspy.periodic.LombScargleFast` to do this:
+estimators, once the ``period_range`` attribute of the optimizer is set
+(see discussion below).
 
-    >>> model = periodic.LombScargleFast()
+Let's quickly demonstrate this with :class:`~gatspy.periodic.LombScargleFast`.
+Because our data is from an RR Lyrae star, we'll set a conservative period
+range of 0.2 to 1.2 days to make sure it contains the true period:
+
+    >>> model = periodic.LombScargleFast(fit_period=True)
+    >>> model.optimizer.period_range = (0.2, 1.2)
     >>> model = model.fit(t_r, mag_r, dmag_r)
-    >>> period = model.best_period
     Finding optimal frequency:
      - Estimated peak width = 0.00189
      - Using 5 steps per peak; omega_step = 0.000378
@@ -94,7 +99,7 @@ estimators. Let's use :class:`~gatspy.periodic.LombScargleFast` to do this:
      - Computing periods at 69190 steps
     Zooming-in on 5 candidate peaks:
      - Computing periods at 995 steps
-    >>> print("{0:.6f}".format(period))
+    >>> print("{0:.6f}".format(model.best_period))
     0.614317
 
 The periodogram optimizer uses a two-step grid search, first searching a
@@ -103,7 +108,8 @@ zooming-in on these to compute the observed period to high precision.
 Let's see how close this period is to the period measured by Sesar 2010
 using template fits:
 
-    >>> true_period = rrlyrae.get_metadata(lcid)['P']
+    >>> metadata = rrlyrae.get_metadata(lcid)
+    >>> true_period = metadata['P']
     >>> print("{0:.6f}".format(true_period))
     0.614318
 
@@ -159,9 +165,9 @@ to the data; we can see the model fit using the ``predict`` method of the
 periodic model:
 
     >>> import numpy as np
-    >>> tfit = np.linspace(0, period, 4)
+    >>> tfit = np.linspace(0, model.best_period, 4)
     >>> model.predict(tfit)
-    >>> array([ 17.03381525,  17.02560232,  17.37830128,  17.03381525])
+    array([ 17.03381525,  17.02560232,  17.37830128,  17.03381525])
 
 Let's take a look at this model plotted over the phased data:
 
@@ -188,6 +194,7 @@ Let's take a look at this model plotted over the phased data:
     # Fit the Lomb-Scargle model
     model = periodic.LombScargleFast()
     model.fit(t_r, mag_r, dmag_r)
+    model.optimizer.period_range = (0.2, 1.2)
 
     # Predict on a regular phase grid
     period = model.best_period
@@ -209,8 +216,8 @@ complicated than a simple sine wave!) but the model serves a useful
 purpose: it gives us an accurate period determination.
     
 
-Adjusting the Optimizer
------------------------
+Configuring the Optimizer
+-------------------------
 Finding the best period requires use of an optimizer. For typical optimization
 problems, this is done using some sort of automated minimization scheme such as
 gradient descent, or perhaps via a Bayesian sampling scheme such as MCMC.
@@ -244,9 +251,9 @@ oversampling factor (say, 5) and compute the grid based on this.
 
 We can see all of this in play when we ask the model for the best period:
 
-    >>> model = periodic.LombScargleFast()
+    >>> model = periodic.LombScargleFast(fit_period=True)
+    >>> model.optimizer.period_range = (0.2, 1.2)
     >>> model = model.fit(t_r, mag_r, dmag_r)
-    >>> period = model.best_period
     Finding optimal frequency:
      - Estimated peak width = 0.00189
      - Using 5 steps per peak; omega_step = 0.000378
@@ -259,11 +266,9 @@ These values can be adjusted via the ``optimizer`` argument to the model; this
 can be done either at or after instantiation. After instantiation is the
 preferred pattern for the default optimizer:
 
-    >>> model = periodic.LombScargleFast()
-    >>> model.optimizer.period_range = (0.5, 0.7)
-    >>> model.optimizer.first_pass_coverage = 10
+    >>> model = periodic.LombScargleFast(fit_period=True)
+    >>> model.optimizer.set(period_range=(0.5, 0.7), first_pass_coverage=10)
     >>> model = model.fit(t_r, mag_r, dmag_r)
-    >>> period = model.best_period
     Finding optimal frequency:
      - Estimated peak width = 0.00189
      - Using 10 steps per peak; omega_step = 0.000189

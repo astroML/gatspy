@@ -47,14 +47,16 @@ class LombScargleMultiband(LeastSquaresMixin, PeriodicModelerMultiband):
     """
     def __init__(self, optimizer=None, Nterms_base=1, Nterms_band=1,
                  reg_base=None, reg_band=1E-6, regularize_by_trace=True,
-                 center_data=True):
+                 center_data=True, fit_period=False, optimizer_kwds=None):
         self.Nterms_base = Nterms_base
         self.Nterms_band = Nterms_band
         self.reg_base = reg_base
         self.reg_band = reg_band
         self.regularize_by_trace = regularize_by_trace
         self.center_data = center_data
-        PeriodicModelerMultiband.__init__(self, optimizer)
+        PeriodicModelerMultiband.__init__(self, optimizer,
+                                          fit_period=fit_period,
+                                          optimizer_kwds=optimizer_kwds)
 
     def _fit(self, t, y, dy, filts):
         self.ymean_ = self._compute_ymean()
@@ -162,6 +164,10 @@ class LombScargleMultibandFast(PeriodicModelerMultiband):
         The base model to use for each individual band.
         By default it will use :class:`LombScargleFast` if Nterms == 1, and
         :class:`LombScargle` otherwise.
+    fit_period : bool (optional)
+        If True, then fit for the best period when fit() method is called.
+    optimizer_kwds : dict (optional
+        Dictionary of keyword arguments for constructing the optimizer
 
     See Also
     --------
@@ -169,7 +175,8 @@ class LombScargleMultibandFast(PeriodicModelerMultiband):
     LombScargleFast
     LombScargleMultiband
     """
-    def __init__(self, optimizer=None, Nterms=1, BaseModel=None):
+    def __init__(self, optimizer=None, Nterms=1, BaseModel=None,
+                 fit_period=False, optimizer_kwds=None):
         # Note: center_data must be True, or else the chi^2 weighting will fail
         self.Nterms = Nterms
 
@@ -179,7 +186,9 @@ class LombScargleMultibandFast(PeriodicModelerMultiband):
             else:
                 BaseModel = LombScargle
         self.BaseModel = BaseModel
-        PeriodicModelerMultiband.__init__(self, optimizer)
+        PeriodicModelerMultiband.__init__(self, optimizer,
+                                          fit_period=fit_period,
+                                          optimizer_kwds=optimizer_kwds)
 
     def _fit(self, t, y, dy, filts):
         masks = [(filts == f) for f in self.unique_filts_]
