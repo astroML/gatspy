@@ -22,9 +22,9 @@ class LinearScanOptimizer(PeriodicOptimizer):
     -----------------------
     period_range : tuple
         (min_period, max_period) for the linear scan
-    verbose : int (default = 1)
-        Level of verbosity for the optimization process. If greater than zero,
-        information about the optimization will be printed to stdout.
+    quiet : bool (default = False)
+        If true, then suppress printed output during optimization.
+        By default, information is printed to stdout.
     first_pass_coverage : float (default = 5.0)
         estimated number of points across the width of a typical peak for the
         initial scan.
@@ -32,12 +32,31 @@ class LinearScanOptimizer(PeriodicOptimizer):
         estimated number of points across the width of a typical peak within
         the final scan.
     """
-    def __init__(self, period_range=(0.2, 1.2), verbose=1,
+    def __init__(self, period_range=None, quiet=False,
                  first_pass_coverage=5, final_pass_coverage=500):
-        self.period_range = period_range
-        self.verbose = verbose
+        self._period_range = period_range
+        self.quiet = quiet
         self.first_pass_coverage = first_pass_coverage
         self.final_pass_coverage = final_pass_coverage
+
+    def set(self, **kwargs):
+        for key, val in kwargs.items():
+            setattr(self, key, val)
+
+    @property
+    def period_range(self):
+        if self._period_range is None:
+            raise ValueError("period_range must be set in optimizer in order "
+                             "to find the best periods. For example:\n"
+                             " >>> model = LombScargle(fit_period=True)\n"
+                             " >>> model.optimizer.period_range = (0.2, 1.0)")
+        return self._period_range
+
+    @period_range.setter
+    def period_range(self, value):
+        value = tuple(value)
+        assert len(value) == 2
+        self._period_range = value
 
     def compute_grid_size(self, model):
         # compute the estimated peak width from the data range
@@ -67,7 +86,7 @@ class LinearScanOptimizer(PeriodicOptimizer):
         periods = 2 * np.pi / omegas
 
         # print some updates if desired
-        if self.verbose:
+        if not self.quiet:
             print("Finding optimal frequency:")
             print(" - Estimated peak width = {0:.3g}".format(width))
             print(" - Using {0} steps per peak; "
@@ -109,7 +128,7 @@ class LinearScanOptimizer(PeriodicOptimizer):
             freqs = steps + candidate_freqs[:, np.newaxis]
             periods = 1. / freqs
 
-            if self.verbose:
+            if not self.quiet:
                 print("Zooming-in on {0} candidate peaks:"
                       "".format(n_candidates))
                 print(" - Computing periods at {0:.0f} "

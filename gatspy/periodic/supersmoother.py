@@ -24,6 +24,10 @@ class SuperSmoother(PeriodicModeler):
     optimizer : PeriodicOptimizer instance
         Optimizer to use to find the best period. If not specified, the
         LinearScanOptimizer will be used.
+    fit_period : bool (optional)
+        If True, then fit for the best period when fit() method is called.
+    optimizer_kwds : dict (optional
+        Dictionary of keyword arguments for constructing the optimizer
 
     Examples
     --------
@@ -33,6 +37,7 @@ class SuperSmoother(PeriodicModeler):
     >>> omega = 10
     >>> y = np.sin(omega * t) + dy * rng.randn(100)
     >>> ssm = SuperSmoother().fit(t, y, dy)
+    >>> ssm.optimizer.period_range = (0.2, 1.2)
     >>> ssm.best_period
     Finding optimal frequency:
      - Estimated peak width = 0.0639
@@ -49,8 +54,11 @@ class SuperSmoother(PeriodicModeler):
     --------
     LombScargle
     """
-    def __init__(self, optimizer=None):
-        PeriodicModeler.__init__(self, optimizer)
+    def __init__(self, optimizer=None,
+                 fit_period=False, optimizer_kwds=None):
+        PeriodicModeler.__init__(self, optimizer,
+                                 fit_period=fit_period,
+                                 optimizer_kwds=optimizer_kwds)
 
     def _fit(self, t, y, dy):
         # TODO: this should actually be a weighted median, probably...
@@ -80,10 +88,17 @@ class SuperSmootherMultiband(PeriodicModelerMultiband):
         LinearScanOptimizer will be used.
     BaseModel : class type (default = SuperSmoother)
         The base model to use for each individual band.
+    fit_period : bool (optional)
+        If True, then fit for the best period when fit() method is called.
+    optimizer_kwds : dict (optional
+        Dictionary of keyword arguments for constructing the optimizer
     """
-    def __init__(self, optimizer=None, BaseModel=SuperSmoother):
+    def __init__(self, optimizer=None, BaseModel=SuperSmoother,
+                 fit_period=False, optimizer_kwds=None):
         self.BaseModel = BaseModel
-        PeriodicModelerMultiband.__init__(self, optimizer)
+        PeriodicModelerMultiband.__init__(self, optimizer,
+                                          fit_period=fit_period,
+                                          optimizer_kwds=optimizer_kwds)
 
     def _fit(self, t, y, dy, filts):
         masks = [(filts == f) for f in self.unique_filts_]

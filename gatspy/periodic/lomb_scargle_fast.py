@@ -347,6 +347,10 @@ class LombScargleFast(LombScargle):
         the result
     ls_kwds : dict
         Dictionary of keywords to pass to the ``lomb_scargle_fast`` routine.
+    fit_period : bool (optional)
+        If True, then fit for the best period when fit() method is called.
+    optimizer_kwds : dict (optional
+        Dictionary of keyword arguments for constructing the optimizer
 
     Examples
     --------
@@ -356,6 +360,7 @@ class LombScargleFast(LombScargle):
     >>> omega = 10
     >>> y = np.sin(omega * t) + dy * rng.randn(100)
     >>> ls = LombScargleFast().fit(t, y, dy)
+    >>> ls.optimizer.period_range = (0.2, 1.2)
     >>> ls.best_period
     Finding optimal frequency:
      - Estimated peak width = 0.0639
@@ -379,7 +384,8 @@ class LombScargleFast(LombScargle):
            of unevenly sampled data". ApJ 1:338, p277, 1989
     """
     def __init__(self, optimizer=None, center_data=True, fit_offset=True,
-                 use_fft=True, ls_kwds=None, Nterms=1):
+                 use_fft=True, ls_kwds=None, Nterms=1,
+                 fit_period=False, optimizer_kwds=None):
         self.use_fft = use_fft
         self.ls_kwds = ls_kwds
 
@@ -388,7 +394,9 @@ class LombScargleFast(LombScargle):
 
         LombScargle.__init__(self, optimizer=optimizer,
                              center_data=center_data, fit_offset=fit_offset,
-                             Nterms=1, regularization=None)
+                             Nterms=1, regularization=None,
+                             fit_period=fit_period,
+                             optimizer_kwds=optimizer_kwds)
 
     def _score_frequency_grid(self, f0, df, N):
         freq, P = lomb_scargle_fast(self.t, self.y, self.dy,

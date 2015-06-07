@@ -136,6 +136,7 @@ def test_regularized(N=100, period=1):
         model = LombScargle(Nterms=1, regularization=0.1,
                             regularize_by_trace=regularize_by_trace)
         model.fit(t, y, dy)
+        model.optimizer.period_range = (0.2, 1.0)
         pred = model.predict(period)
 
 

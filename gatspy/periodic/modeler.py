@@ -7,13 +7,19 @@ from .optimizer import LinearScanOptimizer
 
 class PeriodicModeler(object):
     """Base class for periodic modeling"""
-    def __init__(self, optimizer=None, *args, **kwargs):
+    def __init__(self, optimizer=None, fit_period=False,
+                 optimizer_kwds=None, *args, **kwargs):
         if optimizer is None:
-            optimizer = LinearScanOptimizer()
+            kwds = optimizer_kwds or {}
+            optimizer = LinearScanOptimizer(**kwds)
+        elif optimizer_kwds:
+            warnings.warn("Optimizer specified, so optimizer keywords ignored")
+
         if not hasattr(optimizer, 'best_period'):
             raise ValueError("optimizer must be a PeriodicOptimizer instance: "
                              "{0} has no best_period method".format(optimizer))
         self.optimizer = optimizer
+        self.fit_period = fit_period
         self.args = args
         self.kwargs = kwargs
         self._best_period = None
@@ -33,6 +39,10 @@ class PeriodicModeler(object):
         self.t, self.y, self.dy = np.broadcast_arrays(t, y, dy)
         self._fit(self.t, self.y, self.dy)
         self._best_period = None  # reset best period in case of refitting
+
+        if self.fit_period:
+            self._best_period = self._calc_best_period()
+            
         return self
 
     def predict(self, t, period=None):
@@ -189,6 +199,9 @@ class PeriodicModelerMultiband(PeriodicModeler):
 
         self._fit(self.t, self.y, self.dy, self.filts)
         self._best_period = None  # reset best period in case of refitting
+
+        if self.fit_period:
+            self._best_period = self._calc_best_period()
         return self
 
     def predict(self, t, filts, period=None):

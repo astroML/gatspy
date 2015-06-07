@@ -118,6 +118,10 @@ class LombScargle(LeastSquaresMixin, PeriodicModeler):
         least squares fit.
     regularize_by_trace : boolean (default = True)
         If True, multiply regularization by the trace of the matrix
+    fit_period : bool (optional)
+        If True, then fit for the best period when fit() method is called.
+    optimizer_kwds : dict (optional
+        Dictionary of keyword arguments for constructing the optimizer
 
     Examples
     --------
@@ -127,6 +131,7 @@ class LombScargle(LeastSquaresMixin, PeriodicModeler):
     >>> omega = 10
     >>> y = np.sin(omega * t) + dy * rng.randn(100)
     >>> ls = LombScargle().fit(t, y, dy)
+    >>> ls.optimizer.period_range = (0.2, 1.2)
     >>> ls.best_period
     Finding optimal frequency:
      - Estimated peak width = 0.0639
@@ -146,13 +151,15 @@ class LombScargle(LeastSquaresMixin, PeriodicModeler):
     LombScargleMultibandFast
     """
     def __init__(self, optimizer=None, center_data=True, fit_offset=True,
-                 Nterms=1, regularization=None, regularize_by_trace=True):
+                 Nterms=1, regularization=None, regularize_by_trace=True,
+                 fit_period=False, optimizer_kwds=None):
         self.center_data = center_data
         self.fit_offset = fit_offset
         self.Nterms = int(Nterms)
         self.regularization = regularization
         self.regularize_by_trace = regularize_by_trace
-        PeriodicModeler.__init__(self, optimizer)
+        PeriodicModeler.__init__(self, optimizer, fit_period=fit_period,
+                                 optimizer_kwds=optimizer_kwds)
 
         if not self.center_data and not self.fit_offset:
             warnings.warn("Not centering data or fitting offset can lead "
@@ -223,6 +230,10 @@ class LombScargleAstroML(LombScargle):
     slow_version : boolean (default = False)
         If True, use the slower pure-python version from astroML. Otherwise,
         use the faster version of the code from astroML_addons
+    fit_period : bool (optional)
+        If True, then fit for the best period when fit() method is called.
+    optimizer_kwds : dict (optional
+        Dictionary of keyword arguments for constructing the optimizer
 
     Examples
     --------
@@ -232,6 +243,7 @@ class LombScargleAstroML(LombScargle):
     >>> omega = 10
     >>> y = np.sin(omega * t) + dy * rng.randn(100)
     >>> ls = LombScargleAstroML().fit(t, y, dy)
+    >>> ls.optimizer.period_range = (0.2, 1.2)
     >>> ls.best_period
     Finding optimal frequency:
      - Estimated peak width = 0.0639
@@ -249,12 +261,15 @@ class LombScargleAstroML(LombScargle):
     LombScargleMultibandFast
     """
     def __init__(self, optimizer=None, Nterms=1, fit_offset=True,
-                 center_data=True, slow_version=False):
+                 center_data=True, slow_version=False,
+                 fit_period=False, optimizer_kwds=None):
         if Nterms != 1:
             raise ValueError("Only Nterms=1 is supported")
 
         LombScargle.__init__(self, optimizer=optimizer, Nterms=1,
-                             center_data=center_data, fit_offset=fit_offset)
+                             center_data=center_data, fit_offset=fit_offset,
+                             fit_period=fit_period,
+                             optimizer_kwds=optimizer_kwds)
         if slow_version:
             from astroML.time_series._periodogram import lomb_scargle
         else:
