@@ -143,4 +143,4 @@ def test_bad_args():
     assert_raises(ValueError, LombScargle, Nterms=-2)
     assert_raises(ValueError, LombScargle, Nterms=0, fit_offset=False)
     assert_raises(ValueError, LombScargleAstroML, Nterms=2)
-    assert_raises(TypeError, LombScargleFast, Nterms=2)
+    assert_raises(ValueError, LombScargleFast, Nterms=2)

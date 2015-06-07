@@ -377,9 +377,13 @@ class LombScargleFast(LombScargle):
            of unevenly sampled data". ApJ 1:338, p277, 1989
     """
     def __init__(self, optimizer=None, center_data=True, fit_offset=True,
-                 use_fft=True, ls_kwds=None):
+                 use_fft=True, ls_kwds=None, Nterms=1):
         self.use_fft = use_fft
         self.ls_kwds = ls_kwds
+
+        if Nterms != 1:
+            raise ValueError("LombScargleFast supports only Nterms = 1")
+
         LombScargle.__init__(self, optimizer=optimizer,
                              center_data=center_data, fit_offset=fit_offset,
                              Nterms=1, regularization=None)

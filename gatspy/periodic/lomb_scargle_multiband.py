@@ -10,6 +10,7 @@ import numpy as np
 
 from .modeler import PeriodicModelerMultiband
 from .lomb_scargle import LombScargle, LeastSquaresMixin
+from .lomb_scargle_fast import LombScargleFast
 
 
 class LombScargleMultiband(LeastSquaresMixin, PeriodicModelerMultiband):
@@ -41,7 +42,7 @@ class LombScargleMultiband(LeastSquaresMixin, PeriodicModelerMultiband):
     See Also
     --------
     LombScargle
-    LombScargleAstroML
+    LombScargleFast
     LombScargleMultibandFast
     """
     def __init__(self, optimizer=None, Nterms_base=1, Nterms_band=1,
@@ -157,18 +158,26 @@ class LombScargleMultibandFast(PeriodicModelerMultiband):
         LinearScanOptimizer will be used.
     Nterms : integer (default = 1)
         Number of fourier terms to use in the model
-    BaseModel : class type (default = LombScargle)
+    BaseModel : PeriodicModeler class (optional)
         The base model to use for each individual band.
+        By default it will use :class:`LombScargleFast` if Nterms == 1, and
+        :class:`LombScargle` otherwise.
 
     See Also
     --------
     LombScargle
-    LombScargleAstroML
+    LombScargleFast
     LombScargleMultiband
     """
-    def __init__(self, optimizer=None, Nterms=1, BaseModel=LombScargle):
+    def __init__(self, optimizer=None, Nterms=1, BaseModel=None):
         # Note: center_data must be True, or else the chi^2 weighting will fail
         self.Nterms = Nterms
+
+        if BaseModel is None:
+            if Nterms == 1:
+                BaseModel = LombScargleFast
+            else:
+                BaseModel = LombScargle
         self.BaseModel = BaseModel
         PeriodicModelerMultiband.__init__(self, optimizer)
 
