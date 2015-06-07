@@ -1,6 +1,8 @@
 #Change Log
 
-## (v0.2) Feature Release
+## (v0.3) (not yet releaset)
+
+## (v0.2) Feature Release (07 June 2015)
 
 - Improved test coverage & refactored much of the code
 - Refactored datasets objects to be picklable for easier parallel analysis
