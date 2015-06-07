@@ -1,5 +1,9 @@
 .. _periodic_lomb_scargle_multiband:
 
+
+Multiband Lomb-Scargle Periodogram
+==================================
+
 .. currentmodule:: gatspy.periodic
 
 .. testsetup:: *
@@ -10,16 +14,12 @@
    rrlyrae = datasets.fetch_rrlyrae()
    lcid = rrlyrae.ids[0]
    t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
-   model = periodic.LombScargleMultibandFast()
+   model = periodic.LombScargleMultibandFast(fit_period=True)
+   model.optimizer.set(period_range=(0.5, 0.7), quiet=True)
    model.fit(t, mag, dmag, filts)
-   period = model.best_period
-
-   tfit = np.linspace(0, period, 1000)
+   tfit = np.linspace(0, model.best_period, 1000)
    magfit = model.predict(tfit, filts='g')
 
-
-Multiband Lomb-Scargle Periodogram
-==================================
 Though classical periodogram approaches only handle a single band of data,
 multiband extensions have been recently proposed. ``gatspy`` implements one
 which was suggested by
@@ -28,35 +28,50 @@ The interface is almost identical to that discussed in
 :ref:`periodic_lomb_scargle`, with the exception of the ``fit()`` method and
 ``predict()`` method requiring a specification of the filters.
 
+Two versions of the multiband periodogram are available:
+
+:class:`LombScargleMultiband`
+  This class implements the flexible multiband model described in VanderPlas
+  (2015). In particular, it uses regularization to push common variation into
+  a base model, which effectively simplifies the overall model and leads to
+  less background signal in the periodogram.
+
+:class:`LombScargleMultibandFast`
+  This class is a faster version of the multiband periodogram without
+  regularization. This means that it cannot fit the same range of models as
+  :class:`LombScargleMultiband`.
+
 Here is a quick example of finding the best period in multiband data. We'll
-use :class:`LombScargleMultibandFast`, which is less flexible than
-:class:`LombScargleMultiband` but uses a more efficient underlying model:
+use :class:`LombScargleMultibandFast` here.
+We start by loading the lightcurve (for more information, see :ref:`datasets`):
 
     >>> from gatspy import datasets, periodic
     >>> rrlyrae = datasets.fetch_rrlyrae()
     >>> lcid = rrlyrae.ids[0]
     >>> t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
 
-    >>> model = periodic.LombScargleMultibandFast()
+With this lightcurve specified, we can now build and fit the model:
+
+    >>> model = periodic.LombScargleMultibandFast(fit_period=True)
+    >>> model.optimizer.period_range=(0.5, 0.7)
     >>> model = model.fit(t, mag, dmag, filts)
-    >>> period = model.best_period
     Finding optimal frequency:
      - Estimated peak width = 0.00189
      - Using 5 steps per peak; omega_step = 0.000378
      - User-specified period range:  0.5 to 0.7
      - Computing periods at 9490 steps
     Zooming-in on 5 candidate peaks:
-    - Computing periods at 1000 steps
-    >>> print('{0:.6f}'.format(period))
+     - Computing periods at 1000 steps
+    >>> print('{0:.6f}'.format(model.best_period))
     0.614317
 
-With the model fit in this way, we can then use the ``predict()`` method to
+Once the model is fit, we can then use the ``predict()`` method to
 look at the model prediction for any given band:
 
-    >>> tfit = np.linspace(0, period, 1000)
+    >>> tfit = np.linspace(0, model.best_period, 1000)
     >>> magfit = model.predict(tfit, filts='g')
     >>> magfit[:4]
-    array([ 17.26358276,  17.26147076,  17.25936307,  17.25725976])
+    array([ 17.1411512 ,  17.13947457,  17.13780707,  17.13614876])
 
 Below is a plot of the magnitudes at this best-fit period:
 
@@ -79,18 +94,18 @@ Below is a plot of the magnitudes at this best-fit period:
     t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
 
     # Fit the Lomb-Scargle model
-    model = periodic.LombScargleMultibandFast()
+    model = periodic.LombScargleMultibandFast(fit_period=True)
+    model.optimizer.period_range = (0.2, 1.2)
     model.fit(t, mag, dmag, filts)
 
     # Predict on a regular phase grid
-    period = model.best_period
-    tfit = np.linspace(0, period, 1000)
+    tfit = np.linspace(0, model.best_period, 1000)
     filtsfit = np.array(list('ugriz'))[:, np.newaxis]
     magfit = model.predict(tfit, filts=filtsfit)
 
     # Plot the results
-    phase = (t / period) % 1
-    phasefit = (tfit / period)
+    phase = (t / model.best_period) % 1
+    phasefit = (tfit / model.best_period)
     
     fig, ax = plt.subplots()
     for i, filt in enumerate('ugriz'):
