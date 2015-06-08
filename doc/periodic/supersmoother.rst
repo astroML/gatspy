@@ -16,8 +16,8 @@ each candidate frequency, the supersmoother algorithm is applied to the phased
 data and the model scatter is computed. The period for which the model error
 is minimized is reported as the best period.
 
-Single Band
------------
+Single-band Supersmoother
+-------------------------
 The standard, single-band supersmoother is implemented in the
 :class:`SuperSmoother` algorithm. The main parts of the API discussion from
 :ref:`periodic_lomb_scargle` apply here as well. Here is an example of using
@@ -127,8 +127,8 @@ The supersmoother periodogram shows a clear spike at a period of around
 0.62 days.
 
 
-Multi Band
-----------
+Multiband Supersmoother
+-----------------------
 The ``gatspy.periodic`` module also contains a multiband version of the
 supersmoother. Unlike the multiband lomb-scargle, there is no attempt here to
 make the smoothing on each band consistent: the multiband model consists of

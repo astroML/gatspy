@@ -17,26 +17,28 @@ Lomb-Scargle Periodogram
    model.optimizer.set(period_range=(0.2, 1.2), quiet=True)
    model.fit(t_r, mag_r, dmag_r)
 
-One of the best known methods for detecting periodicity in time series is the
-Lomb-Scargle Periodogram. ``gatspy`` has three main implementations of the
-classic periodogram:
-
-:class:`~gatspy.periodic.LombScargleFast` 
-  This class implements the fast, O[N logN] implementation of Lomb-Scargle.
-  It is much faster than any of the above methods, especially as the number
-  of data points and frequencies increases. It is limited to a floating mean
-  model, and the frequencies must be computed on a regular grid.
+One of the best known methods for detecting periodicity in unevenly-sampled
+time series is the Lomb-Scargle Periodogram. ``gatspy`` has three main
+implementations of the classic periodogram:
 
 :class:`~gatspy.periodic.LombScargle`
   This basic method uses simple linear algebra to compute the periodogram.
   Though it is relatively slow, the approach allows for some enhancements such
   as floating mean, multiple Fourier terms, and regularization terms.
 
+:class:`~gatspy.periodic.LombScargleFast` 
+  This class implements the fast, O[N logN] implementation of the Lomb-Scargle
+  periodogram. It is much faster than either of the below methods, especially
+  as the number of data points and frequencies increases. It is limited to
+  either a simple pre-centered model or a floating mean model, and the
+  frequencies must be computed on a regular grid.
+
 :class:`~gatspy.periodic.LombScargleAstroML`
   This class depends on the Lomb-Scargle implementation in
   `astroML <http://www.astroml.org>`_. This is a cython implementation, and
   is slightly faster than :class:`~gatspy.periodic.LombScargle`, though it
-  does not handle higher-order fits or regularization.
+  does not handle higher-order fits or regularization. It is mainly implemented
+  for the sake of unit testing.
 
 For the basic no-frills Lomb-Scargle algorithm, the best option to use is
 :class:`~gatspy.periodic.LombScargleFast`. Keep in mind that aside from
@@ -62,7 +64,8 @@ important ways:
    filter/band in which the magnitude is observed.
 2. The ``predict()`` and ``score()`` methods require specification of a period.
    If this period is not supplied, the best period will be found automatically
-   via an exhaustive grid search, which can be very slow for some datasets!
+   via an exhaustive grid search, which can be very slow for some models and/or
+   datasets!
 
 We'll see examples of this below.
 
@@ -71,7 +74,8 @@ Basic Lomb-Scargle Periodogram
 We'll start by looking at the basic Lomb-Scargle Periodogram, using the
 :class:`~gatspy.periodic.LombScargleFast` model.
 Let's start by loading one r-band RR Lyrae lightcurve using the
-:func:`gatspy.datasets.fetch_rrlyrae` function:
+:func:`gatspy.datasets.fetch_rrlyrae` function, which is discussed more fully
+in :ref:`datasets`.
 
     >>> from gatspy import datasets, periodic
     >>> rrlyrae = datasets.fetch_rrlyrae()
@@ -80,7 +84,7 @@ Let's start by loading one r-band RR Lyrae lightcurve using the
     >>> mask = (filts == 'r')
     >>> t_r, mag_r, dmag_r = t[mask], mag[mask], dmag[mask]
 
-Given this data, we'd like to find the best period with the periodogram.
+Given this data, we'd like to determine the best period using the periodogram.
 This can be done using the ``find_best_period`` method of any of the above
 estimators, once the ``period_range`` attribute of the optimizer is set
 (see discussion below).
@@ -213,7 +217,9 @@ Let's take a look at this model plotted over the phased data:
 
 The model is clearly not a good fit for the data (RR Lyrae are much more
 complicated than a simple sine wave!) but the model serves a useful
-purpose: it gives us an accurate period determination.
+purpose: it gives us an accurate period determination: the key is that although
+the sine wave is not a good fit to the data, it is a *much better fit* at the
+correct period than it is at the incorrect period.
     
 
 Configuring the Optimizer
@@ -237,7 +243,8 @@ This can't be stressed enough, as such misuse of Nyquist-type arguments comes
 up often in the literature: **The periodogram of an unequally-spaced time
 series is generally sensitive to periods far smaller than the minimum time
 between observations.** Thus the search range is an entirely free parameter,
-which must be set by the user based on intuition about the data.
+which must be set by the user based on intuition about the data, and in gatspy
+is set via the ``model.optimizer.period_range`` parameter.
 
 The **spacing of the grid** is easier to determine automatically. The grid
 spacing must be much smaller than the width a typical periodogram peak, or
@@ -245,9 +252,14 @@ you risk entirely missing peaks within the scan. The typical width of a
 periodogram peak is inversely proportional to the **range** of the data; that
 is, if the first observation is at :math:`t_{min}` and the last observation is
 at :math:`t_{max}`, then the peak width *in frequency* is approximately
-:math:`w = 2\pi/(t_{max} - t_{min})`. The grid should be chosen such that
-multiple grid poins cover each potential peak, so we need to choose an
-oversampling factor (say, 5) and compute the grid based on this.
+
+.. math::
+
+   \Delta f = 2\pi/(t_{max} - t_{min}).
+
+The grid should be chosen such that multiple grid poins cover each potential
+peak, so we need to choose an oversampling factor (say, 5) and compute the
+grid based on this.
 
 We can see all of this in play when we ask the model for the best period.
 Since we're looking at RR Lyrae which have typical periods of around 0.5 days,
