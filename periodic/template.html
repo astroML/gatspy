@@ -64,14 +64,13 @@
 perhaps the best way to narrow-in on the period of astronomical objects,
 particularly if the templates fit the data well. The reason for the slow
 performance is that template models require a nonlinear optimization for
-each period.</p>
+each candidate period.</p>
 <p>Note that while it is possible to use the period optimizer with the template
 method, we skip it here because it is very computationally intensive.</p>
 <div class="section" id="single-band-template-model">
 <h2>Single Band Template Model<a class="headerlink" href="#single-band-template-model" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><code class="docutils literal"><span class="pre">gatspy</span></code> implements a template-based model using the Sesar 2010 RR Lyrae</div></blockquote>
-<p>templates in the <a class="reference internal" href="API.html#gatspy.periodic.RRLyraeTemplateModeler" title="gatspy.periodic.RRLyraeTemplateModeler"><code class="xref py py-class docutils literal"><span class="pre">RRLyraeTemplateModeler</span></code></a> class.
+<p><code class="docutils literal"><span class="pre">gatspy</span></code> implements a template-based model using the Sesar 2010 RR Lyrae
+templates in the <a class="reference internal" href="API.html#gatspy.periodic.RRLyraeTemplateModeler" title="gatspy.periodic.RRLyraeTemplateModeler"><code class="xref py py-class docutils literal"><span class="pre">RRLyraeTemplateModeler</span></code></a> class.
 We&#8217;ll demonstrate its use here, starting with fetching some RR Lyrae data:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gatspy</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">periodic</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">fetch_rrlyrae</span><span class="p">()</span>
@@ -87,8 +86,8 @@ We&#8217;ll demonstrate its use here, starting with fetching some RR Lyrae data:
 </pre></div>
 </div>
 <p>With this model fit, we can now compute the light curve for any given period.
-This fit will try all available templates and use the one which provides
-the closest fit:</p>
+This fit will compute the RMS residual around all available templates and use
+the one which provides the closest fit:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">t_fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mag_fit</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">t_fit</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
 </pre></div>

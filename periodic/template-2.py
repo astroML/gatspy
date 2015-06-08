@@ -26,5 +26,5 @@ for i, filt in enumerate('ugriz'):
     errorbar = ax.errorbar(phase[mask], mag[mask], dmag[mask], fmt='o')
     ax.plot(phasefit, mag_fit[i], label=filt,
             color=errorbar.lines[0].get_color(), alpha=0.5, lw=2)
-ax.set(xlabel='phase', ylabel='r magnitude')
+ax.set(xlabel='phase', ylabel='magnitude')
 ax.invert_yaxis()

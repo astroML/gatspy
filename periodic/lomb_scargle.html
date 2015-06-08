@@ -60,24 +60,26 @@
             
   <div class="section" id="lomb-scargle-periodogram">
 <span id="periodic-lomb-scargle"></span><h1>Lomb-Scargle Periodogram<a class="headerlink" href="#lomb-scargle-periodogram" title="Permalink to this headline">¶</a></h1>
-<p>One of the best known methods for detecting periodicity in time series is the
-Lomb-Scargle Periodogram. <code class="docutils literal"><span class="pre">gatspy</span></code> has three main implementations of the
-classic periodogram:</p>
+<p>One of the best known methods for detecting periodicity in unevenly-sampled
+time series is the Lomb-Scargle Periodogram. <code class="docutils literal"><span class="pre">gatspy</span></code> has three main
+implementations of the classic periodogram:</p>
 <dl class="docutils">
-<dt><a class="reference internal" href="API.html#gatspy.periodic.LombScargleFast" title="gatspy.periodic.LombScargleFast"><code class="xref py py-class docutils literal"><span class="pre">LombScargleFast</span></code></a></dt>
-<dd>This class implements the fast, O[N logN] implementation of Lomb-Scargle.
-It is much faster than any of the above methods, especially as the number
-of data points and frequencies increases. It is limited to a floating mean
-model, and the frequencies must be computed on a regular grid.</dd>
 <dt><a class="reference internal" href="API.html#gatspy.periodic.LombScargle" title="gatspy.periodic.LombScargle"><code class="xref py py-class docutils literal"><span class="pre">LombScargle</span></code></a></dt>
 <dd>This basic method uses simple linear algebra to compute the periodogram.
 Though it is relatively slow, the approach allows for some enhancements such
 as floating mean, multiple Fourier terms, and regularization terms.</dd>
+<dt><a class="reference internal" href="API.html#gatspy.periodic.LombScargleFast" title="gatspy.periodic.LombScargleFast"><code class="xref py py-class docutils literal"><span class="pre">LombScargleFast</span></code></a></dt>
+<dd>This class implements the fast, O[N logN] implementation of the Lomb-Scargle
+periodogram. It is much faster than either of the below methods, especially
+as the number of data points and frequencies increases. It is limited to
+either a simple pre-centered model or a floating mean model, and the
+frequencies must be computed on a regular grid.</dd>
 <dt><a class="reference internal" href="API.html#gatspy.periodic.LombScargleAstroML" title="gatspy.periodic.LombScargleAstroML"><code class="xref py py-class docutils literal"><span class="pre">LombScargleAstroML</span></code></a></dt>
 <dd>This class depends on the Lomb-Scargle implementation in
 <a class="reference external" href="http://www.astroml.org">astroML</a>. This is a cython implementation, and
 is slightly faster than <a class="reference internal" href="API.html#gatspy.periodic.LombScargle" title="gatspy.periodic.LombScargle"><code class="xref py py-class docutils literal"><span class="pre">LombScargle</span></code></a>, though it
-does not handle higher-order fits or regularization.</dd>
+does not handle higher-order fits or regularization. It is mainly implemented
+for the sake of unit testing.</dd>
 </dl>
 <p>For the basic no-frills Lomb-Scargle algorithm, the best option to use is
 <a class="reference internal" href="API.html#gatspy.periodic.LombScargleFast" title="gatspy.periodic.LombScargleFast"><code class="xref py py-class docutils literal"><span class="pre">LombScargleFast</span></code></a>. Keep in mind that aside from
@@ -102,7 +104,8 @@ For multiband methods, the fit method also accepts a specification of the
 filter/band in which the magnitude is observed.</li>
 <li>The <code class="docutils literal"><span class="pre">predict()</span></code> and <code class="docutils literal"><span class="pre">score()</span></code> methods require specification of a period.
 If this period is not supplied, the best period will be found automatically
-via an exhaustive grid search, which can be very slow for some datasets!</li>
+via an exhaustive grid search, which can be very slow for some models and/or
+datasets!</li>
 </ol>
 <p>We&#8217;ll see examples of this below.</p>
 </div>
@@ -111,7 +114,8 @@ via an exhaustive grid search, which can be very slow for some datasets!</li>
 <p>We&#8217;ll start by looking at the basic Lomb-Scargle Periodogram, using the
 <a class="reference internal" href="API.html#gatspy.periodic.LombScargleFast" title="gatspy.periodic.LombScargleFast"><code class="xref py py-class docutils literal"><span class="pre">LombScargleFast</span></code></a> model.
 Let&#8217;s start by loading one r-band RR Lyrae lightcurve using the
-<a class="reference internal" href="../datasets/API.html#gatspy.datasets.fetch_rrlyrae" title="gatspy.datasets.fetch_rrlyrae"><code class="xref py py-func docutils literal"><span class="pre">gatspy.datasets.fetch_rrlyrae()</span></code></a> function:</p>
+<a class="reference internal" href="../datasets/API.html#gatspy.datasets.fetch_rrlyrae" title="gatspy.datasets.fetch_rrlyrae"><code class="xref py py-func docutils literal"><span class="pre">gatspy.datasets.fetch_rrlyrae()</span></code></a> function, which is discussed more fully
+in <a class="reference internal" href="../datasets/index.html#datasets"><span>Datasets (gatspy.datasets)</span></a>.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gatspy</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">periodic</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">fetch_rrlyrae</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -120,7 +124,7 @@ Let&#8217;s start by loading one r-band RR Lyrae lightcurve using the
 <span class="gp">&gt;&gt;&gt; </span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">mag</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dmag</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>Given this data, we&#8217;d like to find the best period with the periodogram.
+<p>Given this data, we&#8217;d like to determine the best period using the periodogram.
 This can be done using the <code class="docutils literal"><span class="pre">find_best_period</span></code> method of any of the above
 estimators, once the <code class="docutils literal"><span class="pre">period_range</span></code> attribute of the optimizer is set
 (see discussion below).</p>
@@ -178,7 +182,9 @@ periodic model:</p>
 </div>
 <p>The model is clearly not a good fit for the data (RR Lyrae are much more
 complicated than a simple sine wave!) but the model serves a useful
-purpose: it gives us an accurate period determination.</p>
+purpose: it gives us an accurate period determination: the key is that although
+the sine wave is not a good fit to the data, it is a <em>much better fit</em> at the
+correct period than it is at the incorrect period.</p>
 </div>
 <div class="section" id="configuring-the-optimizer">
 <h2>Configuring the Optimizer<a class="headerlink" href="#configuring-the-optimizer" title="Permalink to this headline">¶</a></h2>
@@ -199,16 +205,19 @@ This can&#8217;t be stressed enough, as such misuse of Nyquist-type arguments co
 up often in the literature: <strong>The periodogram of an unequally-spaced time
 series is generally sensitive to periods far smaller than the minimum time
 between observations.</strong> Thus the search range is an entirely free parameter,
-which must be set by the user based on intuition about the data.</p>
+which must be set by the user based on intuition about the data, and in gatspy
+is set via the <code class="docutils literal"><span class="pre">model.optimizer.period_range</span></code> parameter.</p>
 <p>The <strong>spacing of the grid</strong> is easier to determine automatically. The grid
 spacing must be much smaller than the width a typical periodogram peak, or
 you risk entirely missing peaks within the scan. The typical width of a
 periodogram peak is inversely proportional to the <strong>range</strong> of the data; that
 is, if the first observation is at <img class="math" src="../_images/math/1212b474e0e738e501f3106b8eb2825bca472c7c.png" alt="t_{min}"/> and the last observation is
-at <img class="math" src="../_images/math/0c479dcb6ef4ceaf2dba254bede5607d454c5c49.png" alt="t_{max}"/>, then the peak width <em>in frequency</em> is approximately
-<img class="math" src="../_images/math/4b04319842095b4ea29fb3d84f7c56c250e719cb.png" alt="w = 2\pi/(t_{max} - t_{min})"/>. The grid should be chosen such that
-multiple grid poins cover each potential peak, so we need to choose an
-oversampling factor (say, 5) and compute the grid based on this.</p>
+at <img class="math" src="../_images/math/0c479dcb6ef4ceaf2dba254bede5607d454c5c49.png" alt="t_{max}"/>, then the peak width <em>in frequency</em> is approximately</p>
+<div class="math">
+<p><img src="../_images/math/63662a2980c7fbdf45acc140dce44897cbd57dc1.png" alt="\Delta f = 2\pi/(t_{max} - t_{min})."/></p>
+</div><p>The grid should be chosen such that multiple grid poins cover each potential
+peak, so we need to choose an oversampling factor (say, 5) and compute the
+grid based on this.</p>
 <p>We can see all of this in play when we ask the model for the best period.
 Since we&#8217;re looking at RR Lyrae which have typical periods of around 0.5 days,
 we&#8217;ll choose a range around this.

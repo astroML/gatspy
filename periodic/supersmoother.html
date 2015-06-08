@@ -65,8 +65,8 @@ within the astronomical literature as an estimator of periodic content. For
 each candidate frequency, the supersmoother algorithm is applied to the phased
 data and the model scatter is computed. The period for which the model error
 is minimized is reported as the best period.</p>
-<div class="section" id="single-band">
-<h2>Single Band<a class="headerlink" href="#single-band" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="single-band-supersmoother">
+<h2>Single-band Supersmoother<a class="headerlink" href="#single-band-supersmoother" title="Permalink to this headline">¶</a></h2>
 <p>The standard, single-band supersmoother is implemented in the
 <a class="reference internal" href="API.html#gatspy.periodic.SuperSmoother" title="gatspy.periodic.SuperSmoother"><code class="xref py py-class docutils literal"><span class="pre">SuperSmoother</span></code></a> algorithm. The main parts of the API discussion from
 <a class="reference internal" href="lomb_scargle.html#periodic-lomb-scargle"><span>Lomb-Scargle Periodogram</span></a> apply here as well. Here is an example of using
@@ -109,8 +109,8 @@ analog of the Lomb-Scargle periodogram using the supersmoother as well:</p>
 <p>The supersmoother periodogram shows a clear spike at a period of around
 0.62 days.</p>
 </div>
-<div class="section" id="multi-band">
-<h2>Multi Band<a class="headerlink" href="#multi-band" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="multiband-supersmoother">
+<h2>Multiband Supersmoother<a class="headerlink" href="#multiband-supersmoother" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="docutils literal"><span class="pre">gatspy.periodic</span></code> module also contains a multiband version of the
 supersmoother. Unlike the multiband lomb-scargle, there is no attempt here to
 make the smoothing on each band consistent: the multiband model consists of
@@ -135,8 +135,8 @@ unknown peak.</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">SuperSmoother</a><ul>
-<li><a class="reference internal" href="#single-band">Single Band</a></li>
-<li><a class="reference internal" href="#multi-band">Multi Band</a></li>
+<li><a class="reference internal" href="#single-band-supersmoother">Single-band Supersmoother</a></li>
+<li><a class="reference internal" href="#multiband-supersmoother">Multiband Supersmoother</a></li>
 </ul>
 </li>
 </ul>

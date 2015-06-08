@@ -77,7 +77,8 @@ less background signal in the periodogram.</dd>
 <dt><a class="reference internal" href="API.html#gatspy.periodic.LombScargleMultibandFast" title="gatspy.periodic.LombScargleMultibandFast"><code class="xref py py-class docutils literal"><span class="pre">LombScargleMultibandFast</span></code></a></dt>
 <dd>This class is a faster version of the multiband periodogram without
 regularization. This means that it cannot fit the same range of models as
-<a class="reference internal" href="API.html#gatspy.periodic.LombScargleMultiband" title="gatspy.periodic.LombScargleMultiband"><code class="xref py py-class docutils literal"><span class="pre">LombScargleMultiband</span></code></a>.</dd>
+<a class="reference internal" href="API.html#gatspy.periodic.LombScargleMultiband" title="gatspy.periodic.LombScargleMultiband"><code class="xref py py-class docutils literal"><span class="pre">LombScargleMultiband</span></code></a>, but essentially just combines several
+independent band-by-band fits.</dd>
 </dl>
 <p>Here is a quick example of finding the best period in multiband data. We&#8217;ll
 use <a class="reference internal" href="API.html#gatspy.periodic.LombScargleMultibandFast" title="gatspy.periodic.LombScargleMultibandFast"><code class="xref py py-class docutils literal"><span class="pre">LombScargleMultibandFast</span></code></a> here.
@@ -117,7 +118,9 @@ look at the model prediction for any given band:</p>
 <img alt="../_images/lomb_scargle_multiband-1.png" src="../_images/lomb_scargle_multiband-1.png" />
 </div>
 <p>We see that the simplest multiband model is just a set of offset sine fits to
-the individual bands.</p>
+the individual bands. As in the single-band case, the model is not a
+particularly good fit to the data, but nevertheless it is useful in
+determining the period from the data.</p>
 <p>A more sophisticated multiband approach involves model simplification via a
 regularization term that pushes common variation into a &#8220;base model&#8221;; this
 is slightly slower to compute, but can be accomplished with the

@@ -39,7 +39,8 @@ Two versions of the multiband periodogram are available:
 :class:`LombScargleMultibandFast`
   This class is a faster version of the multiband periodogram without
   regularization. This means that it cannot fit the same range of models as
-  :class:`LombScargleMultiband`.
+  :class:`LombScargleMultiband`, but essentially just combines several
+  independent band-by-band fits.
 
 Here is a quick example of finding the best period in multiband data. We'll
 use :class:`LombScargleMultibandFast` here.
@@ -116,7 +117,9 @@ Below is a plot of the magnitudes at this best-fit period:
     ax.invert_yaxis()
 
 We see that the simplest multiband model is just a set of offset sine fits to
-the individual bands.
+the individual bands. As in the single-band case, the model is not a
+particularly good fit to the data, but nevertheless it is useful in
+determining the period from the data.
 
 A more sophisticated multiband approach involves model simplification via a
 regularization term that pushes common variation into a "base model"; this
