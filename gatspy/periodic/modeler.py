@@ -36,7 +36,12 @@ class PeriodicModeler(object):
         dy : float or array_like (optional)
             errors on observed values
         """
+        # For linear models, dy=1 is equivalent to no errors
+        if dy is None:
+            dy = 1
+
         self.t, self.y, self.dy = np.broadcast_arrays(t, y, dy)
+
         self._fit(self.t, self.y, self.dy)
         self._best_period = None  # reset best period in case of refitting
 
@@ -194,6 +199,11 @@ class PeriodicModelerMultiband(PeriodicModeler):
             The array specifying the filter/bandpass for each observation.
         """
         self.unique_filts_ = np.unique(filts)
+
+        # For linear models, dy=1 is equivalent to no errors
+        if dy is None:
+            dy = 1
+
         all_data = np.broadcast_arrays(t, y, dy, filts)
         self.t, self.y, self.dy, self.filts = map(np.ravel, all_data)
 

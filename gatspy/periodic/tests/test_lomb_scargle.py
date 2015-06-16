@@ -47,8 +47,6 @@ def test_lomb_scargle_std_vs_centered(N=100, period=1):
 
 
 def test_dy_scalar(N=100, period=1):
-    """Test whether the standard and generalized lomb-scargle
-    give close to the same results for non-centered data"""
     t, y, dy = _generate_data(N, period)
 
     # Make dy array all the same
@@ -144,3 +142,16 @@ def test_bad_args():
     assert_raises(ValueError, LombScargle, Nterms=0, fit_offset=False)
     assert_raises(ValueError, LombScargleAstroML, Nterms=2)
     assert_raises(ValueError, LombScargleFast, Nterms=2)
+
+
+def test_dy_None(N=100, period=1):
+    t, y, dy = _generate_data(N, period)
+    period, score = LombScargle().fit(t, y, 1).periodogram_auto()
+
+    def check_model(Model):
+        p, s = Model().fit(t, y).periodogram_auto()
+        assert_allclose(p, period)
+        assert_allclose(s, score, atol=1E-2)
+
+    for Model in [LombScargle, LombScargleAstroML, LombScargleFast]:
+        yield check_model, Model

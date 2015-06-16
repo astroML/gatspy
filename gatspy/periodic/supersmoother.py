@@ -62,7 +62,10 @@ class SuperSmoother(PeriodicModeler):
 
     def _fit(self, t, y, dy):
         # TODO: this should actually be a weighted median, probably...
-        mu = np.sum(y / dy ** 2) / np.sum(1 / dy ** 2)
+        if dy.size == 1:
+            mu = np.mean(y)
+        else:
+            mu = np.average(y, weights=1 / dy ** 2)
         self.baseline_err = np.mean(abs((y - mu) / dy))
 
     def _predict(self, t, period):

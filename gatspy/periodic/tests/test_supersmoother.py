@@ -19,8 +19,6 @@ def _generate_data(N=100, period=1, theta=[10, 2, 3], dy=1, rseed=0):
 
 
 def test_supersmoother(N=100, period=1):
-    """Test whether the standard and generalized lomb-scargle
-    give close to the same results for non-centered data"""
     t, y, dy = _generate_data(N, period)
 
     model = SuperSmoother().fit(t, y, dy)
@@ -30,8 +28,6 @@ def test_supersmoother(N=100, period=1):
 
 
 def test_supersmoother_dy_scalar(N=100, period=1):
-    """Test whether the standard and generalized lomb-scargle
-    give close to the same results for non-centered data"""
     t, y, dy = _generate_data(N, period)
 
     # Make dy array all the same
@@ -40,6 +36,14 @@ def test_supersmoother_dy_scalar(N=100, period=1):
 
     assert_equal(SuperSmoother().fit(t, y, dy).score(periods),
                  SuperSmoother().fit(t, y, dy[0]).score(periods))
+
+
+def test_supersmoother_dy_None(N=100, period=1):
+    t, y, dy = _generate_data(N, period)
+    periods = np.linspace(period / 2, period * 2, 100)
+
+    assert_equal(SuperSmoother().fit(t, y, 1).score(periods),
+                 SuperSmoother().fit(t, y).score(periods))
 
 
 def test_supersmoother_multiband(N=100, period=1):

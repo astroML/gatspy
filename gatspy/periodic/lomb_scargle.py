@@ -36,12 +36,10 @@ class LeastSquaresMixin(object):
         y = np.asarray(kwargs.get('y', self.y))
         dy = np.asarray(kwargs.get('dy', self.dy))
 
-        # if dy is a scalar, we use the simple mean
         if dy.size == 1:
             return np.mean(y)
         else:
-            w = 1 / dy ** 2
-            return np.dot(y, w) / w.sum()
+            return np.average(y, weights=1 / dy ** 2)
 
     def _construct_y(self, weighted=True, **kwargs):
         y = kwargs.get('y', self.y)
@@ -194,7 +192,6 @@ class LombScargle(LeastSquaresMixin, PeriodicModeler):
     def _fit(self, t, y, dy):
         self.yw_ = self._construct_y(weighted=True)
         self.ymean_ = self._compute_ymean()
-        return self
 
     def _predict(self, t, period):
         omega = 2 * np.pi / period
