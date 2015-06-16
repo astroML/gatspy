@@ -38,8 +38,8 @@ class RRLyraeGenerated(object):
     >>> mag.round(2)
     array([ 17.74,  17.04])
     """
-    lcdata = fetch_rrlyrae()
-    templates = fetch_rrlyrae_templates()
+    lcdata = None
+    templates = None
 
     # Extinction corrections: Table 1 from Berry et al. (2012, ApJ, 757, 166).
     ext_correction = {'u': 1.810,
@@ -47,6 +47,12 @@ class RRLyraeGenerated(object):
                       'r': 1.0,
                       'i': 0.759,
                       'z': 0.561}
+
+    @classmethod
+    def _fetch_data(cls):
+        if cls.lcdata is None:
+            cls.lcdata = fetch_rrlyrae()
+            cls.templates = fetch_rrlyrae_templates()
 
     @classmethod
     def _template_func(cls, num, band, mu=0, A=1):
@@ -57,6 +63,7 @@ class RRLyraeGenerated(object):
         return interp1d(phase, mu + A * amp)
 
     def __init__(self, lcid, random_state=None):
+        self._fetch_data()
         self.lcid = lcid
         self.meta = self.lcdata.get_metadata(lcid)
         self.obsmeta = self.lcdata.get_obsmeta(lcid)
