@@ -3,20 +3,6 @@
 Lomb-Scargle Periodogram
 ========================
 
-.. testsetup:: *
-
-   import numpy as np
-   from gatspy import datasets, periodic
-
-   rrlyrae = datasets.fetch_rrlyrae()
-   lcid = rrlyrae.ids[0]
-   t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
-   mask = (filts == 'r')
-   t_r, mag_r, dmag_r = t[mask], mag[mask], dmag[mask]
-   model = periodic.LombScargleFast(fit_period=True)
-   model.optimizer.set(period_range=(0.2, 1.2), quiet=True)
-   model.fit(t_r, mag_r, dmag_r)
-
 One of the best known methods for detecting periodicity in unevenly-sampled
 time series is the Lomb-Scargle Periodogram. ``gatspy`` has three main
 implementations of the classic periodogram:
@@ -77,12 +63,19 @@ Let's start by loading one r-band RR Lyrae lightcurve using the
 :func:`gatspy.datasets.fetch_rrlyrae` function, which is discussed more fully
 in :ref:`datasets`.
 
-    >>> from gatspy import datasets, periodic
-    >>> rrlyrae = datasets.fetch_rrlyrae()
-    >>> lcid = rrlyrae.ids[0]
-    >>> t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
-    >>> mask = (filts == 'r')
-    >>> t_r, mag_r, dmag_r = t[mask], mag[mask], dmag[mask]
+.. ipython::
+
+    In [1]: from gatspy import datasets, periodic
+
+    In [2]: rrlyrae = datasets.fetch_rrlyrae()
+
+    In [3]: lcid = rrlyrae.ids[0]
+
+    In [4]: t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
+
+    In [5]: mask = (filts == 'r')
+
+    In [6]: t_r, mag_r, dmag_r = t[mask], mag[mask], dmag[mask]
 
 Given this data, we'd like to determine the best period using the periodogram.
 This can be done using the ``find_best_period`` method of any of the above
@@ -93,9 +86,13 @@ Let's quickly demonstrate this with :class:`~gatspy.periodic.LombScargleFast`.
 Because our data is from an RR Lyrae star, we'll set a conservative period
 range of 0.2 to 1.2 days to make sure it contains the true period:
 
-    >>> model = periodic.LombScargleFast(fit_period=True)
-    >>> model.optimizer.period_range = (0.2, 1.2)
-    >>> model = model.fit(t_r, mag_r, dmag_r)
+.. ipython::
+
+    In [7]: model = periodic.LombScargleFast(fit_period=True)
+
+    In [8]: model.optimizer.period_range = (0.2, 1.2)
+
+    In [9]: model = model.fit(t_r, mag_r, dmag_r)
     Finding optimal frequency:
      - Estimated peak width = 0.00189
      - Using 5 steps per peak; omega_step = 0.000378
@@ -103,8 +100,14 @@ range of 0.2 to 1.2 days to make sure it contains the true period:
      - Computing periods at 69190 steps
     Zooming-in on 5 candidate peaks:
      - Computing periods at 995 steps
-    >>> print("{0:.6f}".format(model.best_period))
-    0.614317
+
+Now the best period is found in the ``best_period`` attribute of the model:
+
+.. ipython::
+
+    @doctest float
+    In [10]: model.best_period
+    Out[10]: 0.61431661211675215
 
 The periodogram optimizer uses a two-step grid search, first searching a
 relatively coarse grid to find several candidate frequencies, and finally
@@ -112,10 +115,15 @@ zooming-in on these to compute the observed period to high precision.
 Let's see how close this period is to the period measured by Sesar 2010
 using template fits:
 
-    >>> metadata = rrlyrae.get_metadata(lcid)
-    >>> true_period = metadata['P']
-    >>> print("{0:.6f}".format(true_period))
-    0.614318
+.. ipython::
+
+    In [11]: metadata = rrlyrae.get_metadata(lcid)
+
+    In [12]: true_period = metadata['P']
+
+    @doctest float
+    In [13]: true_period
+    Out[13]: 0.61431831
 
 The two periods differ to about :math:`10^{-6}` days, or approximately one tenth
 of a second. To see more about what is going on in the periodogram, let's plot
@@ -168,10 +176,15 @@ The Lomb-Scargle model is essentially a least squares fit of a single sinusoid
 to the data; we can see the model fit using the ``predict`` method of the
 periodic model:
 
-    >>> import numpy as np
-    >>> tfit = np.linspace(0, model.best_period, 4)
-    >>> model.predict(tfit)
-    array([ 17.03381525,  17.02560232,  17.37830128,  17.03381525])
+.. ipython::
+
+    In [14]: import numpy as np
+
+    In [15]: tfit = np.linspace(0, model.best_period, 4)
+
+    @doctest float
+    In [16]: model.predict(tfit)
+    Out[16]: array([ 17.03381525,  17.02560232,  17.37830128,  17.03381525])
 
 Let's take a look at this model plotted over the phased data:
 
@@ -268,9 +281,13 @@ Note that the units of ``period_range`` should match the units of the times
 passed to the ``fit()`` algorithm. Here the input times are in days, so the
 ``period_range`` is specified as ``(min_period, max_period)`` in days:
 
-    >>> model = periodic.LombScargleFast(fit_period=True)
-    >>> model.optimizer.period_range = (0.2, 1.2)
-    >>> model = model.fit(t_r, mag_r, dmag_r)
+.. ipython::
+
+    In [17]: model = periodic.LombScargleFast(fit_period=True)
+
+    In [18]: model.optimizer.period_range = (0.2, 1.2)
+
+    In [19]: model = model.fit(t_r, mag_r, dmag_r)
     Finding optimal frequency:
      - Estimated peak width = 0.00189
      - Using 5 steps per peak; omega_step = 0.000378
@@ -283,9 +300,13 @@ These values can be adjusted via the ``optimizer`` argument to the model; this
 can be done either at or after instantiation. After instantiation is the
 preferred pattern for the default optimizer:
 
-    >>> model = periodic.LombScargleFast(fit_period=True)
-    >>> model.optimizer.set(period_range=(0.5, 0.7), first_pass_coverage=10)
-    >>> model = model.fit(t_r, mag_r, dmag_r)
+.. ipython::
+
+    In [20]: model = periodic.LombScargleFast(fit_period=True)
+
+    In [21]: model.optimizer.set(period_range=(0.5, 0.7), first_pass_coverage=10)
+
+    In [22]: model = model.fit(t_r, mag_r, dmag_r)
     Finding optimal frequency:
      - Estimated peak width = 0.00189
      - Using 10 steps per peak; omega_step = 0.000189
