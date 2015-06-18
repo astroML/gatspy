@@ -92,7 +92,7 @@ range of 0.2 to 1.2 days to make sure it contains the true period:
 
     In [8]: model.optimizer.period_range = (0.2, 1.2)
 
-    In [9]: model = model.fit(t_r, mag_r, dmag_r)
+    In [9]: model.fit(t_r, mag_r, dmag_r);
     Finding optimal frequency:
      - Estimated peak width = 0.00189
      - Using 5 steps per peak; omega_step = 0.000378
@@ -287,7 +287,7 @@ passed to the ``fit()`` algorithm. Here the input times are in days, so the
 
     In [18]: model.optimizer.period_range = (0.2, 1.2)
 
-    In [19]: model = model.fit(t_r, mag_r, dmag_r)
+    In [19]: model.fit(t_r, mag_r, dmag_r);
     Finding optimal frequency:
      - Estimated peak width = 0.00189
      - Using 5 steps per peak; omega_step = 0.000378
@@ -306,7 +306,7 @@ preferred pattern for the default optimizer:
 
     In [21]: model.optimizer.set(period_range=(0.5, 0.7), first_pass_coverage=10)
 
-    In [22]: model = model.fit(t_r, mag_r, dmag_r)
+    In [22]: model.fit(t_r, mag_r, dmag_r);
     Finding optimal frequency:
      - Estimated peak width = 0.00189
      - Using 10 steps per peak; omega_step = 0.000189
