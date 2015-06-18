@@ -1,15 +1,5 @@
 .. _datasets_sesar2010rrlyrae:
 
-.. testsetup:: *
-
-    from gatspy.datasets import fetch_rrlyrae, fetch_rrlyrae_templates
-    rrlyrae = fetch_rrlyrae()
-    lcid = rrlyrae.ids[0]
-    t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
-    metadata = rrlyrae.get_metadata(lcid)
-    obsmeta = rrlyrae.get_obsmeta(lcid)
-    templates = fetch_rrlyrae_templates()
-
 
 Sesar 2010 RR Lyrae (Stripe 82)
 ===============================
@@ -24,17 +14,25 @@ Observed Light Curves
 The photometric light curves for these stars can be downloaded and accessed
 via the :func:`~gatspy.datasets.fetch_rrlyrae` function. For example:
 
-    >>> from gatspy.datasets import fetch_rrlyrae
-    >>> rrlyrae = fetch_rrlyrae()
-    >>> len(rrlyrae.ids)
-    483
+.. ipython::
+
+   In [1]: from gatspy.datasets import fetch_rrlyrae
+   
+   In [2]: rrlyrae = fetch_rrlyrae()
+   
+   @doctest
+   In [3]: len(rrlyrae.ids)
+   Out[3]: 483
 
 As you can see, the result of the download is an object which contains the data
 for all 483 lightcurves. You can fetch an individual lightcurve using the
 ``get_lightcurve`` method, which takes a lightcurve id as an argument:
 
-    >>> lcid = rrlyrae.ids[0]
-    >>> t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
+.. ipython::
+
+    In [3]: lcid = rrlyrae.ids[0]
+
+    In [4]: t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
 
 Let's use matplotlib to visualize this data, and get a feel for what is there:
 
@@ -80,23 +78,32 @@ available in the ``get_metadata()`` method.
 The observational metadata includes quantities like RA, Dec, extinction, etc.
 Details are in Table 3 of Sesar (2010).
 
-    >>> obsmeta = rrlyrae.get_obsmeta(lcid)
-    >>> print(obsmeta.dtype.names)
+.. ipython::
+
+    In [4]: obsmeta = rrlyrae.get_obsmeta(lcid)
+
+    In [5]: print(obsmeta.dtype.names)
     ('id', 'RA', 'DEC', 'rExt', 'd', 'RGC', 'u', 'g', 'r', 'i', 'z', 'V', 'ugmin', 'ugmin_err', 'grmin', 'grmin_err')
 
 The fit metadata includes quantities like the period, type of RR Lyrae, etc.
 Details are in Table 2 of Sesar (2010).
 
-    >>> metadata = rrlyrae.get_metadata(lcid)
-    >>> print(metadata.dtype.names)
+.. ipython::
+
+    In [6]: metadata = rrlyrae.get_metadata(lcid)
+
+    In [7]: print(metadata.dtype.names)
     ('id', 'type', 'P', 'uA', 'u0', 'uE', 'uT', 'gA', 'g0', 'gE', 'gT', 'rA', 'r0', 'rE', 'rT', 'iA', 'i0', 'iE', 'iT', 'zA', 'z0', 'zE', 'zT')
 
 
 For example, we can use the period from the metadata to phase the lightcurve as
 follows:
 
-    >>> period = metadata['P']
-    >>> phase = (t / period) % 1
+.. ipython::
+
+    In [8]: period = metadata['P']
+
+    In [9]: phase = (t / period) % 1
 
 Using this, we can plot the phased lightcurve, which lets us more easily see
 the structure across the observations:
@@ -141,16 +148,24 @@ RR Lyrae Templates
 in Sesar 2010. These are available via the
 :func:`~gatspy.datasets.fetch_rrlyrae_templates` function:
 
-    >>> from gatspy.datasets import fetch_rrlyrae_templates
-    >>> templates = fetch_rrlyrae_templates()
-    >>> len(templates.ids)
-    98
+.. ipython::
+
+    In [10]: from gatspy.datasets import fetch_rrlyrae_templates
+
+    In [11]: templates = fetch_rrlyrae_templates()
+
+    @doctest
+    In [12]: len(templates.ids)
+    Out[12]: 98
 
 There are 98 templates spread among the five bands, which can be referenced
 by their id:
 
-    >>> templates.ids[:10]
-    ['0g', '0i', '0r', '0u', '0z', '100g', '100i', '100r', '100u', '100z']
+.. ipython::
+
+    @doctest
+    In [13]: templates.ids[:10]
+    Out[13]: ['0g', '0i', '0r', '0u', '0z', '100g', '100i', '100r', '100u', '100z']
 
 Each of these templates is normalized from 0 to 1 in phase, and from 0 to 1 in
 magnitude. For example, plotting template ``'100'`` we see:
@@ -193,13 +208,21 @@ class as an interface for this.
 In order to make the observations as realistic as possible, these lightcurves
 are based on one of the 483 Stripe 82 RR Lyrae compiled by Sesar (2010):
 
-    >>> from gatspy.datasets import fetch_rrlyrae, RRLyraeGenerated
-    >>> rrlyrae = fetch_rrlyrae()
-    >>> lcid = rrlyrae.ids[0]
-    >>> gen = RRLyraeGenerated(lcid, random_state=0)
-    >>> mag = gen.generated('g', [51080.0, 51080.5], err=0.3)
-    >>> mag.round(2)
-    array([ 17.74,  17.04])
+.. ipython::
+
+    In [14]: from gatspy.datasets import fetch_rrlyrae, RRLyraeGenerated
+
+    In [15]: rrlyrae = fetch_rrlyrae()
+
+    In [16]: lcid = rrlyrae.ids[0]
+
+    In [17]: gen = RRLyraeGenerated(lcid, random_state=0)
+
+    In [18]: mag = gen.generated('g', [51080.0, 51080.5], err=0.3)
+
+    @doctest
+    In [19]: mag.round(2)
+    Out[19]: array([ 17.74,  17.04])
 
 This will create observations drawn from the best-fit template with the given
 magnitude error. Here let's use the observed times and errors to compare a

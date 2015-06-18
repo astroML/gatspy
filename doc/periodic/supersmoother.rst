@@ -5,11 +5,6 @@ SuperSmoother
 
 .. currentmodule:: gatspy.periodic
 
-.. testsetup:: *
-
-    from gatspy import datasets, periodic
-    from gatspy.periodic import *
-
 The supersmoother is a non-parametric adaptive smoother which has been used
 within the astronomical literature as an estimator of periodic content. For
 each candidate frequency, the supersmoother algorithm is applied to the phased
@@ -26,15 +21,25 @@ supersmoother algorithm is much slower than even the slow version of Lomb
 Scargle; for this reason we'll narrow the period search range for the sake
 of this example:
 
-    >>> from gatspy import datasets, periodic
-    >>> rrlyrae = datasets.fetch_rrlyrae()
-    >>> lcid = rrlyrae.ids[0]
-    >>> t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
-    >>> mask = (filts == 'r')
-    >>> t_r, mag_r, dmag_r = t[mask], mag[mask], dmag[mask]
-    >>> model = periodic.SuperSmoother(fit_period=True)
-    >>> model.optimizer.period_range = (0.61, 0.62)
-    >>> model = model.fit(t_r, mag_r, dmag_r)
+.. ipython::
+
+    In [1]: from gatspy import datasets, periodic
+
+    In [2]: rrlyrae = datasets.fetch_rrlyrae()
+
+    In [3]: lcid = rrlyrae.ids[0]
+
+    In [4]: t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
+
+    In [5]: mask = (filts == 'r')
+
+    In [6]: t_r, mag_r, dmag_r = t[mask], mag[mask], dmag[mask]
+
+    In [7]: model = periodic.SuperSmoother(fit_period=True)
+
+    In [8]: model.optimizer.period_range = (0.61, 0.62)
+
+    In [9]: model.fit(t_r, mag_r, dmag_r);
     Finding optimal frequency:
      - Estimated peak width = 0.00189
      - Using 5 steps per peak; omega_step = 0.000378
@@ -42,8 +47,14 @@ of this example:
      - Computing periods at 441 steps
     Zooming-in on 5 candidate peaks:
      - Computing periods at 995 steps
-    >>> print("{0:.6f}".format(model.best_period))
-    0.614320
+
+Now the best period is stored in a class attribute:
+
+.. ipython::
+   
+    @doctest float
+    In [10]: model.best_period
+    Out[10]: 0.61432002634119753
 
 Let's take a look at the best-fit supersmoother model at this period:
 
