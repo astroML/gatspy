@@ -12,7 +12,6 @@ import gzip
 from io import BytesIO
 
 import numpy as np
-from astroML.datasets.tools import get_data_home, download_with_progress_bar
 
 
 SESAR_RRLYRAE_URL = 'http://www.astro.washington.edu/users/bsesar/S82_RRLyr/'
@@ -22,6 +21,9 @@ def _get_download_or_cache(filename, data_home=None,
                            url=SESAR_RRLYRAE_URL,
                            force_download=False):
     """Private utility to download and/or load data from disk cache."""
+    # Import here so astroML is not required at package level
+    from astroML.datasets.tools import (get_data_home, 
+                                        download_with_progress_bar)
     if data_home is None:
         data_home = get_data_home(data_home)
     data_home = os.path.join(data_home, 'Sesar2010')
