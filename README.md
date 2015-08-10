@@ -27,8 +27,11 @@ Gatspy has the following dependencies:
 
 - [numpy](http://numpy.org) version 1.8 or higher
 - [scipy](http://scipy.org)
-- [astroML](http://astroML.org)
 - [supersmoother](http://github.com/jakevdp/supersmoother)
+
+Additionally, for some of the functionality gatspy optionally depends on:
+
+- [astroML](http://astroML.org)
 
 
 ## Unit Tests
