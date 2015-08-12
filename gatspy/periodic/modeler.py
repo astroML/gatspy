@@ -51,7 +51,7 @@ class PeriodicModeler(object):
         return self
 
     def predict(self, t, period=None):
-        """Compute the best-fit model at ``t`` for a given frequency omega
+        """Compute the best-fit model at ``t`` for a given period
 
         Parameters
         ----------
@@ -132,13 +132,12 @@ class PeriodicModeler(object):
         Parameters
         ----------
         periods : float or array_like
-            Array of angular frequencies at which to compute
-            the periodogram.
+            Array of periods at which to compute the periodogram.
 
         Returns
         -------
         scores : np.ndarray
-            Array of normalized powers (between 0 and 1) for each frequency.
+            Array of normalized powers (between 0 and 1) for each period.
             Shape of scores matches the shape of the provided periods.
         """
         periods = np.asarray(periods)
@@ -215,7 +214,7 @@ class PeriodicModelerMultiband(PeriodicModeler):
         return self
 
     def predict(self, t, filts, period=None):
-        """Compute the best-fit model at ``t`` for a given frequency omega
+        """Compute the best-fit model at ``t`` for a given period
 
         Parameters
         ----------
