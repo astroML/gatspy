@@ -132,14 +132,13 @@ class BaseTemplateModeler(PeriodicModeler):
         ----------
         template_id : simple type
             Template ID used by base class to define templates
-        
+
         Returns
         -------
         phase, y : ndarrays
             arrays containing the sorted phase and associated y-values.
         """
         raise NotImplementedError()
-    
 
 
 class RRLyraeTemplateModeler(BaseTemplateModeler):
@@ -165,14 +164,18 @@ class RRLyraeTemplateModeler(BaseTemplateModeler):
     --------
     RRLyraeTemplateModelerMultiband : multiband version of template model
     """
-    _raw_templates = fetch_rrlyrae_templates()
-
     def __init__(self, filts='ugriz', optimizer=None,
                  fit_period=False, optimizer_kwds=None):
         self.filts = list(filts)
+        self._load_templates()
         BaseTemplateModeler.__init__(self, optimizer=optimizer,
                                      fit_period=fit_period,
                                      optimizer_kwds=optimizer_kwds)
+
+    @classmethod
+    def _load_templates(cls):
+        """Load lightcurve templates & save as class variable"""
+        cls._raw_templates = fetch_rrlyrae_templates()
 
     def _template_ids(self):
         return (tid for tid in self._raw_templates.ids
