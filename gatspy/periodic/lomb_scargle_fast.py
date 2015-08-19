@@ -377,6 +377,11 @@ class LombScargleFast(LombScargle):
     >>> ls.predict([0, 0.5])
     array([-0.02019474, -0.92910567])
 
+    Notes
+    -----
+    Currently, a NotImplementedError will be raised if both center_data
+    and fit_offset are False.
+
     See Also
     --------
     LombScargle
