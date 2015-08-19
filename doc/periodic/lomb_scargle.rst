@@ -288,13 +288,9 @@ passed to the ``fit()`` algorithm. Here the input times are in days, so the
     In [18]: model.optimizer.period_range = (0.2, 1.2)
 
     In [19]: model.fit(t_r, mag_r, dmag_r);
-    Finding optimal frequency:
-     - Estimated peak width = 0.00189
-     - Using 5 steps per peak; omega_step = 0.000378
-     - User-specified period range:  0.2 to 1.2
-     - Computing periods at 69190 steps
-    Zooming-in on 5 candidate peaks:
-     - Computing periods at 995 steps
+
+    In [20]: model.best_period
+    Out[20]: 0.61431661211675215
 
 These values can be adjusted via the ``optimizer`` argument to the model; this
 can be done either at or after instantiation. After instantiation is the
@@ -302,18 +298,14 @@ preferred pattern for the default optimizer:
 
 .. ipython::
 
-    In [20]: model = periodic.LombScargleFast(fit_period=True)
+    In [21]: model = periodic.LombScargleFast(fit_period=True)
 
-    In [21]: model.optimizer.set(period_range=(0.5, 0.7), first_pass_coverage=10)
+    In [22]: model.optimizer.set(period_range=(0.5, 0.7), first_pass_coverage=10)
 
-    In [22]: model.fit(t_r, mag_r, dmag_r);
-    Finding optimal frequency:
-     - Estimated peak width = 0.00189
-     - Using 10 steps per peak; omega_step = 0.000189
-     - User-specified period range:  0.5 to 0.7
-     - Computing periods at 18979 steps
-    Zooming-in on 5 candidate peaks:
-     - Computing periods at 495 steps
+    In [23]: model.fit(t_r, mag_r, dmag_r);
+
+    In [24]: model.best_period
+    Out[24]: 0.61430890466467969
 
 Before you do any period optimization, be sure to set these quantities
 appropriately! And note that becuase the grid spacing is equal in frequency,
