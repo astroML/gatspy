@@ -33,6 +33,6 @@ Here's a quick step-by-step for cutting a new release of gatspy.
 
 ## Post-release
 
-1. update version in ``gatspy.__version__`` to next version; e.g. '0.3-git'
+1. update version in ``gatspy/__init__.py`` to next version; e.g. '0.3-git'
 
-2. update version in ``docs/conf.py`` to the same (in two places)
+2. update version in ``doc/conf.py`` to the same (in two places)
