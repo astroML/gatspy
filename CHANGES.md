@@ -1,6 +1,14 @@
 #Change Log
 
-## (v0.3) (not yet releaset)
+## (v0.3) (not yet released)
+
+## (v0.2.1) bugfix release (19 Aug 2015)
+
+- Fix installation issues [PR 11](https://github.com/astroML/gatspy/pull/11)
+- Fix corner cases in rrlyrae_fast
+- Fix so that data does not download on import
+- Make astroML a soft dependency
+- ipython-style code snippets in documentation
 
 ## (v0.2) Feature Release (07 June 2015)
 

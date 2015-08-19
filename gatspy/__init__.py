@@ -7,5 +7,5 @@ from __future__ import absolute_import
 from . import datasets, periodic
 
 __all__ = ['datasets', 'periodic']
-__version__ = '0.3-git'
+__version__ = '0.2.1'
 
