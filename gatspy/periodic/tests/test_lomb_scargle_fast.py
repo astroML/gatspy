@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose, assert_equal
 
 from ..lomb_scargle_fast import (extirpolate, bitceil, trig_sum,
                                  lomb_scargle_fast)
-from .. import LombScargle, LombScargleFast
+from .. import LombScargle, LombScargleAstroML, LombScargleFast
 
 
 def _generate_data(N=100, period=1, theta=[10, 2, 3], dy=1, rseed=0):
@@ -100,6 +100,8 @@ def test_lomb_scargle_fast():
 
     for center_data in [True, False]:
         for fit_offset in [True, False]:
+            if not fit_offset and not center_data:
+                continue
             yield check_results, center_data, fit_offset
 
 
@@ -121,6 +123,8 @@ def test_find_best_period():
     for use_fft in [True, False]:
         for fit_offset in [True, False]:
             for center_data in [True, False]:
+                if not fit_offset and not center_data:
+                    continue
                 yield check_result, use_fft, fit_offset, center_data
 
 
@@ -146,4 +150,3 @@ def test_power():
                 if not fit_offset and not center_data:
                     continue
                 yield check_result, use_fft, fit_offset, center_data
-    

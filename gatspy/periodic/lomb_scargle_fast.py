@@ -263,6 +263,10 @@ def lomb_scargle_fast(t, y, dy=1, f0=0, df=None, Nf=None,
     # this step makes the expressions below more succinct
     if center_data or fit_offset:
         y = y - np.dot(w, y)
+    else:
+        # TODO: can we relax this?
+        raise NotImplementedError("lomb_scargle_fast requires either "
+                                  "center_data or fit_offset to be True")
 
     # set up arguments to trig_sum
     kwargs = dict.copy(trig_sum_kwds or {})
