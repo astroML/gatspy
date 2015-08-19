@@ -164,6 +164,8 @@ class RRLyraeTemplateModeler(BaseTemplateModeler):
     --------
     RRLyraeTemplateModelerMultiband : multiband version of template model
     """
+    _raw_templates = None
+
     def __init__(self, filts='ugriz', optimizer=None,
                  fit_period=False, optimizer_kwds=None):
         self.filts = list(filts)
@@ -175,7 +177,8 @@ class RRLyraeTemplateModeler(BaseTemplateModeler):
     @classmethod
     def _load_templates(cls):
         """Load lightcurve templates & save as class variable"""
-        cls._raw_templates = fetch_rrlyrae_templates()
+        if cls._raw_templates is None:
+            cls._raw_templates = fetch_rrlyrae_templates()
 
     def _template_ids(self):
         return (tid for tid in self._raw_templates.ids
