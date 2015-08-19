@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Sesar 2010 RR Lyrae (Stripe 82) &mdash; gatspy 0.2 documentation</title>
+    <title>Sesar 2010 RR Lyrae (Stripe 82) &mdash; gatspy 0.2.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.2',
+        VERSION:     '0.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="gatspy 0.2 documentation" href="../index.html" />
+    <link rel="top" title="gatspy 0.2.1 documentation" href="../index.html" />
     <link rel="up" title="Datasets (gatspy.datasets)" href="index.html" />
     <link rel="next" title="API Documentation" href="API.html" />
     <link rel="prev" title="Datasets (gatspy.datasets)" href="index.html" />
@@ -48,7 +48,7 @@
         <li class="right" >
           <a href="index.html" title="Datasets (gatspy.datasets)"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">gatspy 0.2.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Datasets (<code class="docutils literal"><span class="pre">gatspy.datasets</span></code>)</a> &raquo;</li> 
       </ul>
     </div>  
@@ -58,8 +58,8 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <span class="target" id="datasets-sesar2010rrlyrae"></span><div class="section" id="sesar-2010-rr-lyrae-stripe-82">
-<h1>Sesar 2010 RR Lyrae (Stripe 82)<a class="headerlink" href="#sesar-2010-rr-lyrae-stripe-82" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="sesar-2010-rr-lyrae-stripe-82">
+<span id="datasets-sesar2010rrlyrae"></span><h1>Sesar 2010 RR Lyrae (Stripe 82)<a class="headerlink" href="#sesar-2010-rr-lyrae-stripe-82" title="Permalink to this headline">¶</a></h1>
 <p>The primary dataset available is the 483 RR Lyrae from Sesar 2010.
 This dataset contains observations of 483 RR Lyrae stars in Stripe 82 over
 approximately a decade, along with observational metadata, derived metadata,
@@ -68,17 +68,20 @@ and templates derived from the code.</p>
 <h2>Observed Light Curves<a class="headerlink" href="#observed-light-curves" title="Permalink to this headline">¶</a></h2>
 <p>The photometric light curves for these stars can be downloaded and accessed
 via the <a class="reference internal" href="API.html#gatspy.datasets.fetch_rrlyrae" title="gatspy.datasets.fetch_rrlyrae"><code class="xref py py-func docutils literal"><span class="pre">fetch_rrlyrae()</span></code></a> function. For example:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gatspy.datasets</span> <span class="kn">import</span> <span class="n">fetch_rrlyrae</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">fetch_rrlyrae</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
-<span class="go">483</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [1]: </span><span class="kn">from</span> <span class="nn">gatspy.datasets</span> <span class="kn">import</span> <span class="n">fetch_rrlyrae</span>
+
+<span class="gp">In [2]: </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">fetch_rrlyrae</span><span class="p">()</span>
+
+<span class="gp">In [3]: </span><span class="nb">len</span><span class="p">(</span><span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+<span class="gh">Out[3]: </span><span class="go">483</span>
 </pre></div>
 </div>
 <p>As you can see, the result of the download is an object which contains the data
 for all 483 lightcurves. You can fetch an individual lightcurve using the
 <code class="docutils literal"><span class="pre">get_lightcurve</span></code> method, which takes a lightcurve id as an argument:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">dmag</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_lightcurve</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [4]: </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="gp">In [5]: </span><span class="n">t</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">dmag</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_lightcurve</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Let&#8217;s use matplotlib to visualize this data, and get a feel for what is there:</p>
@@ -96,22 +99,25 @@ metadata available from the <code class="docutils literal"><span class="pre">get
 available in the <code class="docutils literal"><span class="pre">get_metadata()</span></code> method.</p>
 <p>The observational metadata includes quantities like RA, Dec, extinction, etc.
 Details are in Table 3 of Sesar (2010).</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">obsmeta</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_obsmeta</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">obsmeta</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [6]: </span><span class="n">obsmeta</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_obsmeta</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+
+<span class="gp">In [7]: </span><span class="k">print</span><span class="p">(</span><span class="n">obsmeta</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
 <span class="go">(&#39;id&#39;, &#39;RA&#39;, &#39;DEC&#39;, &#39;rExt&#39;, &#39;d&#39;, &#39;RGC&#39;, &#39;u&#39;, &#39;g&#39;, &#39;r&#39;, &#39;i&#39;, &#39;z&#39;, &#39;V&#39;, &#39;ugmin&#39;, &#39;ugmin_err&#39;, &#39;grmin&#39;, &#39;grmin_err&#39;)</span>
 </pre></div>
 </div>
 <p>The fit metadata includes quantities like the period, type of RR Lyrae, etc.
 Details are in Table 2 of Sesar (2010).</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">metadata</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">metadata</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [8]: </span><span class="n">metadata</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+
+<span class="gp">In [9]: </span><span class="k">print</span><span class="p">(</span><span class="n">metadata</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
 <span class="go">(&#39;id&#39;, &#39;type&#39;, &#39;P&#39;, &#39;uA&#39;, &#39;u0&#39;, &#39;uE&#39;, &#39;uT&#39;, &#39;gA&#39;, &#39;g0&#39;, &#39;gE&#39;, &#39;gT&#39;, &#39;rA&#39;, &#39;r0&#39;, &#39;rE&#39;, &#39;rT&#39;, &#39;iA&#39;, &#39;i0&#39;, &#39;iE&#39;, &#39;iT&#39;, &#39;zA&#39;, &#39;z0&#39;, &#39;zE&#39;, &#39;zT&#39;)</span>
 </pre></div>
 </div>
 <p>For example, we can use the period from the metadata to phase the lightcurve as
 follows:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">period</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s">&#39;P&#39;</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">phase</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span> <span class="o">/</span> <span class="n">period</span><span class="p">)</span> <span class="o">%</span> <span class="mi">1</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [10]: </span><span class="n">period</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s">&#39;P&#39;</span><span class="p">]</span>
+
+<span class="gp">In [11]: </span><span class="n">phase</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span> <span class="o">/</span> <span class="n">period</span><span class="p">)</span> <span class="o">%</span> <span class="mi">1</span>
 </pre></div>
 </div>
 <p>Using this, we can plot the phased lightcurve, which lets us more easily see
@@ -127,16 +133,18 @@ the structure across the observations:</p>
 <p><code class="docutils literal"><span class="pre">gatspy</span></code> also provides a loader for the empirical RR Lyrae templates derived
 in Sesar 2010. These are available via the
 <a class="reference internal" href="API.html#gatspy.datasets.fetch_rrlyrae_templates" title="gatspy.datasets.fetch_rrlyrae_templates"><code class="xref py py-func docutils literal"><span class="pre">fetch_rrlyrae_templates()</span></code></a> function:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gatspy.datasets</span> <span class="kn">import</span> <span class="n">fetch_rrlyrae_templates</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">templates</span> <span class="o">=</span> <span class="n">fetch_rrlyrae_templates</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">templates</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
-<span class="go">98</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [12]: </span><span class="kn">from</span> <span class="nn">gatspy.datasets</span> <span class="kn">import</span> <span class="n">fetch_rrlyrae_templates</span>
+
+<span class="gp">In [13]: </span><span class="n">templates</span> <span class="o">=</span> <span class="n">fetch_rrlyrae_templates</span><span class="p">()</span>
+
+<span class="gp">In [14]: </span><span class="nb">len</span><span class="p">(</span><span class="n">templates</span><span class="o">.</span><span class="n">ids</span><span class="p">)</span>
+<span class="gh">Out[14]: </span><span class="go">98</span>
 </pre></div>
 </div>
 <p>There are 98 templates spread among the five bands, which can be referenced
 by their id:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">templates</span><span class="o">.</span><span class="n">ids</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span>
-<span class="go">[&#39;0g&#39;, &#39;0i&#39;, &#39;0r&#39;, &#39;0u&#39;, &#39;0z&#39;, &#39;100g&#39;, &#39;100i&#39;, &#39;100r&#39;, &#39;100u&#39;, &#39;100z&#39;]</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [15]: </span><span class="n">templates</span><span class="o">.</span><span class="n">ids</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span>
+<span class="gh">Out[15]: </span><span class="go">[&#39;0g&#39;, &#39;0i&#39;, &#39;0r&#39;, &#39;0u&#39;, &#39;0z&#39;, &#39;100g&#39;, &#39;100i&#39;, &#39;100r&#39;, &#39;100u&#39;, &#39;100z&#39;]</span>
 </pre></div>
 </div>
 <p>Each of these templates is normalized from 0 to 1 in phase, and from 0 to 1 in
@@ -154,13 +162,18 @@ Lyrae stars. <code class="docutils literal"><span class="pre">gatspy</span></cod
 class as an interface for this.
 In order to make the observations as realistic as possible, these lightcurves
 are based on one of the 483 Stripe 82 RR Lyrae compiled by Sesar (2010):</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gatspy.datasets</span> <span class="kn">import</span> <span class="n">fetch_rrlyrae</span><span class="p">,</span> <span class="n">RRLyraeGenerated</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">fetch_rrlyrae</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">gen</span> <span class="o">=</span> <span class="n">RRLyraeGenerated</span><span class="p">(</span><span class="n">lcid</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mag</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generated</span><span class="p">(</span><span class="s">&#39;g&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mf">51080.0</span><span class="p">,</span> <span class="mf">51080.5</span><span class="p">],</span> <span class="n">err</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mag</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-<span class="go">array([ 17.74,  17.04])</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [16]: </span><span class="kn">from</span> <span class="nn">gatspy.datasets</span> <span class="kn">import</span> <span class="n">fetch_rrlyrae</span><span class="p">,</span> <span class="n">RRLyraeGenerated</span>
+
+<span class="gp">In [17]: </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">fetch_rrlyrae</span><span class="p">()</span>
+
+<span class="gp">In [18]: </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="gp">In [19]: </span><span class="n">gen</span> <span class="o">=</span> <span class="n">RRLyraeGenerated</span><span class="p">(</span><span class="n">lcid</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="gp">In [20]: </span><span class="n">mag</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generated</span><span class="p">(</span><span class="s">&#39;g&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mf">51080.0</span><span class="p">,</span> <span class="mf">51080.5</span><span class="p">],</span> <span class="n">err</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+<span class="gp">In [21]: </span><span class="n">mag</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="gh">Out[21]: </span><span class="go">array([ 17.74,  17.04])</span>
 </pre></div>
 </div>
 <p>This will create observations drawn from the best-fit template with the given

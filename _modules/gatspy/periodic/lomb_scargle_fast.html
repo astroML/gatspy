@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>gatspy.periodic.lomb_scargle_fast &mdash; gatspy 0.2 documentation</title>
+    <title>gatspy.periodic.lomb_scargle_fast &mdash; gatspy 0.2.1 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.2',
+        VERSION:     '0.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="gatspy 0.2 documentation" href="../../../index.html" />
+    <link rel="top" title="gatspy 0.2.1 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
    
   
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">gatspy 0.2.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -316,6 +316,10 @@
     <span class="c"># this step makes the expressions below more succinct</span>
     <span class="k">if</span> <span class="n">center_data</span> <span class="ow">or</span> <span class="n">fit_offset</span><span class="p">:</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># TODO: can we relax this?</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;lomb_scargle_fast requires either &quot;</span>
+                                  <span class="s">&quot;center_data or fit_offset to be True&quot;</span><span class="p">)</span>
 
     <span class="c"># set up arguments to trig_sum</span>
     <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">trig_sum_kwds</span> <span class="ow">or</span> <span class="p">{})</span>
@@ -369,8 +373,8 @@
 
         <span class="n">power</span> <span class="o">=</span> <span class="p">(</span><span class="n">YC</span> <span class="o">*</span> <span class="n">YC</span> <span class="o">/</span> <span class="n">CC</span> <span class="o">+</span> <span class="n">YS</span> <span class="o">*</span> <span class="n">YS</span> <span class="o">/</span> <span class="n">SS</span><span class="p">)</span> <span class="o">/</span> <span class="n">YY</span>
 
-        <span class="c"># fix NaN at zero frequency</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">power</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="c"># fix NaN and INF at zero frequency</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">power</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">power</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
             <span class="n">power</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">return</span> <span class="n">freq</span><span class="p">,</span> <span class="n">power</span>
@@ -425,6 +429,11 @@
 <span class="sd">    0.62826265739259146</span>
 <span class="sd">    &gt;&gt;&gt; ls.predict([0, 0.5])</span>
 <span class="sd">    array([-0.02019474, -0.92910567])</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Currently, a NotImplementedError will be raised if both center_data</span>
+<span class="sd">    and fit_offset are False.</span>
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>

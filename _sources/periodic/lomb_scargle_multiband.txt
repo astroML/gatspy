@@ -6,20 +6,6 @@ Multiband Lomb-Scargle Periodogram
 
 .. currentmodule:: gatspy.periodic
 
-.. testsetup:: *
-
-   import numpy as np
-   from gatspy import datasets, periodic
-
-   rrlyrae = datasets.fetch_rrlyrae()
-   lcid = rrlyrae.ids[0]
-   t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
-   model = periodic.LombScargleMultibandFast(fit_period=True)
-   model.optimizer.set(period_range=(0.5, 0.7), quiet=True)
-   model.fit(t, mag, dmag, filts)
-   tfit = np.linspace(0, model.best_period, 1000)
-   magfit = model.predict(tfit, filts='g')
-
 Though classical periodogram approaches only handle a single band of data,
 multiband extensions have been recently proposed. ``gatspy`` implements one
 which was suggested by
@@ -46,16 +32,25 @@ Here is a quick example of finding the best period in multiband data. We'll
 use :class:`LombScargleMultibandFast` here.
 We start by loading the lightcurve (for more information, see :ref:`datasets`):
 
-    >>> from gatspy import datasets, periodic
-    >>> rrlyrae = datasets.fetch_rrlyrae()
-    >>> lcid = rrlyrae.ids[0]
-    >>> t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
+.. ipython::
+
+    In [1]: from gatspy import datasets, periodic
+
+    In [2]: rrlyrae = datasets.fetch_rrlyrae()
+
+    In [3]: lcid = rrlyrae.ids[0]
+
+    In [4]: t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
 
 With this lightcurve specified, we can now build and fit the model:
 
-    >>> model = periodic.LombScargleMultibandFast(fit_period=True)
-    >>> model.optimizer.period_range=(0.5, 0.7)
-    >>> model = model.fit(t, mag, dmag, filts)
+.. ipython::
+
+    In [5]: model = periodic.LombScargleMultibandFast(fit_period=True)
+
+    In [6]: model.optimizer.period_range=(0.5, 0.7)
+
+    In [7]: model.fit(t, mag, dmag, filts);
     Finding optimal frequency:
      - Estimated peak width = 0.00189
      - Using 5 steps per peak; omega_step = 0.000378
@@ -63,16 +58,27 @@ With this lightcurve specified, we can now build and fit the model:
      - Computing periods at 9490 steps
     Zooming-in on 5 candidate peaks:
      - Computing periods at 1000 steps
-    >>> print('{0:.6f}'.format(model.best_period))
-    0.614317
+
+And, as with the single-band version, the best period is now stored as an attribute of the model:
+
+.. ipython::
+
+    @ doctest float
+    In [8]: model.best_period
+    Out[8]: 0.61431670719850195
 
 Once the model is fit, we can then use the ``predict()`` method to
 look at the model prediction for any given band:
 
-    >>> tfit = np.linspace(0, model.best_period, 1000)
-    >>> magfit = model.predict(tfit, filts='g')
-    >>> magfit[:4]
-    array([ 17.1411512 ,  17.13947457,  17.13780707,  17.13614876])
+.. ipython::
+
+    In [9]: tfit = np.linspace(0, model.best_period, 1000)
+
+    In [10]: magfit = model.predict(tfit, filts='g')
+
+    @doctest float
+    In [11]: magfit[:4]
+    Out[12]: array([ 17.1411512 ,  17.13947457,  17.13780707,  17.13614876])
 
 Below is a plot of the magnitudes at this best-fit period:
 

@@ -3,25 +3,6 @@
 Template-based Period Fitting
 =============================
 
-.. testsetup:: *
-
-   import numpy as np
-   from gatspy import datasets, periodic
-
-   rrlyrae = datasets.fetch_rrlyrae()
-   lcid = rrlyrae.ids[0]
-   t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
-   mask = (filts == 'r')
-   t_r, mag_r, dmag_r = t[mask], mag[mask], dmag[mask]
-   period = rrlyrae.get_metadata(lcid)['P']
-   phase = (t_r / period) % 1
-
-   model = periodic.RRLyraeTemplateModeler('r')
-   model.fit(t_r, mag_r, dmag_r)
-   t_fit = np.linspace(0, period, 1000)
-   mag_fit = model.predict(t_fit, period=period)
-   phasefit = t_fit / period
-
 Though it can be very slow in practice, a template-based fitting method is
 perhaps the best way to narrow-in on the period of astronomical objects,
 particularly if the templates fit the data well. The reason for the slow
@@ -38,25 +19,39 @@ Single Band Template Model
 templates in the :class:`~gatspy.periodic.RRLyraeTemplateModeler` class.
 We'll demonstrate its use here, starting with fetching some RR Lyrae data:
 
-    >>> from gatspy import datasets, periodic
-    >>> rrlyrae = datasets.fetch_rrlyrae()
-    >>> lcid = rrlyrae.ids[0]
-    >>> t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
-    >>> mask = (filts == 'r')
-    >>> t_r, mag_r, dmag_r = t[mask], mag[mask], dmag[mask]
+.. ipython::
+
+    In [1]: from gatspy import datasets, periodic
+
+    In [2]: rrlyrae = datasets.fetch_rrlyrae()
+
+    In [3]: lcid = rrlyrae.ids[0]
+
+    In [4]: t, mag, dmag, filts = rrlyrae.get_lightcurve(lcid)
+
+    In [5]: mask = (filts == 'r')
+
+    In [6]: t_r, mag_r, dmag_r = t[mask], mag[mask], dmag[mask]
 
 Next we will define the template model and fit it to the data:
 
+.. ipython::
 
-    >>> model = periodic.RRLyraeTemplateModeler('r')
-    >>> model = model.fit(t_r, mag_r, dmag_r)
+    In [7]: model = periodic.RRLyraeTemplateModeler('r')
+
+    In [8]: model.fit(t_r, mag_r, dmag_r);
 
 With this model fit, we can now compute the light curve for any given period.
 This fit will compute the RMS residual around all available templates and use
 the one which provides the closest fit:
 
-    >>> t_fit = np.linspace(0, period, 1000)
-    >>> mag_fit = model.predict(t_fit, period=period)
+.. ipython::
+
+    In [9]: period = rrlyrae.get_metadata(lcid)['P']
+
+    In [10]: t_fit = np.linspace(0, period, 1000)
+
+    In [11]: mag_fit = model.predict(t_fit, period=period)
 
 Plotting the results, we see the best fit template at this phase:
 

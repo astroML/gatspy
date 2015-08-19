@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Template-based Period Fitting &mdash; gatspy 0.2 documentation</title>
+    <title>Template-based Period Fitting &mdash; gatspy 0.2.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.2',
+        VERSION:     '0.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="gatspy 0.2 documentation" href="../index.html" />
+    <link rel="top" title="gatspy 0.2.1 documentation" href="../index.html" />
     <link rel="up" title="Tools for Periodic Timeseries (gatspy.periodic)" href="index.html" />
     <link rel="next" title="API Documentation" href="API.html" />
     <link rel="prev" title="SuperSmoother" href="supersmoother.html" />
@@ -48,7 +48,7 @@
         <li class="right" >
           <a href="supersmoother.html" title="SuperSmoother"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">gatspy 0.2.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Tools for Periodic Timeseries (<code class="docutils literal"><span class="pre">gatspy.periodic</span></code>)</a> &raquo;</li> 
       </ul>
     </div>  
@@ -72,24 +72,33 @@ method, we skip it here because it is very computationally intensive.</p>
 <p><code class="docutils literal"><span class="pre">gatspy</span></code> implements a template-based model using the Sesar 2010 RR Lyrae
 templates in the <a class="reference internal" href="API.html#gatspy.periodic.RRLyraeTemplateModeler" title="gatspy.periodic.RRLyraeTemplateModeler"><code class="xref py py-class docutils literal"><span class="pre">RRLyraeTemplateModeler</span></code></a> class.
 We&#8217;ll demonstrate its use here, starting with fetching some RR Lyrae data:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gatspy</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">periodic</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">fetch_rrlyrae</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">dmag</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_lightcurve</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">filts</span> <span class="o">==</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">mag</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dmag</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [1]: </span><span class="kn">from</span> <span class="nn">gatspy</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">periodic</span>
+
+<span class="gp">In [2]: </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">fetch_rrlyrae</span><span class="p">()</span>
+
+<span class="gp">In [3]: </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="gp">In [4]: </span><span class="n">t</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">dmag</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_lightcurve</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+
+<span class="gp">In [5]: </span><span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">filts</span> <span class="o">==</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+
+<span class="gp">In [6]: </span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">mag</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dmag</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Next we will define the template model and fit it to the data:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">periodic</span><span class="o">.</span><span class="n">RRLyraeTemplateModeler</span><span class="p">(</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span><span class="p">)</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [7]: </span><span class="n">model</span> <span class="o">=</span> <span class="n">periodic</span><span class="o">.</span><span class="n">RRLyraeTemplateModeler</span><span class="p">(</span><span class="s">&#39;r&#39;</span><span class="p">)</span>
+
+<span class="gp">In [8]: </span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>With this model fit, we can now compute the light curve for any given period.
 This fit will compute the RMS residual around all available templates and use
 the one which provides the closest fit:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">t_fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mag_fit</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">t_fit</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [9]: </span><span class="n">period</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="n">lcid</span><span class="p">)[</span><span class="s">&#39;P&#39;</span><span class="p">]</span>
+
+<span class="gp">In [10]: </span><span class="n">t_fit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+
+<span class="gp">In [11]: </span><span class="n">mag_fit</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">t_fit</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Plotting the results, we see the best fit template at this phase:</p>

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>gatspy.periodic.template_modeler &mdash; gatspy 0.2 documentation</title>
+    <title>gatspy.periodic.template_modeler &mdash; gatspy 0.2.1 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.2',
+        VERSION:     '0.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="gatspy 0.2 documentation" href="../../../index.html" />
+    <link rel="top" title="gatspy 0.2.1 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
    
   
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">gatspy 0.2.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
       </ul>
     </div>  
@@ -185,14 +185,13 @@
 <span class="sd">        ----------</span>
 <span class="sd">        template_id : simple type</span>
 <span class="sd">            Template ID used by base class to define templates</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        phase, y : ndarrays</span>
 <span class="sd">            arrays containing the sorted phase and associated y-values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
-    
 
 
 <div class="viewcode-block" id="RRLyraeTemplateModeler"><a class="viewcode-back" href="../../../periodic/API.html#gatspy.periodic.RRLyraeTemplateModeler">[docs]</a><span class="k">class</span> <span class="nc">RRLyraeTemplateModeler</span><span class="p">(</span><span class="n">BaseTemplateModeler</span><span class="p">):</span>
@@ -218,14 +217,21 @@
 <span class="sd">    --------</span>
 <span class="sd">    RRLyraeTemplateModelerMultiband : multiband version of template model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_raw_templates</span> <span class="o">=</span> <span class="n">fetch_rrlyrae_templates</span><span class="p">()</span>
+    <span class="n">_raw_templates</span> <span class="o">=</span> <span class="bp">None</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filts</span><span class="o">=</span><span class="s">&#39;ugriz&#39;</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                  <span class="n">fit_period</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">optimizer_kwds</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">filts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_templates</span><span class="p">()</span>
         <span class="n">BaseTemplateModeler</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
                                      <span class="n">fit_period</span><span class="o">=</span><span class="n">fit_period</span><span class="p">,</span>
                                      <span class="n">optimizer_kwds</span><span class="o">=</span><span class="n">optimizer_kwds</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_load_templates</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load lightcurve templates &amp; save as class variable&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">_raw_templates</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_raw_templates</span> <span class="o">=</span> <span class="n">fetch_rrlyrae_templates</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_template_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">tid</span> <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_templates</span><span class="o">.</span><span class="n">ids</span>

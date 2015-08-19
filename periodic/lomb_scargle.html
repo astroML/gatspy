@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Lomb-Scargle Periodogram &mdash; gatspy 0.2 documentation</title>
+    <title>Lomb-Scargle Periodogram &mdash; gatspy 0.2.1 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.2',
+        VERSION:     '0.2.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="gatspy 0.2 documentation" href="../index.html" />
+    <link rel="top" title="gatspy 0.2.1 documentation" href="../index.html" />
     <link rel="up" title="Tools for Periodic Timeseries (gatspy.periodic)" href="index.html" />
     <link rel="next" title="Multiband Lomb-Scargle Periodogram" href="lomb_scargle_multiband.html" />
     <link rel="prev" title="Tools for Periodic Timeseries (gatspy.periodic)" href="index.html" />
@@ -48,7 +48,7 @@
         <li class="right" >
           <a href="index.html" title="Tools for Periodic Timeseries (gatspy.periodic)"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">gatspy 0.2 documentation</a> &raquo;</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">gatspy 0.2.1 documentation</a> &raquo;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Tools for Periodic Timeseries (<code class="docutils literal"><span class="pre">gatspy.periodic</span></code>)</a> &raquo;</li> 
       </ul>
     </div>  
@@ -116,12 +116,17 @@ datasets!</li>
 Let&#8217;s start by loading one r-band RR Lyrae lightcurve using the
 <a class="reference internal" href="../datasets/API.html#gatspy.datasets.fetch_rrlyrae" title="gatspy.datasets.fetch_rrlyrae"><code class="xref py py-func docutils literal"><span class="pre">gatspy.datasets.fetch_rrlyrae()</span></code></a> function, which is discussed more fully
 in <a class="reference internal" href="../datasets/index.html#datasets"><span>Datasets (gatspy.datasets)</span></a>.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">gatspy</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">periodic</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">fetch_rrlyrae</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">dmag</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_lightcurve</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">filts</span> <span class="o">==</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">mag</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dmag</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [1]: </span><span class="kn">from</span> <span class="nn">gatspy</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">periodic</span>
+
+<span class="gp">In [2]: </span><span class="n">rrlyrae</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">fetch_rrlyrae</span><span class="p">()</span>
+
+<span class="gp">In [3]: </span><span class="n">lcid</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="gp">In [4]: </span><span class="n">t</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">dmag</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_lightcurve</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+
+<span class="gp">In [5]: </span><span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">filts</span> <span class="o">==</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+
+<span class="gp">In [6]: </span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">mag</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dmag</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Given this data, we&#8217;d like to determine the best period using the periodogram.
@@ -131,18 +136,16 @@ estimators, once the <code class="docutils literal"><span class="pre">period_ran
 <p>Let&#8217;s quickly demonstrate this with <a class="reference internal" href="API.html#gatspy.periodic.LombScargleFast" title="gatspy.periodic.LombScargleFast"><code class="xref py py-class docutils literal"><span class="pre">LombScargleFast</span></code></a>.
 Because our data is from an RR Lyrae star, we&#8217;ll set a conservative period
 range of 0.2 to 1.2 days to make sure it contains the true period:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">periodic</span><span class="o">.</span><span class="n">LombScargleFast</span><span class="p">(</span><span class="n">fit_period</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">period_range</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span><span class="p">)</span>
-<span class="go">Finding optimal frequency:</span>
-<span class="go"> - Estimated peak width = 0.00189</span>
-<span class="go"> - Using 5 steps per peak; omega_step = 0.000378</span>
-<span class="go"> - User-specified period range:  0.2 to 1.2</span>
-<span class="go"> - Computing periods at 69190 steps</span>
-<span class="go">Zooming-in on 5 candidate peaks:</span>
-<span class="go"> - Computing periods at 995 steps</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="s">&quot;{0:.6f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">best_period</span><span class="p">))</span>
-<span class="go">0.614317</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [7]: </span><span class="n">model</span> <span class="o">=</span> <span class="n">periodic</span><span class="o">.</span><span class="n">LombScargleFast</span><span class="p">(</span><span class="n">fit_period</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="gp">In [8]: </span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">period_range</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
+
+<span class="gp">In [9]: </span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Now the best period is found in the <code class="docutils literal"><span class="pre">best_period</span></code> attribute of the model:</p>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [10]: </span><span class="n">model</span><span class="o">.</span><span class="n">best_period</span>
+<span class="gh">Out[10]: </span><span class="go">0.61431661211675215</span>
 </pre></div>
 </div>
 <p>The periodogram optimizer uses a two-step grid search, first searching a
@@ -150,10 +153,12 @@ relatively coarse grid to find several candidate frequencies, and finally
 zooming-in on these to compute the observed period to high precision.
 Let&#8217;s see how close this period is to the period measured by Sesar 2010
 using template fits:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">metadata</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">true_period</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s">&#39;P&#39;</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="s">&quot;{0:.6f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">true_period</span><span class="p">))</span>
-<span class="go">0.614318</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [11]: </span><span class="n">metadata</span> <span class="o">=</span> <span class="n">rrlyrae</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">(</span><span class="n">lcid</span><span class="p">)</span>
+
+<span class="gp">In [12]: </span><span class="n">true_period</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s">&#39;P&#39;</span><span class="p">]</span>
+
+<span class="gp">In [13]: </span><span class="n">true_period</span>
+<span class="gh">Out[13]: </span><span class="go">0.61431831</span>
 </pre></div>
 </div>
 <p>The two periods differ to about <img class="math" src="../_images/math/269435a5d5273bd7237630944032e7b2e8f9ac59.png" alt="10^{-6}"/> days, or approximately one tenth
@@ -169,10 +174,12 @@ significant peak!</p>
 <p>The Lomb-Scargle model is essentially a least squares fit of a single sinusoid
 to the data; we can see the model fit using the <code class="docutils literal"><span class="pre">predict</span></code> method of the
 periodic model:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tfit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">best_period</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">tfit</span><span class="p">)</span>
-<span class="go">array([ 17.03381525,  17.02560232,  17.37830128,  17.03381525])</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [14]: </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="gp">In [15]: </span><span class="n">tfit</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">best_period</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+
+<span class="gp">In [16]: </span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">tfit</span><span class="p">)</span>
+<span class="gh">Out[16]: </span><span class="go">array([ 17.03381525,  17.02560232,  17.37830128,  17.03381525])</span>
 </pre></div>
 </div>
 <p>Let&#8217;s take a look at this model plotted over the phased data:</p>
@@ -224,31 +231,27 @@ we&#8217;ll choose a range around this.
 Note that the units of <code class="docutils literal"><span class="pre">period_range</span></code> should match the units of the times
 passed to the <code class="docutils literal"><span class="pre">fit()</span></code> algorithm. Here the input times are in days, so the
 <code class="docutils literal"><span class="pre">period_range</span></code> is specified as <code class="docutils literal"><span class="pre">(min_period,</span> <span class="pre">max_period)</span></code> in days:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">periodic</span><span class="o">.</span><span class="n">LombScargleFast</span><span class="p">(</span><span class="n">fit_period</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">period_range</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span><span class="p">)</span>
-<span class="go">Finding optimal frequency:</span>
-<span class="go"> - Estimated peak width = 0.00189</span>
-<span class="go"> - Using 5 steps per peak; omega_step = 0.000378</span>
-<span class="go"> - User-specified period range:  0.2 to 1.2</span>
-<span class="go"> - Computing periods at 69190 steps</span>
-<span class="go">Zooming-in on 5 candidate peaks:</span>
-<span class="go"> - Computing periods at 995 steps</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [17]: </span><span class="n">model</span> <span class="o">=</span> <span class="n">periodic</span><span class="o">.</span><span class="n">LombScargleFast</span><span class="p">(</span><span class="n">fit_period</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="gp">In [18]: </span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">period_range</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
+
+<span class="gp">In [19]: </span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span><span class="p">);</span>
+
+<span class="gp">In [20]: </span><span class="n">model</span><span class="o">.</span><span class="n">best_period</span>
+<span class="go">                                                                                                                                                                                                                                                                 Out[20]: 0.61431661211675215</span>
 </pre></div>
 </div>
 <p>These values can be adjusted via the <code class="docutils literal"><span class="pre">optimizer</span></code> argument to the model; this
 can be done either at or after instantiation. After instantiation is the
 preferred pattern for the default optimizer:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">periodic</span><span class="o">.</span><span class="n">LombScargleFast</span><span class="p">(</span><span class="n">fit_period</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">period_range</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">),</span> <span class="n">first_pass_coverage</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span><span class="p">)</span>
-<span class="go">Finding optimal frequency:</span>
-<span class="go"> - Estimated peak width = 0.00189</span>
-<span class="go"> - Using 10 steps per peak; omega_step = 0.000189</span>
-<span class="go"> - User-specified period range:  0.5 to 0.7</span>
-<span class="go"> - Computing periods at 18979 steps</span>
-<span class="go">Zooming-in on 5 candidate peaks:</span>
-<span class="go"> - Computing periods at 495 steps</span>
+<div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [21]: </span><span class="n">model</span> <span class="o">=</span> <span class="n">periodic</span><span class="o">.</span><span class="n">LombScargleFast</span><span class="p">(</span><span class="n">fit_period</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="gp">In [22]: </span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">period_range</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">),</span> <span class="n">first_pass_coverage</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="gp">In [23]: </span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t_r</span><span class="p">,</span> <span class="n">mag_r</span><span class="p">,</span> <span class="n">dmag_r</span><span class="p">);</span>
+
+<span class="gp">In [24]: </span><span class="n">model</span><span class="o">.</span><span class="n">best_period</span>
+<span class="go">                                                                                                                                                                                                                                                                  Out[24]: 0.61430890466467969</span>
 </pre></div>
 </div>
 <p>Before you do any period optimization, be sure to set these quantities
