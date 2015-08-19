@@ -80,7 +80,6 @@ def test_trig_sum():
 
 
 def test_lomb_scargle_fast():
-    """Test lomb scargle with and without FFT"""
     rng = np.random.RandomState(0)
 
     t = 30 * rng.rand(100)
