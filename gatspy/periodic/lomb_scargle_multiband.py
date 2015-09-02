@@ -9,8 +9,9 @@ __all__ = ['LombScargleMultiband', 'LombScargleMultibandFast']
 import numpy as np
 
 from .modeler import PeriodicModelerMultiband
-from .lomb_scargle import LombScargle, LeastSquaresMixin
+from .lomb_scargle import LombScargle
 from .lomb_scargle_fast import LombScargleFast
+from ._least_squares_mixin import LeastSquaresMixin
 
 
 class LombScargleMultiband(LeastSquaresMixin, PeriodicModelerMultiband):
