@@ -132,7 +132,7 @@ class PeriodicModeler(object):
         Parameters
         ----------
         periods : float or array_like
-            Array of angular frequencies at which to compute
+            Array of periods at which to compute
             the periodogram.
 
         Returns
