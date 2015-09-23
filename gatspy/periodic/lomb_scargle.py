@@ -225,7 +225,7 @@ class LombScargle(LeastSquaresMixin, PeriodicModeler):
     def false_alarm_max(self):
         """
         Calculate the False Alarm Probability for the best period.
-        Following the method outlined in Baluev 2008, Table 1 and 
+        Following the method outlined in Baluev 2008, Table 1 and
         eq. 5
         """
         t = self.t
@@ -238,7 +238,10 @@ class LombScargle(LeastSquaresMixin, PeriodicModeler):
 
         z = self.score(best_period) * 0.5 * Nh
         fmax = 1/min(self.optimizer.period_range)
-        gamma_H = np.sqrt(2./Nh) * gamma(0.5*Nh) / gamma(0.5*(Nh-1))
+        if Nh <= 10:
+            gamma_H = np.sqrt(2./Nh) * gamma(0.5*Nh) / gamma(0.5*(Nh-1))
+        else:
+            gamma_H = 1
 
         def avg(phi, dy):
             return np.sum(phi/dy**2)

@@ -47,7 +47,7 @@ class PeriodicModeler(object):
 
         if self.fit_period:
             self._best_period = self._calc_best_period()
-            
+
         return self
 
     def predict(self, t, period=None):
@@ -178,6 +178,15 @@ class PeriodicModeler(object):
 
     def _predict(self, t, period):
         """Predict the model values at the given times"""
+        raise NotImplementedError()
+
+    def _false_alarm_single(self, periods):
+        """Calculate the False Alarm Probability for every period
+        provided by the input param."""
+        raise NotImplementedError()
+        
+    def _false_alarm_max(self):
+        """Calculate the False Alarm Probability for the best period."""
         raise NotImplementedError()
 
 
