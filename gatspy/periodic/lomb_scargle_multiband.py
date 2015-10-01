@@ -39,6 +39,9 @@ class LombScargleMultiband(LeastSquaresMixin, PeriodicModelerMultiband):
         the normal matrix
     center_data : boolean (default = True)
         if True, then center the y data prior to the fit
+    optimizer_kwds : dict (optional)
+        Dictionary of keyword arguments for constructing the optimizer. For
+        example, silence optimizer output with `optimizer_kwds={"quiet": True}`.
 
     See Also
     --------
@@ -167,8 +170,9 @@ class LombScargleMultibandFast(PeriodicModelerMultiband):
         :class:`LombScargle` otherwise.
     fit_period : bool (optional)
         If True, then fit for the best period when fit() method is called.
-    optimizer_kwds : dict (optional
-        Dictionary of keyword arguments for constructing the optimizer
+    optimizer_kwds : dict (optional)
+        Dictionary of keyword arguments for constructing the optimizer. For
+        example, silence optimizer output with `optimizer_kwds={"quiet": True}`.
 
     See Also
     --------

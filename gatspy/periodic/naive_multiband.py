@@ -36,8 +36,9 @@ class NaiveMultiband(PeriodicModelerMultiband):
         Single-band model to use on data from each band.
     fit_period : bool (optional)
         If True, then fit for the best period when fit() method is called.
-    optimizer_kwds : dict (optional
-        Dictionary of keyword arguments for constructing the optimizer
+    optimizer_kwds : dict (optional)
+        Dictionary of keyword arguments for constructing the optimizer. For
+        example, silence optimizer output with `optimizer_kwds={"quiet": True}`.
     *args, **kwargs :
         additional arguments are passed to BaseModel on construction.
     """

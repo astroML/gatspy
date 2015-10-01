@@ -37,8 +37,9 @@ class LombScargle(LeastSquaresMixin, PeriodicModeler):
         If True, multiply regularization by the trace of the matrix
     fit_period : bool (optional)
         If True, then fit for the best period when fit() method is called.
-    optimizer_kwds : dict (optional
-        Dictionary of keyword arguments for constructing the optimizer
+    optimizer_kwds : dict (optional)
+        Dictionary of keyword arguments for constructing the optimizer. For
+        example, silence optimizer output with `optimizer_kwds={"quiet": True}`.
 
     Examples
     --------
@@ -148,8 +149,9 @@ class LombScargleAstroML(LombScargle):
         use the faster version of the code from astroML_addons
     fit_period : bool (optional)
         If True, then fit for the best period when fit() method is called.
-    optimizer_kwds : dict (optional
-        Dictionary of keyword arguments for constructing the optimizer
+    optimizer_kwds : dict (optional)
+        Dictionary of keyword arguments for constructing the optimizer. For
+        example, silence optimizer output with `optimizer_kwds={"quiet": True}`.
 
     Examples
     --------
