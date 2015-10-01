@@ -353,8 +353,9 @@ class LombScargleFast(LombScargle):
         Dictionary of keywords to pass to the ``lomb_scargle_fast`` routine.
     fit_period : bool (optional)
         If True, then fit for the best period when fit() method is called.
-    optimizer_kwds : dict (optional
-        Dictionary of keyword arguments for constructing the optimizer
+    optimizer_kwds : dict (optional)
+        Dictionary of keyword arguments for constructing the optimizer. For
+        example, silence optimizer output with `optimizer_kwds={"quiet": True}`.
 
     Examples
     --------

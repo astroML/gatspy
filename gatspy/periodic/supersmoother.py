@@ -26,8 +26,9 @@ class SuperSmoother(PeriodicModeler):
         LinearScanOptimizer will be used.
     fit_period : bool (optional)
         If True, then fit for the best period when fit() method is called.
-    optimizer_kwds : dict (optional
-        Dictionary of keyword arguments for constructing the optimizer
+    optimizer_kwds : dict (optional)
+        Dictionary of keyword arguments for constructing the optimizer. For
+        example, silence optimizer output with `optimizer_kwds={"quiet": True}`.
 
     Examples
     --------
@@ -93,8 +94,9 @@ class SuperSmootherMultiband(PeriodicModelerMultiband):
         The base model to use for each individual band.
     fit_period : bool (optional)
         If True, then fit for the best period when fit() method is called.
-    optimizer_kwds : dict (optional
-        Dictionary of keyword arguments for constructing the optimizer
+    optimizer_kwds : dict (optional)
+        Dictionary of keyword arguments for constructing the optimizer. For
+        example, silence optimizer output with `optimizer_kwds={"quiet": True}`.
     """
     def __init__(self, optimizer=None, BaseModel=SuperSmoother,
                  fit_period=False, optimizer_kwds=None):
