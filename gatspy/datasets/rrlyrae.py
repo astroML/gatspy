@@ -369,9 +369,8 @@ def fetch_rrlyrae(partial=False, **kwargs):
     array([ 18.702,  17.553,  17.236,  17.124])
     >>> dmag[:4]
     array([ 0.021,  0.005,  0.005,  0.006])
-    >>> bands[:4]
-    array(['u', 'g', 'r', 'i'], 
-          dtype='<U1')
+    >>> list(bands[:4])
+    ['u', 'g', 'r', 'i']
     """
     if partial:
         return PartialRRLyraeLC('table1.tar.gz',
