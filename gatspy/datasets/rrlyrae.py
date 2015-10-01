@@ -358,8 +358,7 @@ def fetch_rrlyrae(partial=False, **kwargs):
 
     Examples
     --------
-    >>> rrlyrae = fetch_rrlyrae() # doctest: +ELLIPSIS
-    ...
+    >>> rrlyrae = fetch_rrlyrae()
     >>> rrlyrae.ids[:5]
     [1013184, 1019544, 1027882, 1052471, 1056152]
     >>> lcid = rrlyrae.ids[0]
