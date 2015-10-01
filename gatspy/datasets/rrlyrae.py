@@ -358,7 +358,8 @@ def fetch_rrlyrae(partial=False, **kwargs):
 
     Examples
     --------
-    >>> rrlyrae = fetch_rrlyrae()
+    >>> rrlyrae = fetch_rrlyrae() # doctest:+ELLIPSIS
+    ...
     >>> rrlyrae.ids[:5]
     [1013184, 1019544, 1027882, 1052471, 1056152]
     >>> lcid = rrlyrae.ids[0]
@@ -369,9 +370,8 @@ def fetch_rrlyrae(partial=False, **kwargs):
     array([ 18.702,  17.553,  17.236,  17.124])
     >>> dmag[:4]
     array([ 0.021,  0.005,  0.005,  0.006])
-    >>> bands[:4]
-    array(['u', 'g', 'r', 'i'], 
-          dtype='<U1')
+    >>> list(bands[:4])
+    ['u', 'g', 'r', 'i']
     """
     if partial:
         return PartialRRLyraeLC('table1.tar.gz',

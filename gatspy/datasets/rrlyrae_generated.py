@@ -31,7 +31,8 @@ class RRLyraeGenerated(object):
     --------
     >>> rrlyrae = fetch_rrlyrae()
     >>> lcid = rrlyrae.ids[0]
-    >>> gen = RRLyraeGenerated(lcid, random_state=0)
+    >>> gen = RRLyraeGenerated(lcid, random_state=0)  # doctest:+ELLIPSIS
+    ...
     >>> gen.period
     0.61431831
     >>> mag = gen.generated('g', [51080.0, 51080.5], err=0.3)
