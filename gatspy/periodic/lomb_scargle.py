@@ -205,11 +205,18 @@ class LombScargle(LeastSquaresMixin, PeriodicModeler):
     def _score(self, periods):
         return LeastSquaresMixin._score(self, periods)
 
-    def false_alarm_single(self, periods):
+    def false_alarm_single(self, periods, logarithmic=False):
         """
         Calculate the False Alarm Probability for every period
         provided by the input param.
-        Following the method outlined in Baluev 2008, Table 1
+        Following the method outlined in Baluev 2008, Table 1.
+
+        Note that this is an upper limit on the False Alarm Probability,
+        and that it assumes low spectral leakage when in reality it's usually
+        an issue.
+
+        If 'logarithmic'=True, false_alarm_single returns log10(FAP).
+        Else, false_alarm_single returns FAP.
         """
         t = self.t
         y = self.y
@@ -219,14 +226,28 @@ class LombScargle(LeastSquaresMixin, PeriodicModeler):
         Nk = N-3
 
         z = self.score(periods) * 0.5 * Nh
-        p = (1 - 2*z/Nh)**(0.5*Nk)
-        return p
 
-    def false_alarm_max(self):
+        if logarithmic:
+            log_fap = (0.5*Nk) * np.log10(1 - 2*z/Nh)
+            return log_fap
+
+        else:
+            fap = (1 - 2*z/Nh)**(0.5*Nk)
+            return fap
+
+    def false_alarm_max(self, logarithmic=False):
         """
         Calculate the False Alarm Probability for the best period.
         Following the method outlined in Baluev 2008, Table 1 and
         eq. 5
+
+        Note that this is an upper limit on the False Alarm Probability,
+        and that it assumes low spectral leakage when in reality it's usually
+        an issue. Set logarithmic=True for small FAP (< 1E-8).
+
+        If 'logarithmic'=True, false_alarm_max returns log10(FAP(single)),
+            and tau. FAP(max) = (1 - FAP(single))*exp(-tau.)
+        Else, false_alarm_max returns FAP(max) for the best calculated period.
         """
         t = self.t
         y = self.y
@@ -250,11 +271,19 @@ class LombScargle(LeastSquaresMixin, PeriodicModeler):
 
         var_t = bar(t**2, dy) - bar(t, dy)**2
         W = fmax * np.sqrt(4*np.pi*var_t)
-        tau = gamma_H * W * (1-2*z/Nh) ** (0.5*(Nk-1)) * np.sqrt(z)
-        Psingle = 1 - self.false_alarm_single(best_period)
-        Pmax = Psingle*np.exp(-tau)
 
-        return 1 - Pmax
+        if logarithmic:
+            tau = gamma_H * W * (1-2*z/Nh) ** (0.5*(Nk-1)) * np.sqrt(z)
+            log_fap_single = self.false_alarm_single(best_period, logarithmic=True)
+
+            return log_fap_single, tau
+
+        else:
+            tau = gamma_H * W * (1-2*z/Nh) ** (0.5*(Nk-1)) * np.sqrt(z)
+            Psingle = 1 - self.false_alarm_single(best_period)
+            Pmax = Psingle*np.exp(-tau)
+
+            return 1 - Pmax
 
 
 class LombScargleAstroML(LombScargle):
