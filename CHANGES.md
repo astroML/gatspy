@@ -2,6 +2,8 @@
 
 ## (v0.3) (not yet released)
 
+- Fix bug in ``predict()`` for ``LombScargle`` methods when ``center_data=False``
+
 ## (v0.2.1) bugfix release (19 Aug 2015)
 
 - Fix installation issues [PR 11](https://github.com/astroML/gatspy/pull/11)
