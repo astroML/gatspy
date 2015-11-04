@@ -66,10 +66,11 @@ class LombScargleMultiband(LeastSquaresMixin, PeriodicModelerMultiband):
         self.ymean_ = self._compute_ymean()
 
         masks = [(filts == filt) for filt in self.unique_filts_]
-        self.ymean_by_filt_ = [LeastSquaresMixin._compute_ymean(self,
-                                                                y=y[mask],
-                                                                dy=dy[mask])
-                               for mask in masks]
+        ymeans = [LeastSquaresMixin._compute_ymean(self,
+                                                   y=y[mask],
+                                                   dy=dy[mask])
+                  for mask in masks]
+        self.ymean_by_filt_ = np.array(ymeans)
 
         self.yw_ = self._construct_y(weighted=True)
         self.regularization = self._construct_regularization()
@@ -134,11 +135,10 @@ class LombScargleMultiband(LeastSquaresMixin, PeriodicModelerMultiband):
     def _predict(self, t, filts, period):
         omega = 2 * np.pi / period
 
-        # TODO: broadcast this
-        ymeans = np.zeros(len(filts))
-        for i, filt in enumerate(filts):
-            j = np.where(self.unique_filts_ == filt)[0][0]
-            ymeans[i] = self.ymean_by_filt_[j]
+        # need to make sure all unique filters are represented
+        u, i = np.unique(np.concatenate([filts, self.unique_filts_]),
+                         return_inverse=True)
+        ymeans = self.ymean_by_filt_[i[:-len(self.unique_filts_)]]
 
         theta = self._best_params(omega)
         X = self._construct_X(omega, weighted=False, t=t, filts=filts)
