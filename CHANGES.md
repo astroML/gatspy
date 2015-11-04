@@ -3,6 +3,7 @@
 ## (v0.3) (not yet released)
 
 - Fix bug in ``predict()`` for ``LombScargle`` methods when ``center_data=False``
+- Fix bug in ``score()`` for ``LombScargle`` methods when ``center_data=False`` and ``fit_offset=False``
 
 ## (v0.2.1) bugfix release (19 Aug 2015)
 
