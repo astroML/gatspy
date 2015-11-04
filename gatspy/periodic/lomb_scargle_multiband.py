@@ -132,11 +132,6 @@ class LombScargleMultiband(LeastSquaresMixin, PeriodicModelerMultiband):
             return np.transpose(np.vstack(cols))
 
     def _predict(self, t, filts, period):
-        t, filts = np.broadcast_arrays(t, filts)
-        output_shape = t.shape
-
-        t = t.ravel()
-        filts = filts.ravel()
         omega = 2 * np.pi / period
 
         # TODO: broadcast this
@@ -147,7 +142,7 @@ class LombScargleMultiband(LeastSquaresMixin, PeriodicModelerMultiband):
 
         theta = self._best_params(omega)
         X = self._construct_X(omega, weighted=False, t=t, filts=filts)
-        return (ymeans + np.dot(X, theta)).reshape(output_shape)
+        return ymeans + np.dot(X, theta)
 
 
 class LombScargleMultibandFast(PeriodicModelerMultiband):
