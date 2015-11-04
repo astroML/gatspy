@@ -60,10 +60,11 @@ class LeastSquaresMixin(object):
         # be much simpler if we did not allow center_data=False.
         # We keep it just to make sure our math is correct
         chi2_0 = np.dot(self.yw_.T, self.yw_)
-        if self.center_data:
-            chi2_ref = chi2_0
-        else:
+        if self.center_data or self.fit_offset:
             yref = self._construct_y(weighted=True, center_data=True)
+            chi2_ref = np.dot(yref.T, yref)
+        else:
+            yref = self._construct_y(weighted=True, center_data=False)
             chi2_ref = np.dot(yref.T, yref)
 
         # Iterate through the omegas and compute the power for each

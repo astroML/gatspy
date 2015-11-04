@@ -51,13 +51,12 @@ def test_dy_scalar(N=100, period=1):
 
     # Make dy array all the same
     dy[:] = dy.mean()
-    periods = np.linspace(period - 0.5, period + 0.5, 100)
 
     def check_model(Model):
-        assert_equal(Model().fit(t, y, dy).score(periods),
-                     Model().fit(t, y, dy[0]).score(periods))
+        assert_equal(Model().fit(t, y, dy).periodogram_auto(),
+                     Model().fit(t, y, dy[0]).periodogram_auto())
 
-    for Model in [LombScargle, LombScargleAstroML]:
+    for Model in [LombScargle, LombScargleAstroML, LombScargleFast]:
         yield check_model, Model
 
 
@@ -168,3 +167,21 @@ def test_dy_None(N=100, period=1):
 
     for Model in [LombScargle, LombScargleAstroML, LombScargleFast]:
         yield check_model, Model
+
+
+def test_power_normalization(N=100, period=1):
+    t, y, dy = _generate_data(N, period)
+
+    def check_model(Model, fit_offset, center_data):
+        if Model is LombScargleFast and not (fit_offset or center_data):
+            raise SkipTest("Known Failure: uncentered LombScargleFast")
+
+        model = Model(fit_offset=fit_offset, center_data=center_data)
+        model.fit(t, y, dy)
+        p, s = model.periodogram_auto()
+        assert_(np.all((s >= 0) & (s <= 1)))
+
+    for Model in [LombScargle, LombScargleAstroML, LombScargleFast]:
+        for fit_offset in [True, False]:
+            for center_data in [True, False]:
+                yield check_model, Model, fit_offset, center_data

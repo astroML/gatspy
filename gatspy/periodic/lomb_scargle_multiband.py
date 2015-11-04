@@ -49,6 +49,8 @@ class LombScargleMultiband(LeastSquaresMixin, PeriodicModelerMultiband):
     LombScargleFast
     LombScargleMultibandFast
     """
+    fit_offset=True
+
     def __init__(self, optimizer=None, Nterms_base=1, Nterms_band=1,
                  reg_base=None, reg_band=1E-6, regularize_by_trace=True,
                  center_data=True, fit_period=False, optimizer_kwds=None):
