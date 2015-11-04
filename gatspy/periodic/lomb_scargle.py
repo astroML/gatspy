@@ -117,7 +117,10 @@ class LombScargle(LeastSquaresMixin, PeriodicModeler):
         omega = 2 * np.pi / period
         theta = self._best_params(omega)
         X = self._construct_X(omega, weighted=False, t=t)
-        return self.ymean_ + np.dot(X, theta)
+        if self.center_data:
+            return self.ymean_ + np.dot(X, theta)
+        else:
+            return np.dot(X, theta)
 
     def _score(self, periods):
         return LeastSquaresMixin._score(self, periods)

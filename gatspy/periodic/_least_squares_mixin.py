@@ -8,15 +8,12 @@ class LeastSquaresMixin(object):
     def _construct_X(self, omega, weighted=True, **kwargs):
         raise NotImplementedError()
 
-    def _construct_y(self, weighted=True, **kwargs):
-        raise NotImplementedError()
-
     def _construct_X_M(self, omega, **kwargs):
         """Construct the weighted normal matrix of the problem"""
         X = self._construct_X(omega, weighted=True, **kwargs)
         M = np.dot(X.T, X)
 
-        if hasattr(self, 'regularization') and self.regularization is not None:
+        if getattr(self, 'regularization', None) is not None:
             diag = M.ravel(order='K')[::M.shape[0] + 1]
             if self.regularize_by_trace:
                 diag += diag.sum() * np.asarray(self.regularization)
@@ -68,9 +65,9 @@ class LeastSquaresMixin(object):
         else:
             yref = self._construct_y(weighted=True, center_data=True)
             chi2_ref = np.dot(yref.T, yref)
-        chi2_0_minus_chi2 = np.zeros(omegas.size, dtype=float)
 
         # Iterate through the omegas and compute the power for each
+        chi2_0_minus_chi2 = np.zeros(omegas.size, dtype=float)
         for i, omega in enumerate(omegas.flat):
             Xw, XTX = self._construct_X_M(omega)
             XTy = np.dot(Xw.T, self.yw_)

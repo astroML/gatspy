@@ -142,7 +142,11 @@ class LombScargleMultiband(LeastSquaresMixin, PeriodicModelerMultiband):
 
         theta = self._best_params(omega)
         X = self._construct_X(omega, weighted=False, t=t, filts=filts)
-        return ymeans + np.dot(X, theta)
+
+        if self.center_data:
+            return ymeans + np.dot(X, theta)
+        else:
+            return np.dot(X, theta)
 
 
 class LombScargleMultibandFast(PeriodicModelerMultiband):

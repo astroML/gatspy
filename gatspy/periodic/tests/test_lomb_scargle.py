@@ -137,6 +137,19 @@ def test_regularized(N=100, period=1):
         pred = model.predict(period)
 
 
+def test_predict_center_data(N=100, period=1):
+    """Test that results are the same for centered and non-centered data"""
+    theta_true = [10, 2, 3]
+    dy = 1.0
+    t, y, dy = _generate_data(N, period, theta_true, dy)
+    y += 5
+
+    m1 = LombScargle(center_data=True).fit(t, y, dy).predict(t, period=period)
+    m2 = LombScargle(center_data=False).fit(t, y, dy).predict(t, period=period)
+
+    assert_allclose(m1, m2)
+
+
 def test_bad_args():
     assert_raises(ValueError, LombScargle, Nterms=-2)
     assert_raises(ValueError, LombScargle, Nterms=0, fit_offset=False)

@@ -95,3 +95,22 @@ def test_multiband_predict_broadcast(N=100, period=1):
 
     for Nterms in [1, 2, 3]:
         yield check_models, Nterms
+
+
+def test_multiband_predict_center_data(N=100, period=1):
+    """Test that results are the same for centered and non-centered data"""
+    t, y, dy = _generate_data(N, period)
+
+    rng = np.random.RandomState(0)
+    filts = rng.randint(0, 3, N)
+    masks = [(filts == f) for f in range(3)]
+
+    model1 = LombScargleMultiband(center_data=True).fit(t, y, dy, filts)
+    model2 = LombScargleMultiband(center_data=False).fit(t, y, dy, filts)
+
+    tfit = np.linspace(5 * period, 15 * period, 30)
+    filtsfit = np.arange(3)[:, None]
+
+    assert_allclose(model1.predict(tfit, filtsfit, period=period),
+                    model2.predict(tfit, filtsfit, period=period),
+                    rtol=1E-6)
