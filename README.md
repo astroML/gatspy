@@ -49,4 +49,4 @@ The tests are run on Python versions 2.6, 2.7, 3.3, 3.4, and 3.5.
 ## Citing
 If you use this code in an academic publication, please consider including a citation. Citation information in a variety of formats can be found [on zenodo](http://dx.doi.org/10.5281/zenodo.14833).
 
-Please also see our paper describing the multiband methods in this software; it is in review and a preprint available on arXiv: http://adsabs.harvard.edu/abs/2015arXiv150201344V
+Please also see our paper describing the multiband methods in this package: [VanderPlas & Ivezic (2015)](http://adsabs.harvard.edu/abs/2015ApJ...812...18V).
