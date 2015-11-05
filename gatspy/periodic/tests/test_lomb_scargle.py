@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_allclose, assert_, assert_equal, assert_raises
+from numpy.testing import assert_allclose, assert_, assert_raises
 from nose import SkipTest
 
 from .. import LombScargle, LombScargleAstroML, LombScargleFast
@@ -53,8 +53,8 @@ def test_dy_scalar(N=100, period=1):
     dy[:] = dy.mean()
 
     def check_model(Model):
-        assert_equal(Model().fit(t, y, dy).periodogram_auto(),
-                     Model().fit(t, y, dy[0]).periodogram_auto())
+        assert_allclose(Model().fit(t, y, dy).periodogram_auto(),
+                        Model().fit(t, y, dy[0]).periodogram_auto())
 
     for Model in [LombScargle, LombScargleAstroML, LombScargleFast]:
         yield check_model, Model
