@@ -99,8 +99,6 @@ def test_lomb_scargle_fast():
 
     for center_data in [True, False]:
         for fit_offset in [True, False]:
-            if not fit_offset and not center_data:
-                continue
             yield check_results, center_data, fit_offset
 
 
@@ -122,8 +120,6 @@ def test_find_best_period():
     for use_fft in [True, False]:
         for fit_offset in [True, False]:
             for center_data in [True, False]:
-                if not fit_offset and not center_data:
-                    continue
                 yield check_result, use_fft, fit_offset, center_data
 
 
@@ -146,6 +142,4 @@ def test_power():
     for use_fft in [True, False]:
         for fit_offset in [True, False]:
             for center_data in [True, False]:
-                if not fit_offset and not center_data:
-                    continue
                 yield check_result, use_fft, fit_offset, center_data

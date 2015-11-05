@@ -1,6 +1,5 @@
 import numpy as np
 from numpy.testing import assert_allclose, assert_, assert_equal, assert_raises
-from nose import SkipTest
 
 from .. import LombScargle, LombScargleAstroML, LombScargleFast
 
@@ -173,9 +172,6 @@ def test_power_normalization(N=100, period=1):
     t, y, dy = _generate_data(N, period)
 
     def check_model(Model, fit_offset, center_data):
-        if Model is LombScargleFast and not (fit_offset or center_data):
-            raise SkipTest("Known Failure: uncentered LombScargleFast")
-
         model = Model(fit_offset=fit_offset, center_data=center_data)
         model.fit(t, y, dy)
         p, s = model.periodogram_auto()
