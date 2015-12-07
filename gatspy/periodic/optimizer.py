@@ -78,6 +78,11 @@ class LinearScanOptimizer(PeriodicOptimizer):
         tmin, tmax = np.min(model.t), np.max(model.t)
         width = 2 * np.pi / (tmax - tmin)
 
+        # raise a ValueError if period limits are out of range
+        if tmax - tmin < np.max(self.period_range):
+            raise ValueError("The optimizer is not designed to search for "
+                             "for periods larger than the data baseline. ")
+
         # our candidate steps in omega is controlled by period_range & coverage
         omega_step = width / self.first_pass_coverage
         omega_min = 2 * np.pi / np.max(self.period_range)
