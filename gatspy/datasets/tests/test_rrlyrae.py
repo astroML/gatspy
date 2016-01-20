@@ -2,7 +2,16 @@ import pickle
 import numpy as np
 from numpy.testing import assert_equal, assert_raises
 from .. import fetch_rrlyrae, fetch_rrlyrae_templates
+from nose import SkipTest
 
+try:
+    # Python 3
+    from urllib.error import URLError
+    ConnectionError = ConnectionResetError
+except ImportError:
+    # Python 2
+    from urllib2 import URLError
+    from socket import error as ConnectionError
 
 def test_rrlyrae_lightcurves():
     for partial in [True, False]:

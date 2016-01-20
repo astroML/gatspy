@@ -1,5 +1,15 @@
 import numpy as np
 from numpy.testing import assert_allclose, assert_raises
+from nose import SkipTest
+
+try:
+    # Python 3
+    from urllib.error import URLError
+    ConnectionError = ConnectionResetError
+except ImportError:
+    # Python 2
+    from urllib2 import URLError
+    from socket import error as ConnectionError
 
 from .. import RRLyraeTemplateModeler, RRLyraeTemplateModelerMultiband
 from ...datasets import fetch_rrlyrae_templates, fetch_rrlyrae
