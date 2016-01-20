@@ -1,9 +1,25 @@
 from numpy.testing import assert_equal
 from .. import RRLyraeGenerated, fetch_rrlyrae
 
+from nose import SkipTest
+
+try:
+    # Python 3
+    from urllib.error import URLError
+    ConnectionError = ConnectionResetError
+except ImportError:
+    # Python 2
+    from urllib2 import URLError
+    from socket import error as ConnectionError
+
 
 def test_rrlyrae_generated():
-    rrlyrae = fetch_rrlyrae()
+    try:
+        rrlyrae = fetch_rrlyrae()
+    except(URLError, ConnectionError):
+        raise SkipTest("No internet connection: "
+                       "data download test skipped")
+
     lcid = rrlyrae.ids[100]
 
     gen = RRLyraeGenerated(lcid)

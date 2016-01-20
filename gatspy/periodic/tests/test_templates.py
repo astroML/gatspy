@@ -1,5 +1,15 @@
 import numpy as np
 from numpy.testing import assert_allclose, assert_raises
+from nose import SkipTest
+
+try:
+    # Python 3
+    from urllib.error import URLError
+    ConnectionError = ConnectionResetError
+except ImportError:
+    # Python 2
+    from urllib2 import URLError
+    from socket import error as ConnectionError
 
 from .. import RRLyraeTemplateModeler, RRLyraeTemplateModelerMultiband
 from ...datasets import fetch_rrlyrae_templates, fetch_rrlyrae
@@ -9,7 +19,12 @@ from scipy.interpolate import UnivariateSpline
 def test_basic_template_model():
     template_id = 25
 
-    templates = fetch_rrlyrae_templates()
+    try:
+        templates = fetch_rrlyrae_templates()
+    except(URLError, ConnectionError):
+        raise SkipTest("No internet connection: "
+                       "data download test skipped")
+
     phase, y = templates.get_template(templates.ids[template_id])
     model = UnivariateSpline(phase, y, s=0, k=5)
 
@@ -38,7 +53,12 @@ def test_basic_template_model():
 def test_multiband_fit():
     # TODO: this is a long test.
     # We could artificially limit the number of templates to make it faster
-    rrlyrae = fetch_rrlyrae()
+    try:
+        rrlyrae = fetch_rrlyrae()
+    except(URLError, ConnectionError):
+        raise SkipTest("No internet connection: "
+                       "data download test skipped")
+
     t, y, dy, filts = rrlyrae.get_lightcurve(rrlyrae.ids[0])
     t = t[::10]
     y = y[::10]
@@ -63,4 +83,9 @@ def test_multiband_fit():
 
 
 def test_bad_args():
-    assert_raises(ValueError, RRLyraeTemplateModeler, filts='abc')
+    try:
+        assert_raises(ValueError, RRLyraeTemplateModeler, filts='abc')
+    except(URLError, ConnectionError):
+        raise SkipTest("No internet connection: "
+                       "data download test skipped")
+

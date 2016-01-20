@@ -2,11 +2,24 @@ import pickle
 import numpy as np
 from numpy.testing import assert_equal, assert_raises
 from .. import fetch_rrlyrae, fetch_rrlyrae_templates
+from nose import SkipTest
 
+try:
+    # Python 3
+    from urllib.error import URLError
+    ConnectionError = ConnectionResetError
+except ImportError:
+    # Python 2
+    from urllib2 import URLError
+    from socket import error as ConnectionError
 
 def test_rrlyrae_lightcurves():
     for partial in [True, False]:
-        rrlyrae = fetch_rrlyrae(partial=partial)
+        try:
+            rrlyrae = fetch_rrlyrae(partial=partial)
+        except(URLError, ConnectionError):
+            raise SkipTest("No internet connection: "
+                           "data download test skipped")
         lcid = rrlyrae.ids[0]
 
         if not partial:
@@ -34,21 +47,33 @@ def test_rrlyrae_lightcurves():
 
 
 def test_bad_lcid():
-    rrlyrae = fetch_rrlyrae()
+    try:
+        rrlyrae = fetch_rrlyrae()
+    except(URLError, ConnectionError):
+        raise SkipTest("No internet connection: "
+                       "data download test skipped")
     lcid = 'BAD_ID'
 
     assert_raises(ValueError, rrlyrae.get_lightcurve, lcid)
     assert_raises(ValueError, rrlyrae.get_metadata, lcid)
     assert_raises(ValueError, rrlyrae.get_obsmeta, lcid)
 
-    rrlyrae = fetch_rrlyrae(partial=True)
+    try:
+        rrlyrae = fetch_rrlyrae(partial=True)
+    except(URLError, ConnectionError):
+        raise SkipTest("No internet connection: "
+                       "data download test skipped")
     assert_raises(ValueError, rrlyrae.get_lightcurve, rrlyrae.ids[0],
                   return_1d=False)
 
 
 def test_rrlyrae_pickle():
     for partial in [True, False]:
-        rrlyrae = fetch_rrlyrae(partial=partial)
+        try:
+            rrlyrae = fetch_rrlyrae(partial=partial)
+        except(URLError, ConnectionError):
+            raise SkipTest("No internet connection: "
+                           "data download test skipped")        
         s = pickle.dumps(rrlyrae)
         rrlyrae2 = pickle.loads(s)
 
@@ -58,7 +83,12 @@ def test_rrlyrae_pickle():
 
 
 def test_rrlyrae_templates():
-    templates = fetch_rrlyrae_templates()
+    try:
+        templates = fetch_rrlyrae_templates()
+    except(URLError, ConnectionError):
+        raise SkipTest("No internet connection: "
+                       "data download test skipped")
+
     filename = templates.filenames[0]
     tid = templates.ids[0]
     t = templates.get_template(tid)
