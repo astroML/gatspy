@@ -3,7 +3,12 @@ from .. import RRLyraeGenerated, fetch_rrlyrae
 
 
 def test_rrlyrae_generated():
-    rrlyrae = fetch_rrlyrae()
+    try:
+        rrlyrae = fetch_rrlyrae()
+    except(URLError, ConnectionError):
+        raise SkipTest("No internet connection: "
+                       "data download test skipped")
+
     lcid = rrlyrae.ids[100]
 
     gen = RRLyraeGenerated(lcid)
