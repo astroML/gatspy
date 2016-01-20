@@ -16,7 +16,11 @@ except ImportError:
 def test_downloads():
     for downloader in (fetch_rrlyrae, fetch_rrlyrae_fitdata,
                        fetch_rrlyrae_templates, fetch_rrlyrae_lc_params):
-        data = downloader()
+        try:
+            data = downloader()
+        except (URLError, ConnectionError):
+            raise SkipTest("No internet connection: "
+                           "data download test skipped")
         assert data is not None
 
 
