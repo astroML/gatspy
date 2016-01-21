@@ -10,8 +10,7 @@ import numpy as np
 try:
     import supersmoother as ssm
 except ImportError:
-    raise ImportError("Package supersmoother is required. "
-                      "Use ``pip install supersmoother`` to install")
+    ssm = None
 
 from .modeler import PeriodicModeler, PeriodicModelerMultiband
 
@@ -57,6 +56,9 @@ class SuperSmoother(PeriodicModeler):
     """
     def __init__(self, optimizer=None,
                  fit_period=False, optimizer_kwds=None):
+        if ssm is None:
+            raise ImportError("Package supersmoother is required. "
+                              "Use ``pip install supersmoother`` to install")
         PeriodicModeler.__init__(self, optimizer,
                                  fit_period=fit_period,
                                  optimizer_kwds=optimizer_kwds)
