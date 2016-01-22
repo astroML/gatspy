@@ -194,10 +194,7 @@ def lomb_scargle_fast(t, y, dy=1, f0=0, df=None, Nf=None,
     """Compute a lomb-scargle periodogram for the given data
 
     This implements both an O[N^2] method if use_fft==False, or an
-    O[NlogN] method if use_fft==True. The fft algorithm will closely
-    approximate the Lomb-Scargle periodogram at high frequencies
-    (i.e. >~ 1 full periods represented in the data). For very low
-    frequencies, the approximation is not as good.
+    O[NlogN] method if use_fft==True.
 
     Parameters
     ----------
@@ -237,6 +234,13 @@ def lomb_scargle_fast(t, y, dy=1, f0=0, df=None, Nf=None,
         extra keyword arguments to pass to the ``trig_sum`` utility.
         Options are ``oversampling`` and ``Mfft``. See documentation
         of ``trig_sum`` for details.
+
+    Notes
+    -----
+    Note that the ``use_fft=True`` algorithm is an approximation to the true
+    Lomb-Scargle periodogram, and as the number of points grows this
+    approximation improves. On the other hand, for very small datasets
+    (<~50 points or so) this approximation may not be useful.
 
     References
     ----------
@@ -334,11 +338,7 @@ class LombScargleFast(LombScargle):
     To compute the periodogram via the fast algorithm, use the
     ``score_frequency_grid()`` method. The ``score()`` method and
     ``periodogram()`` method will default to the slower algorithm.
-
-    Note that the fast fft-based algorithm will closely approximate the
-    Lomb-Scargle periodogram at high frequencies (i.e. >~ 1 full periods
-    represented in the data). For very low frequencies, the approximation
-    is not as good.
+    See Notes below for more information about the algorithm.
 
     Parameters
     ----------
@@ -360,6 +360,9 @@ class LombScargleFast(LombScargle):
     optimizer_kwds : dict (optional)
         Dictionary of keyword arguments for constructing the optimizer. For
         example, silence optimizer output with `optimizer_kwds={"quiet": True}`.
+    warn_on_small_data : bool (default=True)
+        If True, then warn the user when ``use_fft=True`` is used for small
+        datasets (fewer than 50 points).
 
     Examples
     --------
@@ -387,6 +390,12 @@ class LombScargleFast(LombScargle):
     Currently, a NotImplementedError will be raised if both center_data
     and fit_offset are False.
 
+    Note also that the fast algorithm is only an approximation to the true
+    Lomb-Scargle periodogram, and as the number of points grows this
+    approximation improves. On the other hand, for very small datasets
+    (<~50 points or so) this approximation may produce incorrect results
+    for some datasets.
+
     See Also
     --------
     LombScargle
@@ -399,9 +408,11 @@ class LombScargleFast(LombScargle):
     """
     def __init__(self, optimizer=None, center_data=True, fit_offset=True,
                  use_fft=True, ls_kwds=None, Nterms=1,
-                 fit_period=False, optimizer_kwds=None):
+                 fit_period=False, optimizer_kwds=None,
+                 warn_on_small_data=True):
         self.use_fft = use_fft
         self.ls_kwds = ls_kwds
+        self.warn_on_small_data = warn_on_small_data
 
         if Nterms != 1:
             raise ValueError("LombScargleFast supports only Nterms = 1")
@@ -413,6 +424,13 @@ class LombScargleFast(LombScargle):
                              optimizer_kwds=optimizer_kwds)
 
     def _score_frequency_grid(self, f0, df, N):
+        if self.warn_on_small_data and self.t.size < 50:
+            warnings.warn("For smaller datasets, the approximation used by "
+                          "LombScargleFast may not be suitable.\n"
+                          "It is recommended to use LombScargle instead.\n"
+                          "To silence this warning, set "
+                          "``warn_on_small_data=False``")
+
         freq, P = lomb_scargle_fast(self.t, self.y, self.dy,
                                     f0=f0, df=df, Nf=N,
                                     center_data=self.center_data,
