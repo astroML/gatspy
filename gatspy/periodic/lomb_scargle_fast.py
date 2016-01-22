@@ -194,7 +194,10 @@ def lomb_scargle_fast(t, y, dy=1, f0=0, df=None, Nf=None,
     """Compute a lomb-scargle periodogram for the given data
 
     This implements both an O[N^2] method if use_fft==False, or an
-    O[NlogN] method if use_fft==True.
+    O[NlogN] method if use_fft==True. The fft algorithm will closely
+    approximate the Lomb-Scargle periodogram at high frequencies
+    (i.e. >~ 1 full periods represented in the data). For very low
+    frequencies, the approximation is not as good.
 
     Parameters
     ----------
@@ -329,8 +332,13 @@ class LombScargleFast(LombScargle):
     This implements the O[N log N] lomb-scargle periodogram, described in
     Press & Rybicki (1989) [1].
     To compute the periodogram via the fast algorithm, use the
-    ``score_frequency_grid()`` method. The ``score()`` method of
+    ``score_frequency_grid()`` method. The ``score()`` method and
     ``periodogram()`` method will default to the slower algorithm.
+
+    Note that the fast fft-based algorithm will closely approximate the
+    Lomb-Scargle periodogram at high frequencies (i.e. >~ 1 full periods
+    represented in the data). For very low frequencies, the approximation
+    is not as good.
 
     Parameters
     ----------
