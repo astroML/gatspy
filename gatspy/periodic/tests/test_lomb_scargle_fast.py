@@ -2,11 +2,12 @@ from __future__ import division
 import warnings
 
 import numpy as np
-from numpy.testing import assert_allclose, assert_equal
+from numpy.testing import (assert_allclose, assert_equal,
+                           assert_warns, assert_no_warnings)
 
 from ..lomb_scargle_fast import (extirpolate, bitceil, trig_sum,
                                  lomb_scargle_fast)
-from .. import LombScargle, LombScargleAstroML, LombScargleFast
+from .. import LombScargle, LombScargleFast
 
 
 def _generate_data(N=100, period=1, theta=[10, 2, 3], dy=1, rseed=0):
@@ -143,3 +144,10 @@ def test_power():
         for fit_offset in [True, False]:
             for center_data in [True, False]:
                 yield check_result, use_fft, fit_offset, center_data
+
+def check_warn_on_small_data():
+    t, y, dy = _generate_data(20)
+    model = LombScargleFast()
+    assert_warns(UserWarning, model.score_frequency_grid, 0.8, 0.01, 40)
+    model = LombScargleFast(silence_warnings=True)
+    assert_no_warnings(model.score_frequency_grid, 0.8, 0.01, 40)

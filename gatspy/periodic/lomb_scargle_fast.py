@@ -360,9 +360,10 @@ class LombScargleFast(LombScargle):
     optimizer_kwds : dict (optional)
         Dictionary of keyword arguments for constructing the optimizer. For
         example, silence optimizer output with `optimizer_kwds={"quiet": True}`.
-    warn_on_small_data : bool (default=True)
-        If True, then warn the user when ``use_fft=True`` is used for small
-        datasets (fewer than 50 points).
+    silence_warnings : bool (default=False)
+        If False, then warn the user when doing silly things, like calling
+        ``score()`` rather than ``score_frequency_grid()`` or fitting this to
+        small datasets (fewer than 50 points).
 
     Examples
     --------
@@ -409,10 +410,10 @@ class LombScargleFast(LombScargle):
     def __init__(self, optimizer=None, center_data=True, fit_offset=True,
                  use_fft=True, ls_kwds=None, Nterms=1,
                  fit_period=False, optimizer_kwds=None,
-                 warn_on_small_data=True):
+                 silence_warnings=False):
         self.use_fft = use_fft
         self.ls_kwds = ls_kwds
-        self.warn_on_small_data = warn_on_small_data
+        self.silence_warnings = silence_warnings
 
         if Nterms != 1:
             raise ValueError("LombScargleFast supports only Nterms = 1")
@@ -424,12 +425,12 @@ class LombScargleFast(LombScargle):
                              optimizer_kwds=optimizer_kwds)
 
     def _score_frequency_grid(self, f0, df, N):
-        if self.warn_on_small_data and self.t.size < 50:
+        if not self.silence_warnings and self.t.size < 50:
             warnings.warn("For smaller datasets, the approximation used by "
                           "LombScargleFast may not be suitable.\n"
                           "It is recommended to use LombScargle instead.\n"
                           "To silence this warning, set "
-                          "``warn_on_small_data=False``")
+                          "``silence_warnings=True``")
 
         freq, P = lomb_scargle_fast(self.t, self.y, self.dy,
                                     f0=f0, df=df, Nf=N,
@@ -440,7 +441,10 @@ class LombScargleFast(LombScargle):
         return P
 
     def _score(self, periods):
-        warnings.warn("The score() method defaults to a slower O[N^2] "
-                      "algorithm. Use the score_frequency_grid() method "
-                      "to access the fast FFT-based algorithm")
+        if not self.silence_warnings:
+            warnings.warn("The score() method defaults to a slower O[N^2] "
+                          "algorithm.\nUse the score_frequency_grid() method "
+                          "to access the fast FFT-based algorithm.\n"
+                          "To silence this warning, set "
+                          "``silence_warnings=True``")
         return LombScargle._score(self, periods)
