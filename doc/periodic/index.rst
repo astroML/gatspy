@@ -17,6 +17,7 @@ All of these fitters are classes which derive from a common
 
    lomb_scargle
    lomb_scargle_multiband
+   trended_lomb_scargle
    supersmoother
    template
    API
