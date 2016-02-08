@@ -8,23 +8,25 @@ Here's a quick step-by-step for cutting a new release of gatspy.
 
 2. update version in ``docs/conf.py`` (two places!)
 
-3. create a release tag; e.g.
+3. update change log in ``CHANGES.md``
+
+4. create a release tag; e.g.
    ```
    $ git tag -a v0.2 -m 'version 0.2 release'
    ```
 
-4. push the commits and tag to github
+5. push the commits and tag to github
 
-5. confirm that CI tests pass on github
+6. confirm that CI tests pass on github
 
-6. under "tags" on github, update the release notes
+7. under "tags" on github, update the release notes
 
-7. push the new release to PyPI:
+8. push the new release to PyPI:
    ```
    $ python setup.py sdist upload
    ```
 
-8. change directories to ``doc`` and build the documentation:
+9. change directories to ``doc`` and build the documentation:
    ```
    $ cd doc/
    $ make html     # build documentation
