@@ -41,7 +41,7 @@ Gatspy uses ``nose`` for unit tests. With nosetests installed, type
 
 to run the unit tests.
 
-The tests are run on Python versions 2.6, 2.7, 3.3, 3.4, and 3.5.
+The tests are run on Python versions 2.7, 3.4, and 3.5.
 
 ## Authors
 - [Jake VanderPlas](http://www.vanderplas.com)
