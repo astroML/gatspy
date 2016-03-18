@@ -11,7 +11,7 @@ python:
 env:
   global:
     - TEST_DIR=/tmp/megaman
-    - CONDA_DEPS="numpy scipy nose pip scikit-learn"
+    - CONDA_DEPS="numpy scipy nose pip coverage scikit-learn"
     - PIP_DEPS="supersmoother astroML astroML_addons"
 
 before_install:
