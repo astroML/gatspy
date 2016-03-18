@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>API Documentation &mdash; gatspy 0.2.1 documentation</title>
+    <title>API Documentation &mdash; gatspy 0.3 documentation</title>
     
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.2.1',
+        VERSION:     '0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="gatspy 0.2.1 documentation" href="../index.html" />
+    <link rel="top" title="gatspy 0.3 documentation" href="../index.html" />
     <link rel="up" title="Tools for Periodic Timeseries (gatspy.periodic)" href="index.html" />
     <link rel="prev" title="Template-based Period Fitting" href="template.html" />
    
@@ -31,23 +31,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="template.html" title="Template-based Period Fitting"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">gatspy 0.2.1 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Tools for Periodic Timeseries (<code class="docutils literal"><span class="pre">gatspy.periodic</span></code>)</a> &raquo;</li> 
-      </ul>
-    </div>  
+  <body role="document">  
 
     <div class="document">
       <div class="documentwrapper">
@@ -153,19 +137,41 @@ least squares fit.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">find_best_periods</span></code>([n_periods,&nbsp;return_scores])</td>
+<td>Find the top several best periods for the model</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">fit</span></code>(t,&nbsp;y[,&nbsp;dy])</td>
+<td>Fit the multiterm Periodogram model to the data.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram_auto</span></code>([oversampling,&nbsp;...])</td>
+<td>Compute the periodogram on an automatically-determined grid</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">predict</span></code>(t[,&nbsp;period])</td>
+<td>Compute the best-fit model at <code class="docutils literal"><span class="pre">t</span></code> for a given period</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">score</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">score_frequency_grid</span></code>(f0,&nbsp;df,&nbsp;N)</td>
+<td>Compute the score on a frequency grid.</td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="class">
 <dt id="gatspy.periodic.LombScargleFast">
-<em class="property">class </em><code class="descclassname">gatspy.periodic.</code><code class="descname">LombScargleFast</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>center_data=True</em>, <em>fit_offset=True</em>, <em>use_fft=True</em>, <em>ls_kwds=None</em>, <em>Nterms=1</em>, <em>fit_period=False</em>, <em>optimizer_kwds=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/periodic/lomb_scargle_fast.html#LombScargleFast"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.periodic.LombScargleFast" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">gatspy.periodic.</code><code class="descname">LombScargleFast</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>center_data=True</em>, <em>fit_offset=True</em>, <em>use_fft=True</em>, <em>ls_kwds=None</em>, <em>Nterms=1</em>, <em>fit_period=False</em>, <em>optimizer_kwds=None</em>, <em>silence_warnings=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/periodic/lomb_scargle_fast.html#LombScargleFast"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.periodic.LombScargleFast" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fast FFT-based Lomb-Scargle Periodogram Implementation</p>
 <p>This implements the O[N log N] lomb-scargle periodogram, described in
 Press &amp; Rybicki (1989) [1].
 To compute the periodogram via the fast algorithm, use the
-<code class="docutils literal"><span class="pre">score_frequency_grid()</span></code> method. The <code class="docutils literal"><span class="pre">score()</span></code> method of
-<code class="docutils literal"><span class="pre">periodogram()</span></code> method will default to the slower algorithm.</p>
+<code class="docutils literal"><span class="pre">score_frequency_grid()</span></code> method. The <code class="docutils literal"><span class="pre">score()</span></code> method and
+<code class="docutils literal"><span class="pre">periodogram()</span></code> method will default to the slower algorithm.
+See Notes below for more information about the algorithm.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -197,9 +203,16 @@ the result</p>
 <blockquote>
 <div><p>If True, then fit for the best period when fit() method is called.</p>
 </div></blockquote>
-<p><strong>optimizer_kwds</strong> : dict (optional</p>
+<p><strong>optimizer_kwds</strong> : dict (optional)</p>
+<blockquote>
+<div><p>Dictionary of keyword arguments for constructing the optimizer. For
+example, silence optimizer output with <cite>optimizer_kwds={&#8220;quiet&#8221;: True}</cite>.</p>
+</div></blockquote>
+<p><strong>silence_warnings</strong> : bool (default=False)</p>
 <blockquote class="last">
-<div><p>Dictionary of keyword arguments for constructing the optimizer</p>
+<div><p>If False, then warn the user when doing silly things, like calling
+<code class="docutils literal"><span class="pre">score()</span></code> rather than <code class="docutils literal"><span class="pre">score_frequency_grid()</span></code> or fitting this to
+small datasets (fewer than 50 points).</p>
 </div></blockquote>
 </td>
 </tr>
@@ -212,6 +225,11 @@ the result</p>
 <p class="rubric">Notes</p>
 <p>Currently, a NotImplementedError will be raised if both center_data
 and fit_offset are False.</p>
+<p>Note also that the fast algorithm is only an approximation to the true
+Lomb-Scargle periodogram, and as the number of points grows this
+approximation improves. On the other hand, for very small datasets
+(&lt;~50 points or so) this approximation may produce incorrect results
+for some datasets.</p>
 <p class="rubric">References</p>
 <table class="docutils citation" frame="void" id="r1" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
@@ -260,6 +278,27 @@ of unevenly sampled data&#8221;. ApJ 1:338, p277, 1989</td></tr>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">find_best_periods</span></code>([n_periods,&nbsp;return_scores])</td>
+<td>Find the top several best periods for the model</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">fit</span></code>(t,&nbsp;y[,&nbsp;dy])</td>
+<td>Fit the multiterm Periodogram model to the data.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram_auto</span></code>([oversampling,&nbsp;...])</td>
+<td>Compute the periodogram on an automatically-determined grid</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">predict</span></code>(t[,&nbsp;period])</td>
+<td>Compute the best-fit model at <code class="docutils literal"><span class="pre">t</span></code> for a given period</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">score</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">score_frequency_grid</span></code>(f0,&nbsp;df,&nbsp;N)</td>
+<td>Compute the score on a frequency grid.</td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
@@ -352,6 +391,27 @@ use the faster version of the code from astroML_addons</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">find_best_periods</span></code>([n_periods,&nbsp;return_scores])</td>
+<td>Find the top several best periods for the model</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">fit</span></code>(t,&nbsp;y[,&nbsp;dy])</td>
+<td>Fit the multiterm Periodogram model to the data.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram_auto</span></code>([oversampling,&nbsp;...])</td>
+<td>Compute the periodogram on an automatically-determined grid</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">predict</span></code>(t[,&nbsp;period])</td>
+<td>Compute the best-fit model at <code class="docutils literal"><span class="pre">t</span></code> for a given period</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">score</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">score_frequency_grid</span></code>(f0,&nbsp;df,&nbsp;N)</td>
+<td>Compute the score on a frequency grid.</td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
@@ -424,6 +484,27 @@ the normal matrix</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">find_best_periods</span></code>([n_periods,&nbsp;return_scores])</td>
+<td>Find the top several best periods for the model</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">fit</span></code>(t,&nbsp;y[,&nbsp;dy,&nbsp;filts])</td>
+<td>Fit the multiterm Periodogram model to the data.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram_auto</span></code>([oversampling,&nbsp;...])</td>
+<td>Compute the periodogram on an automatically-determined grid</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">predict</span></code>(t,&nbsp;filts[,&nbsp;period])</td>
+<td>Compute the best-fit model at <code class="docutils literal"><span class="pre">t</span></code> for a given period</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">score</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">score_frequency_grid</span></code>(f0,&nbsp;df,&nbsp;N)</td>
+<td>Compute the score on a frequency grid.</td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
@@ -489,6 +570,149 @@ By default it will use <a class="reference internal" href="#gatspy.periodic.Lomb
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">find_best_periods</span></code>([n_periods,&nbsp;return_scores])</td>
+<td>Find the top several best periods for the model</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">fit</span></code>(t,&nbsp;y[,&nbsp;dy,&nbsp;filts])</td>
+<td>Fit the multiterm Periodogram model to the data.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram_auto</span></code>([oversampling,&nbsp;...])</td>
+<td>Compute the periodogram on an automatically-determined grid</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">predict</span></code>(t,&nbsp;filts[,&nbsp;period])</td>
+<td>Compute the best-fit model at <code class="docutils literal"><span class="pre">t</span></code> for a given period</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">score</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">score_frequency_grid</span></code>(f0,&nbsp;df,&nbsp;N)</td>
+<td>Compute the score on a frequency grid.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="gatspy.periodic.TrendedLombScargle">
+<em class="property">class </em><code class="descclassname">gatspy.periodic.</code><code class="descname">TrendedLombScargle</code><span class="sig-paren">(</span><em>optimizer=None</em>, <em>center_data=True</em>, <em>fit_offset=True</em>, <em>Nterms=1</em>, <em>regularization=None</em>, <em>regularize_by_trace=True</em>, <em>fit_period=False</em>, <em>optimizer_kwds=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gatspy/periodic/trended_lomb_scargle.html#TrendedLombScargle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gatspy.periodic.TrendedLombScargle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trended Lomb-Scargle Periodogram Implementation</p>
+<p>This is a generalized periodogram implementation using the matrix formalism
+outlined in VanderPlas &amp; Ivezic 2015. It fits both a floating mean
+and a trend parameter (as opposed to the <cite>LombScargle</cite> class, which 
+fits only the mean).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>optimizer</strong> : PeriodicOptimizer instance</p>
+<blockquote>
+<div><p>Optimizer to use to find the best period. If not specified, the
+LinearScanOptimizer will be used.</p>
+</div></blockquote>
+<p><strong>center_data</strong> : boolean (default = True)</p>
+<blockquote>
+<div><p>If True, then compute the weighted mean of the input data and subtract
+before fitting the model.</p>
+</div></blockquote>
+<p><strong>fit_offset</strong> : boolean (default = True)</p>
+<blockquote>
+<div><p>If True, then fit a floating-mean sinusoid model.</p>
+</div></blockquote>
+<p><strong>Nterms</strong> : int (default = 1)</p>
+<blockquote>
+<div><p>Number of Fourier frequencies to fit in the model</p>
+</div></blockquote>
+<p><strong>regularization</strong> : float, vector or None (default = None)</p>
+<blockquote>
+<div><p>If specified, then add this regularization penalty to the
+least squares fit.</p>
+</div></blockquote>
+<p><strong>regularize_by_trace</strong> : boolean (default = True)</p>
+<blockquote>
+<div><p>If True, multiply regularization by the trace of the matrix</p>
+</div></blockquote>
+<p><strong>fit_period</strong> : bool (optional)</p>
+<blockquote>
+<div><p>If True, then fit for the best period when fit() method is called.</p>
+</div></blockquote>
+<p><strong>optimizer_kwds</strong> : dict (optional)</p>
+<blockquote class="last">
+<div><p>Dictionary of keyword arguments for constructing the optimizer. For
+example, silence optimizer output with <cite>optimizer_kwds={&#8220;quiet&#8221;: True}</cite>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#gatspy.periodic.LombScargle" title="gatspy.periodic.LombScargle"><code class="xref py py-obj docutils literal"><span class="pre">LombScargle</span></code></a>, <a class="reference internal" href="#gatspy.periodic.LombScargleAstroML" title="gatspy.periodic.LombScargleAstroML"><code class="xref py py-obj docutils literal"><span class="pre">LombScargleAstroML</span></code></a>, <a class="reference internal" href="#gatspy.periodic.LombScargleMultiband" title="gatspy.periodic.LombScargleMultiband"><code class="xref py py-obj docutils literal"><span class="pre">LombScargleMultiband</span></code></a>, <a class="reference internal" href="#gatspy.periodic.LombScargleMultibandFast" title="gatspy.periodic.LombScargleMultibandFast"><code class="xref py py-obj docutils literal"><span class="pre">LombScargleMultibandFast</span></code></a></p>
+</div>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dy</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">omega</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">slope</span> <span class="o">=</span> <span class="mf">2.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">omega</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">slope</span> <span class="o">*</span> <span class="n">t</span> <span class="o">+</span> <span class="n">dy</span> <span class="o">*</span> <span class="n">rng</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span> <span class="o">=</span> <span class="n">TrendedLombScargle</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">period_range</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span><span class="o">.</span><span class="n">best_period</span>
+<span class="go">Finding optimal frequency:</span>
+<span class="go"> - Estimated peak width = 0.0639</span>
+<span class="go"> - Using 5 steps per peak; omega_step = 0.0128</span>
+<span class="go"> - User-specified period range:  0.2 to 1.2</span>
+<span class="go"> - Computing periods at 2051 steps</span>
+<span class="go">Zooming-in on 5 candidate peaks:</span>
+<span class="go"> - Computing periods at 1000 steps</span>
+<span class="go">0.62827068275990694</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span><span class="o">.</span><span class="n">predict</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="go">array([-0.01144474,  0.07567192])</span>
+</pre></div>
+</div>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">best_period</span></code></td>
+<td>Lazy evaluation of the best period given the model</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">find_best_periods</span></code>([n_periods,&nbsp;return_scores])</td>
+<td>Find the top several best periods for the model</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">fit</span></code>(t,&nbsp;y[,&nbsp;dy])</td>
+<td>Fit the multiterm Periodogram model to the data.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram_auto</span></code>([oversampling,&nbsp;...])</td>
+<td>Compute the periodogram on an automatically-determined grid</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">predict</span></code>(t[,&nbsp;period])</td>
+<td>Compute the best-fit model at <code class="docutils literal"><span class="pre">t</span></code> for a given period</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">score</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">score_frequency_grid</span></code>(f0,&nbsp;df,&nbsp;N)</td>
+<td>Compute the score on a frequency grid.</td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
@@ -510,9 +734,10 @@ LinearScanOptimizer will be used.</p>
 <blockquote>
 <div><p>If True, then fit for the best period when fit() method is called.</p>
 </div></blockquote>
-<p><strong>optimizer_kwds</strong> : dict (optional</p>
+<p><strong>optimizer_kwds</strong> : dict (optional)</p>
 <blockquote class="last">
-<div><p>Dictionary of keyword arguments for constructing the optimizer</p>
+<div><p>Dictionary of keyword arguments for constructing the optimizer. For
+example, silence optimizer output with <cite>optimizer_kwds={&#8220;quiet&#8221;: True}</cite>.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -562,6 +787,27 @@ LinearScanOptimizer will be used.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">find_best_periods</span></code>([n_periods,&nbsp;return_scores])</td>
+<td>Find the top several best periods for the model</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">fit</span></code>(t,&nbsp;y[,&nbsp;dy])</td>
+<td>Fit the multiterm Periodogram model to the data.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram_auto</span></code>([oversampling,&nbsp;...])</td>
+<td>Compute the periodogram on an automatically-determined grid</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">predict</span></code>(t[,&nbsp;period])</td>
+<td>Compute the best-fit model at <code class="docutils literal"><span class="pre">t</span></code> for a given period</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">score</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">score_frequency_grid</span></code>(f0,&nbsp;df,&nbsp;N)</td>
+<td>Compute the score on a frequency grid.</td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
@@ -587,9 +833,10 @@ LinearScanOptimizer will be used.</p>
 <blockquote>
 <div><p>If True, then fit for the best period when fit() method is called.</p>
 </div></blockquote>
-<p><strong>optimizer_kwds</strong> : dict (optional</p>
+<p><strong>optimizer_kwds</strong> : dict (optional)</p>
 <blockquote class="last">
-<div><p>Dictionary of keyword arguments for constructing the optimizer</p>
+<div><p>Dictionary of keyword arguments for constructing the optimizer. For
+example, silence optimizer output with <cite>optimizer_kwds={&#8220;quiet&#8221;: True}</cite>.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -614,6 +861,27 @@ LinearScanOptimizer will be used.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">find_best_periods</span></code>([n_periods,&nbsp;return_scores])</td>
+<td>Find the top several best periods for the model</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">fit</span></code>(t,&nbsp;y[,&nbsp;dy,&nbsp;filts])</td>
+<td>Fit the multiterm Periodogram model to the data.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram_auto</span></code>([oversampling,&nbsp;...])</td>
+<td>Compute the periodogram on an automatically-determined grid</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">predict</span></code>(t,&nbsp;filts[,&nbsp;period])</td>
+<td>Compute the best-fit model at <code class="docutils literal"><span class="pre">t</span></code> for a given period</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">score</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">score_frequency_grid</span></code>(f0,&nbsp;df,&nbsp;N)</td>
+<td>Compute the score on a frequency grid.</td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
@@ -676,6 +944,27 @@ LinearScanOptimizer will be used.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">find_best_periods</span></code>([n_periods,&nbsp;return_scores])</td>
+<td>Find the top several best periods for the model</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">fit</span></code>(t,&nbsp;y[,&nbsp;dy])</td>
+<td>Fit the multiterm Periodogram model to the data.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram_auto</span></code>([oversampling,&nbsp;...])</td>
+<td>Compute the periodogram on an automatically-determined grid</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">predict</span></code>(t[,&nbsp;period])</td>
+<td>Compute the best-fit model at <code class="docutils literal"><span class="pre">t</span></code> for a given period</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">score</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">score_frequency_grid</span></code>(f0,&nbsp;df,&nbsp;N)</td>
+<td>Compute the score on a frequency grid.</td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
@@ -725,6 +1014,27 @@ LinearScanOptimizer will be used.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">find_best_periods</span></code>([n_periods,&nbsp;return_scores])</td>
+<td>Find the top several best periods for the model</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">fit</span></code>(t,&nbsp;y[,&nbsp;dy,&nbsp;filts])</td>
+<td>Fit the multiterm Periodogram model to the data.</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram_auto</span></code>([oversampling,&nbsp;...])</td>
+<td>Compute the periodogram on an automatically-determined grid</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">predict</span></code>(t,&nbsp;filts[,&nbsp;period])</td>
+<td>Compute the best-fit model at <code class="docutils literal"><span class="pre">t</span></code> for a given period</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">score</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">score_frequency_grid</span></code>(f0,&nbsp;df,&nbsp;N)</td>
+<td>Compute the score on a frequency grid.</td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
@@ -781,6 +1091,33 @@ LinearScanOptimizer will be used.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#gatspy.periodic.NaiveMultiband.best_periods" title="gatspy.periodic.NaiveMultiband.best_periods"><code class="xref py py-obj docutils literal"><span class="pre">best_periods</span></code></a>()</td>
+<td>Compute the scores under the various models</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">find_best_periods</span></code>([n_periods,&nbsp;return_scores])</td>
+<td>Find the top several best periods for the model</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">fit</span></code>(t,&nbsp;y[,&nbsp;dy,&nbsp;filts])</td>
+<td>Fit the multiterm Periodogram model to the data.</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">periodogram_auto</span></code>([oversampling,&nbsp;...])</td>
+<td>Compute the periodogram on an automatically-determined grid</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">predict</span></code>(t,&nbsp;filts[,&nbsp;period])</td>
+<td>Compute the best-fit model at <code class="docutils literal"><span class="pre">t</span></code> for a given period</td>
+</tr>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">score</span></code>([periods])</td>
+<td>Compute the periodogram for the given period or periods</td>
+</tr>
+<tr class="row-even"><td><code class="xref py py-obj docutils literal"><span class="pre">score_frequency_grid</span></code>(f0,&nbsp;df,&nbsp;N)</td>
+<td>Compute the score on a frequency grid.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#gatspy.periodic.NaiveMultiband.scores" title="gatspy.periodic.NaiveMultiband.scores"><code class="xref py py-obj docutils literal"><span class="pre">scores</span></code></a>(periods)</td>
+<td>Compute the scores under the various models</td>
+</tr>
 </tbody>
 </table>
 <dl class="method">
@@ -853,10 +1190,16 @@ passed to fit()</p>
 </ul>
 </li>
 </ul>
-
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="template.html"
-                        title="previous chapter">Template-based Period Fitting</a></p>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Tools for Periodic Timeseries (<code class="docutils literal"><span class="pre">gatspy.periodic</span></code>)</a><ul>
+      <li>Previous: <a href="template.html" title="previous chapter">Template-based Period Fitting</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -885,12 +1228,12 @@ passed to fit()</p>
       &copy;2015, Jake VanderPlas.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
       
       |
       <a href="../_sources/periodic/API.txt"
-          rel="nofollow">Page source</a></li>
+          rel="nofollow">Page source</a>
     </div>
 
     

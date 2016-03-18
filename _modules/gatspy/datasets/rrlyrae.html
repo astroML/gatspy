@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>gatspy.datasets.rrlyrae &mdash; gatspy 0.2.1 documentation</title>
+    <title>gatspy.datasets.rrlyrae &mdash; gatspy 0.3 documentation</title>
     
     <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.2.1',
+        VERSION:     '0.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,27 +23,14 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="gatspy 0.2.1 documentation" href="../../../index.html" />
+    <link rel="top" title="gatspy 0.3 documentation" href="../../../index.html" />
     <link rel="up" title="Module code" href="../../index.html" />
    
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
 
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../../genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="../../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">gatspy 0.2.1 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
-      </ul>
-    </div>  
+  <body role="document">  
 
     <div class="document">
       <div class="documentwrapper">
@@ -62,12 +49,20 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">tarfile</span>
 <span class="kn">import</span> <span class="nn">gzip</span>
-<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
+<span class="k">try</span><span class="p">:</span>
+    <span class="c"># Python 2</span>
+    <span class="kn">from</span> <span class="nn">urllib2</span> <span class="kn">import</span> <span class="n">urlopen</span>
+    <span class="kn">from</span> <span class="nn">cStringIO</span> <span class="kn">import</span> <span class="n">StringIO</span> <span class="k">as</span> <span class="n">BytesIO</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c"># Python 3</span>
+    <span class="kn">from</span> <span class="nn">urllib.request</span> <span class="kn">import</span> <span class="n">urlopen</span>
+    <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span>
 
-<span class="n">SESAR_RRLYRAE_URL</span> <span class="o">=</span> <span class="s">&#39;http://www.astro.washington.edu/users/bsesar/S82_RRLyr/&#39;</span>
+
+<span class="n">SESAR_RRLYRAE_URL</span> <span class="o">=</span> <span class="s">&#39;http://www.mpia.de/~bsesar/S82_RRLyr/&#39;</span>
 
 
 <span class="k">def</span> <span class="nf">_get_download_or_cache</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">data_home</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
@@ -75,8 +70,8 @@
                            <span class="n">force_download</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Private utility to download and/or load data from disk cache.&quot;&quot;&quot;</span>
     <span class="c"># Import here so astroML is not required at package level</span>
-    <span class="kn">from</span> <span class="nn">astroML.datasets.tools</span> <span class="kn">import</span> <span class="p">(</span><span class="n">get_data_home</span><span class="p">,</span> 
-                                        <span class="n">download_with_progress_bar</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">astroML.datasets.tools</span> <span class="kn">import</span> <span class="n">get_data_home</span>
+
     <span class="k">if</span> <span class="n">data_home</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">data_home</span> <span class="o">=</span> <span class="n">get_data_home</span><span class="p">(</span><span class="n">data_home</span><span class="p">)</span>
     <span class="n">data_home</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_home</span><span class="p">,</span> <span class="s">&#39;Sesar2010&#39;</span><span class="p">)</span>
@@ -87,8 +82,9 @@
     <span class="n">save_loc</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_home</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">force_download</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">save_loc</span><span class="p">):</span>
-        <span class="n">buf</span> <span class="o">=</span> <span class="n">download_with_progress_bar</span><span class="p">(</span><span class="n">src_url</span><span class="p">)</span>
-        <span class="nb">open</span><span class="p">(</span><span class="n">save_loc</span><span class="p">,</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="n">fhandle</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">src_url</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">save_loc</span><span class="p">,</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cache</span><span class="p">:</span>
+            <span class="n">cache</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fhandle</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
     <span class="k">return</span> <span class="n">save_loc</span>
 
 
@@ -214,8 +210,8 @@
             <span class="n">good</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">t</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="n">dy</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="n">filts</span><span class="p">[</span><span class="n">good</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span>
-</div>
+            <span class="k">return</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span></div>
+
 <div class="viewcode-block" id="RRLyraeLC.get_metadata"><a class="viewcode-back" href="../../../datasets/API.html#gatspy.datasets.RRLyraeLC.get_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">get_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lcid</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the parameters derived from the fit for the given id.</span>
 <span class="sd">        This is table 2 of Sesar 2010</span>
@@ -225,8 +221,8 @@
         <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">lcid</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;invalid lcid: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lcid</span><span class="p">))</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-</div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metadata</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span></div>
+
 <div class="viewcode-block" id="RRLyraeLC.get_obsmeta"><a class="viewcode-back" href="../../../datasets/API.html#gatspy.datasets.RRLyraeLC.get_obsmeta">[docs]</a>    <span class="k">def</span> <span class="nf">get_obsmeta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lcid</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the observation metadata for the given id.</span>
 <span class="sd">        This is table 3 of Sesar 2010</span>
@@ -236,9 +232,9 @@
         <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obsdata</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">lcid</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;invalid lcid: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lcid</span><span class="p">))</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obsdata</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obsdata</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span></div></div>
 
-</div></div>
+
 <div class="viewcode-block" id="PartialRRLyraeLC"><a class="viewcode-back" href="../../../datasets/API.html#gatspy.datasets.PartialRRLyraeLC">[docs]</a><span class="k">class</span> <span class="nc">PartialRRLyraeLC</span><span class="p">(</span><span class="n">RRLyraeLC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Class to get a partial Stripe 82 light curve: one band per night.</span>
 
@@ -307,9 +303,9 @@
         <span class="n">mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">t</span> <span class="o">+</span> <span class="n">y</span> <span class="o">+</span> <span class="n">dy</span><span class="p">)</span>
         <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">filts</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">dy</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">filts</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">filts</span>
+        <span class="k">return</span> <span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">filts</span></div>
 
-</div>
+
 <div class="viewcode-block" id="RRLyraeTemplates"><a class="viewcode-back" href="../../../datasets/API.html#gatspy.datasets.RRLyraeTemplates">[docs]</a><span class="k">class</span> <span class="nc">RRLyraeTemplates</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Container to access the RR Lyrae templates from Sesar 2010</span>
 
@@ -381,9 +377,9 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">extractfile</span><span class="p">(</span><span class="n">template_id</span> <span class="o">+</span> <span class="s">&#39;.dat&#39;</span><span class="p">))</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;invalid star id: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">template_id</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span></div></div>
 
-</div></div>
+
 <div class="viewcode-block" id="fetch_rrlyrae"><a class="viewcode-back" href="../../../datasets/API.html#gatspy.datasets.fetch_rrlyrae">[docs]</a><span class="k">def</span> <span class="nf">fetch_rrlyrae</span><span class="p">(</span><span class="n">partial</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Fetch RR Lyrae light curves from Sesar 2010</span>
 
@@ -422,18 +418,17 @@
 <span class="sd">    array([ 18.702,  17.553,  17.236,  17.124])</span>
 <span class="sd">    &gt;&gt;&gt; dmag[:4]</span>
 <span class="sd">    array([ 0.021,  0.005,  0.005,  0.006])</span>
-<span class="sd">    &gt;&gt;&gt; bands[:4]</span>
-<span class="sd">    array([&#39;u&#39;, &#39;g&#39;, &#39;r&#39;, &#39;i&#39;], </span>
-<span class="sd">          dtype=&#39;&lt;U1&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; list(bands[:4])</span>
+<span class="sd">    [&#39;u&#39;, &#39;g&#39;, &#39;r&#39;, &#39;i&#39;]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">partial</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">PartialRRLyraeLC</span><span class="p">(</span><span class="s">&#39;table1.tar.gz&#39;</span><span class="p">,</span>
                                 <span class="n">cache_kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">RRLyraeLC</span><span class="p">(</span><span class="s">&#39;table1.tar.gz&#39;</span><span class="p">,</span>
-                         <span class="n">cache_kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
+                         <span class="n">cache_kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-</div>
+
 <div class="viewcode-block" id="fetch_rrlyrae_lc_params"><a class="viewcode-back" href="../../../datasets/API.html#gatspy.datasets.fetch_rrlyrae_lc_params">[docs]</a><span class="k">def</span> <span class="nf">fetch_rrlyrae_lc_params</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Fetch data from table 2 of Sesar 2010</span>
 
@@ -449,9 +444,9 @@
              <span class="p">(</span><span class="s">&#39;iA&#39;</span><span class="p">,</span> <span class="s">&#39;f&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;i0&#39;</span><span class="p">,</span> <span class="s">&#39;f&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;iE&#39;</span><span class="p">,</span> <span class="s">&#39;f&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;iT&#39;</span><span class="p">,</span> <span class="s">&#39;f&#39;</span><span class="p">),</span>
              <span class="p">(</span><span class="s">&#39;zA&#39;</span><span class="p">,</span> <span class="s">&#39;f&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;z0&#39;</span><span class="p">,</span> <span class="s">&#39;f&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;zE&#39;</span><span class="p">,</span> <span class="s">&#39;f&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;zT&#39;</span><span class="p">,</span> <span class="s">&#39;f&#39;</span><span class="p">)]</span>
 
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">save_loc</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">save_loc</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
 
-</div>
+
 <div class="viewcode-block" id="fetch_rrlyrae_fitdata"><a class="viewcode-back" href="../../../datasets/API.html#gatspy.datasets.fetch_rrlyrae_fitdata">[docs]</a><span class="k">def</span> <span class="nf">fetch_rrlyrae_fitdata</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Fetch data from table 3 of Sesar 2010</span>
 
@@ -467,9 +462,9 @@
              <span class="p">(</span><span class="s">&#39;ugmin&#39;</span><span class="p">,</span> <span class="s">&#39;f&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;ugmin_err&#39;</span><span class="p">,</span> <span class="s">&#39;f&#39;</span><span class="p">),</span>
              <span class="p">(</span><span class="s">&#39;grmin&#39;</span><span class="p">,</span> <span class="s">&#39;f&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;grmin_err&#39;</span><span class="p">,</span> <span class="s">&#39;f&#39;</span><span class="p">)]</span>
 
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">save_loc</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">save_loc</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
 
-</div>
+
 <div class="viewcode-block" id="fetch_rrlyrae_templates"><a class="viewcode-back" href="../../../datasets/API.html#gatspy.datasets.fetch_rrlyrae_templates">[docs]</a><span class="k">def</span> <span class="nf">fetch_rrlyrae_templates</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Access the RR Lyrae template data (table 1 of Sesar 2010)</span>
 
@@ -503,7 +498,15 @@
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
@@ -525,8 +528,8 @@
       &copy;2015, Jake VanderPlas.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
       
     </div>
 
