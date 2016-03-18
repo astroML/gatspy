@@ -7,6 +7,7 @@
 - Make ``supersmoother`` a soft dependency
 - New feature: ``gatspy.periodic.TrendedLombScargle`` extends ``LombScargle``
   by adding a linear trend parameter ``d*t`` to the fitted model
+- Fixed download URL for RR Lyrae datasets
 
 ## (v0.2.1) bugfix release (19 Aug 2015)
 
