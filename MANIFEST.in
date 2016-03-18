@@ -1,5 +1,7 @@
 include *.md
 include *.py
 recursive-include gatspy *.py
+recursive-include doc *
+recursive-include examples *.ipynb
 include LICENSE
 include Makefile
