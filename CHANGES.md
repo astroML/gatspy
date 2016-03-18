@@ -1,6 +1,6 @@
 #Change Log
 
-## (v0.3) (not yet released)
+## (v0.3) Feature Release (18 Mar 2016)
 
 - Fix bug in ``predict()`` for ``LombScargle`` methods when ``center_data=False``
 - Fix bug in ``score()`` for ``LombScargle`` methods when ``center_data=False`` and ``fit_offset=False``
