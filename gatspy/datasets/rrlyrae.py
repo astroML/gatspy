@@ -9,12 +9,20 @@ __all__ = ['fetch_rrlyrae_templates', 'fetch_rrlyrae',
 import os
 import tarfile
 import gzip
-from io import BytesIO
 
 import numpy as np
 
+try:
+    # Python 2
+    from urllib2 import urlopen
+    from cStringIO import StringIO as BytesIO
+except ImportError:
+    # Python 3
+    from urllib.request import urlopen
+    from io import BytesIO
 
-SESAR_RRLYRAE_URL = 'http://www.astro.washington.edu/users/bsesar/S82_RRLyr/'
+
+SESAR_RRLYRAE_URL = 'http://www.mpia.de/~bsesar/S82_RRLyr/'
 
 
 def _get_download_or_cache(filename, data_home=None,
@@ -22,8 +30,8 @@ def _get_download_or_cache(filename, data_home=None,
                            force_download=False):
     """Private utility to download and/or load data from disk cache."""
     # Import here so astroML is not required at package level
-    from astroML.datasets.tools import (get_data_home, 
-                                        download_with_progress_bar)
+    from astroML.datasets.tools import get_data_home
+
     if data_home is None:
         data_home = get_data_home(data_home)
     data_home = os.path.join(data_home, 'Sesar2010')
@@ -34,8 +42,9 @@ def _get_download_or_cache(filename, data_home=None,
     save_loc = os.path.join(data_home, filename)
 
     if force_download or not os.path.exists(save_loc):
-        buf = download_with_progress_bar(src_url)
-        open(save_loc, 'wb').write(buf)
+        fhandle = urlopen(src_url)
+        with open(save_loc, 'wb') as cache:
+            cache.write(fhandle.read())
     return save_loc
 
 
