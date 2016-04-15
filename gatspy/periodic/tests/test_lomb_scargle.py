@@ -184,3 +184,15 @@ def test_power_normalization(N=100, period=1):
         for fit_offset in [True, False]:
             for center_data in [True, False]:
                 yield check_model, Model, fit_offset, center_data
+
+
+def test_ill_conditioned():
+    """Test model on data chosen such that X_w' X_w is nearly singular for some
+    possible value of omega"""
+    N = 201
+    omega = 0.1
+    t = np.linspace(0, 2, N)
+    y = np.sin(2 * np.pi * omega * t)
+    dy = np.repeat(0.1, N)
+    opt_args = {'period_range': (0.01, t.max()), 'quiet': True}
+    model = LombScargle(fit_period=True, optimizer_kwds=opt_args).fit(t, y, dy)

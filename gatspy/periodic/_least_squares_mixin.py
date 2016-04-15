@@ -72,7 +72,11 @@ class LeastSquaresMixin(object):
         for i, omega in enumerate(omegas.flat):
             Xw, XTX = self._construct_X_M(omega)
             XTy = np.dot(Xw.T, self.yw_)
-            chi2_0_minus_chi2[i] = np.dot(XTy.T, np.linalg.solve(XTX, XTy))
+            try:
+                chi2_0_minus_chi2[i] = np.dot(XTy.T, np.linalg.solve(XTX, XTy))
+            # If X'X is not invertible, use pseudoinverse instead
+            except np.linalg.LinAlgError:
+                chi2_0_minus_chi2[i] = np.dot(XTy.T, np.linalg.lstsq(XTX, XTy)[0])
 
         # construct and return the power from the chi2 difference
         if self.center_data:
