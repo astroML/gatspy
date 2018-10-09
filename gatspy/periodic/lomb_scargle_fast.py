@@ -325,7 +325,7 @@ def lomb_scargle_fast(t, y, dy=1, f0=0, df=None, Nf=None,
         
         # fix power at zero frequency
         if f0 == 0:
-            power[0] = np.mean(y ** 2 - (y - np.mean(y)) ** 2)/np.mean(y ** 2)
+            power[0] = np.mean(y ** 2 - (y - np.mean(y)) ** 2) / np.mean(y ** 2)
         
         # fix NaN and INF at zero frequency
         if np.isnan(power[0]) or np.isinf(power[0]):
