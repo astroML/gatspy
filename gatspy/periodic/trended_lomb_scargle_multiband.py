@@ -72,6 +72,19 @@ class TrendedLombScargleMultiband(LombScargleMultiband):
     LombScargleMultibandFast
     """
     
+    def _construct_regularization(self):
+        if self.reg_base is None and self.reg_band is None:
+            reg = 0
+        else:
+            Nbase = 2 + 2 * self.Nterms_base
+            Nband = 2 + 2 * self.Nterms_band
+            reg = np.zeros(Nbase + len(self.unique_filts_) * Nband)
+            if self.reg_base is not None:
+                reg[:Nbase] = self.reg_base
+            if self.reg_band is not None:
+                reg[Nbase:] = self.reg_band
+        return reg
+    
     def _construct_X(self, omega, weighted=True, **kwargs):
         t = kwargs.get('t', self.t)
         dy = kwargs.get('dy', self.dy)
@@ -85,21 +98,21 @@ class TrendedLombScargleMultiband(LombScargleMultiband):
 
         # TODO: the building of the matrix could be more efficient
         cols = [np.ones(len(t))]
-        cols.append(t)   #  coefficients for trend parameter       
+        cols.append(np.copy(t))   #  coefficients for trend parameter       
         cols = sum(([np.sin((i + 1) * omega * t),
                      np.cos((i + 1) * omega * t)]
                     for i in range(self.Nterms_base)), cols)
-
+        
         for filt in self.unique_filts_:
             cols.append(np.ones(len(t)))
-            cols.append(t)   #  coefficients for trend parameter (in filt)
+            cols.append(np.copy(t))   #  coefficients for trend parameter (in filt)
             cols = sum(([np.sin((i + 1) * omega * t),
                          np.cos((i + 1) * omega * t)]
                         for i in range(self.Nterms_band)), cols)
             mask = (filts == filt)
-            for i in range(-1 - 2 * self.Nterms_band, 0):
+            for i in range(-2 - (2 * self.Nterms_band), 0):
                 cols[i][~mask] = 0
-
+        
         if weighted:
             return np.transpose(np.vstack(cols) / dy)
         else:
