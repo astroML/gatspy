@@ -12,64 +12,40 @@ from .lomb_scargle_multiband import LombScargleMultiband
 
 
 class TrendedLombScargleMultiband(LombScargleMultiband):
-    """Trended Lomb-Scargle Periodogram Implementation
+    """Trended Multiband Lomb-Scargle Periodogram Implementation
 
-    This is a generalized periodogram implementation using the matrix formalism
-    outlined in VanderPlas & Ivezic 2015. It fits both a floating mean
-    and a trend parameter (as opposed to the `LombScargle` class, which 
-    fits only the mean).
+    This is a generalized multiband periodogram implementation using the matrix
+    formalism outlined in VanderPlas & Ivezic 2015. It fits both a floating mean
+    and a trend parameter in each band.
 
     Parameters
     ----------
     optimizer : PeriodicOptimizer instance
         Optimizer to use to find the best period. If not specified, the
         LinearScanOptimizer will be used.
+    Nterms_base : integer (default = 1)
+        number of frequency terms to use for the base model common to all bands
+    Nterms_band : integer (default = 1)
+        number of frequency terms to use for the residuals between the base
+        model and each individual band
+    reg_base : float or None (default = None)
+        amount of regularization to use on the base model parameters
+    reg_band : float or None (default = 1E-6)
+        amount of regularization to use on the band model parameters
+    regularize_by_trace : bool (default = True)
+        if True, then regularization is expressed in units of the trace of
+        the normal matrix
     center_data : boolean (default = True)
-        If True, then compute the weighted mean of the input data and subtract
-        before fitting the model.
-    fit_offset : boolean (default = True)
-        If True, then fit a floating-mean sinusoid model.
-    Nterms : int (default = 1)
-        Number of Fourier frequencies to fit in the model
-    regularization : float, vector or None (default = None)
-        If specified, then add this regularization penalty to the
-        least squares fit.
-    regularize_by_trace : boolean (default = True)
-        If True, multiply regularization by the trace of the matrix
-    fit_period : bool (optional)
-        If True, then fit for the best period when fit() method is called.
+        if True, then center the y data prior to the fit
     optimizer_kwds : dict (optional)
         Dictionary of keyword arguments for constructing the optimizer. For
         example, silence optimizer output with `optimizer_kwds={"quiet": True}`.
 
-    Examples
-    --------
-    >>> rng = np.random.RandomState(0)
-    >>> t = 100 * rng.rand(100)
-    >>> dy = 0.1
-    >>> omega = 10
-    >>> slope = 2.
-    >>> y = np.sin(omega * t) + slope * t + dy * rng.randn(100)
-    >>> ls = TrendedLombScargle().fit(t, y, dy)
-    >>> ls.optimizer.period_range = (0.2, 1.2)
-    >>> ls.best_period
-    Finding optimal frequency:
-     - Estimated peak width = 0.0639
-     - Using 5 steps per peak; omega_step = 0.0128
-     - User-specified period range:  0.2 to 1.2
-     - Computing periods at 2051 steps
-    Zooming-in on 5 candidate peaks:
-     - Computing periods at 1000 steps
-    0.62827068275990694
-    >>> ls.predict([0, 0.5])
-    array([-0.01144474,  0.07567192])
-
     See Also
     --------
     LombScargle
-    LombScargleAstroML
     LombScargleMultiband
-    LombScargleMultibandFast
+    TrendedLombScargle
     """
     
     def _construct_regularization(self):
@@ -94,7 +70,7 @@ class TrendedLombScargleMultiband(LombScargleMultiband):
         # which filters are present...
         #
         # huge-ass, quantitatively speaking, is of shape
-        #  [len(t), (1 + 1 + 2 * Nterms_base + nfilts * (1 + 1 + 2 * Nterms_band))]
+        #  [len(t), (2 + 2 * Nterms_base + nfilts * (2 + 2 * Nterms_band))]
 
         # TODO: the building of the matrix could be more efficient
         cols = [np.ones(len(t))]
