@@ -37,7 +37,7 @@ def _get_download_or_cache(filename, data_home=None,
     if not os.path.exists(data_home):
         os.makedirs(data_home)
 
-    src_url = SESAR_RRLYRAE_URL + filename
+    src_url = url + filename
     save_loc = os.path.join(data_home, filename)
 
     if force_download or not os.path.exists(save_loc):
