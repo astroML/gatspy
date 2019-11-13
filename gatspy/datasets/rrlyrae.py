@@ -13,11 +13,9 @@ import numpy as np
 try:
     # Python 2
     from urllib2 import urlopen
-    from cStringIO import StringIO as BytesIO
 except ImportError:
     # Python 3
     from urllib.request import urlopen
-    from io import BytesIO
 
 
 SESAR_RRLYRAE_URL = ('https://github.com/astroML/astroML-data/raw/master/'
@@ -150,9 +148,6 @@ class RRLyraeLC(object):
             data = np.loadtxt(self.data.extractfile(filename))
         except KeyError:
             raise ValueError("invalid star id: {0}".format(star_id))
-
-        RA = data[:, 0]
-        DEC = data[:, 1]
 
         t = data[:, 2::3]
         y = data[:, 3::3]
@@ -295,7 +290,7 @@ class RRLyraeTemplates(object):
                  cache_kwargs=None):
         self.tablename = tablename
         if 'url' not in cache_kwargs:
-            cache_kwargs['url'] = SESAR_RRLYRAE_URL +  '../'
+            cache_kwargs['url'] = SESAR_RRLYRAE_URL + '../'
         self.cache_kwargs = cache_kwargs
         self._load_data()
 
