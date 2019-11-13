@@ -8,8 +8,6 @@ __all__ = ['fetch_rrlyrae_templates', 'fetch_rrlyrae',
 
 import os
 import tarfile
-import gzip
-
 import numpy as np
 
 try:
@@ -22,7 +20,8 @@ except ImportError:
     from io import BytesIO
 
 
-SESAR_RRLYRAE_URL = 'http://www.mpia.de/~bsesar/S82_RRLyr/'
+SESAR_RRLYRAE_URL = ('https://github.com/astroML/astroML-data/raw/master/'
+                     'datasets/S82_RRLyr/')
 
 
 def _get_download_or_cache(filename, data_home=None,
@@ -295,6 +294,8 @@ class RRLyraeTemplates(object):
     def __init__(self, tablename='RRLyr_ugriz_templates.tar.gz',
                  cache_kwargs=None):
         self.tablename = tablename
+        if 'url' not in cache_kwargs:
+            cache_kwargs['url'] = SESAR_RRLYRAE_URL +  '../'
         self.cache_kwargs = cache_kwargs
         self._load_data()
 
@@ -393,7 +394,7 @@ def fetch_rrlyrae_lc_params(**kwargs):
     """Fetch data from table 2 of Sesar 2010
 
     This table includes observationally-derived parameters for all the
-    Sesar 2010 lightcurves. 
+    Sesar 2010 lightcurves.
     """
     save_loc = _get_download_or_cache('table2.dat.gz', **kwargs)
 
