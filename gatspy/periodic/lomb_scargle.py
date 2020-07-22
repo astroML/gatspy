@@ -5,6 +5,7 @@ __all__ = ['LombScargle', 'LombScargleAstroML']
 import warnings
 
 import numpy as np
+from scipy.special import gamma
 
 from .modeler import PeriodicModeler
 from ._least_squares_mixin import LeastSquaresMixin
@@ -124,6 +125,79 @@ class LombScargle(LeastSquaresMixin, PeriodicModeler):
 
     def _score(self, periods):
         return LeastSquaresMixin._score(self, periods)
+
+    def false_alarm_single(self, periods, logarithmic=False):
+        """
+        Calculate the False Alarm Probability for every period
+        provided by the input param.
+        Following the method outlined in Baluev 2008, Table 1.
+
+        Note that this is an upper limit on the False Alarm Probability,
+        and that it assumes low spectral leakage when in reality it's usually
+        an issue.
+
+        If 'logarithmic'=True, false_alarm_single returns log10(FAP).
+        Else, false_alarm_single returns FAP.
+        """
+        t = self.t
+        y = self.y
+        dy = self.dy
+        N = t.size
+        Nh = N - 1
+        Nk = N - 3
+
+        # In Baluev 2008, z = z_scaled * Nh / 2
+        z_scaled = self.score(periods)
+
+        if logarithmic:
+            log_fap = (0.5 * Nk) * np.log10(1 - z_scaled)
+            return log_fap
+
+        else:
+            fap = (1 - z_scaled) ** (0.5 * Nk)
+            return fap
+
+    def false_alarm_max(self):
+        """
+        Calculate the False Alarm Probability for the best period.
+        Following the method outlined in Baluev 2008, Table 1 and
+        eq. 5
+
+        Note that this is an upper limit on the False Alarm Probability,
+        and that it assumes low spectral leakage when in reality it's usually
+        an issue.
+
+        For FAP values near 0 (< 1E-8), will return 0.0.
+        """
+        t = self.t
+        y = self.y
+        dy = self.dy
+        N = t.size
+        Nh = N - 1
+        Nk = N - 3
+        best_period = self.best_period
+
+        z = self.score(best_period) * 0.5 * Nh
+        fmax = 1 / min(self.optimizer.period_range)
+
+        if Nh < 10:
+            gamma_H = np.sqrt(2. / Nh) * gamma(0.5 * Nh) / gamma(0.5 * (Nh - 1))
+        else:
+            gamma_H = 1
+
+        def avg(phi, dy):
+            return np.sum(phi / dy ** 2)
+        def bar(phi, dy):
+            return avg(phi, dy) / avg(np.ones(N), dy)
+
+        var_t = bar(t ** 2, dy) - bar(t, dy) ** 2
+        W = fmax * np.sqrt(4 * np.pi * var_t)
+        tau = gamma_H * W * (1-2 * z / Nh) ** (0.5 * (Nk - 1)) * np.sqrt(z)
+
+        Psingle = 1 - self.false_alarm_single(best_period)
+        Pmax = Psingle * np.exp(-tau)
+
+        return 1 - Pmax
 
 
 class LombScargleAstroML(LombScargle):
