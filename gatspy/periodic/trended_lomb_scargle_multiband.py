@@ -133,11 +133,12 @@ class PolyTrend_LombScargleMultiband(LombScargleMultiband):
     """
     
     def __init__(self, optimizer=None,
-                 poly_trend_order=2,
+                 poly_trend_order_base=2, poly_trend_order_band=1,
                  Nterms_base=1, Nterms_band=1,
                  reg_base=None, reg_band=1E-6, regularize_by_trace=True,
                  center_data=True, fit_period=False, optimizer_kwds=None):
-        self.poly_trend_order = poly_trend_order
+        self.poly_trend_order_base = poly_trend_order_base
+        self.poly_trend_order_band = poly_trend_order_band
         
         LombScargleMultiband.__init__(
             self, optimizer=optimizer,
@@ -152,8 +153,8 @@ class PolyTrend_LombScargleMultiband(LombScargleMultiband):
         if self.reg_base is None and self.reg_band is None:
             reg = 0
         else:
-            Nbase = (self.poly_trend_order + 1) + 2 * self.Nterms_base
-            Nband = (self.poly_trend_order + 1) + 2 * self.Nterms_band
+            Nbase = (self.poly_trend_order_base + 1) + 2 * self.Nterms_base
+            Nband = (self.poly_trend_order_band + 1) + 2 * self.Nterms_band
             reg = np.zeros(Nbase + len(self.unique_filts_) * Nband)
             if self.reg_base is not None:
                 reg[:Nbase] = self.reg_base
@@ -170,13 +171,13 @@ class PolyTrend_LombScargleMultiband(LombScargleMultiband):
         # which filters are present...
         #
         # huge-ass, quantitatively speaking, is of shape
-        #  [len(t), ((poly_trend_order + 1) + 2 * Nterms_base +
-        #            nfilts * ((poly_trend_order + 1) + 2 * Nterms_band))]
+        #  [len(t), ((poly_trend_order_base + 1) + 2 * Nterms_base +
+        #            nfilts * ((poly_trend_order_band + 1) + 2 * Nterms_band))]
         
         # TODO: the building of the matrix could be more efficient
         cols = [np.ones(len(t))]    # Coefficients for constant param
         
-        for cur_poly_trend_order in range(1, self.poly_trend_order + 1):
+        for cur_poly_trend_order in range(1, self.poly_trend_order_base + 1):
             # Coefficients for current polynomial trend order
             cols.append(np.copy(t**cur_poly_trend_order))
         
@@ -187,7 +188,7 @@ class PolyTrend_LombScargleMultiband(LombScargleMultiband):
         for filt in self.unique_filts_:
             cols.append(np.ones(len(t)))
             
-            for cur_poly_trend_order in range(1, self.poly_trend_order + 1):
+            for cur_poly_trend_order in range(1, self.poly_trend_order_band + 1):
                 # Coefficients for current polynomial trend order
                 cols.append(np.copy(t**cur_poly_trend_order))
             
@@ -195,7 +196,7 @@ class PolyTrend_LombScargleMultiband(LombScargleMultiband):
                          np.cos((i + 1) * omega * t)]
                         for i in range(self.Nterms_band)), cols)
             mask = (filts == filt)
-            for i in range((-1 * (self.poly_trend_order + 1)) -
+            for i in range((-1 * (self.poly_trend_order_band + 1)) -
                            (2 * self.Nterms_band), 0):
                 cols[i][~mask] = 0
         
