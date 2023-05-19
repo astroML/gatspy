@@ -18,8 +18,7 @@ except ImportError:
     from urllib.request import urlopen
 
 
-SESAR_RRLYRAE_URL = ('https://github.com/astroML/astroML-data/raw/master/'
-                     'datasets/S82_RRLyr/')
+SESAR_RRLYRAE_URL = ('https://github.com/astroML/astroML-data/raw/main/datasets/S82_RRLyr/')
 
 
 def _get_download_or_cache(filename, data_home=None,
